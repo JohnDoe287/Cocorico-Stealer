@@ -16,6 +16,7 @@ Hi everyone, I plan to start the project. If you're interested, please give it a
 ## <a id="content"></a>🌐 〢 Content
 - [⚠️ Disclaimer](#disclaimer)
 - [📝 Changelog](#changelog)
+- [🕵️‍♂️・Credits](#forkedfrom)
 - [💼 Terms](#terms)
 
 ## <a id="disclaimer"></a>⚠️ Disclaimer
@@ -31,7 +32,11 @@ This software was made for personal **education** and **sandbox testing** purpos
 - V1.0.3 Added Assembly File
 - V1.0.4 Added Requirements.txt
 - V1.0.5 Added Setup.bat
+- V1.0.6 Added Main.py
 ```
+
+### <a id="forkedfrom"></a>🕵️‍♂️ 〢 Forked From:
+- Exela Stealer (Format & Decryption)
 
 ### <a id="terms"></a>💼 〢 Terms Of Usage
 - [x] This script is for educational purposes only. Use at your own risk. The developer is not responsible for any damage caused by its use.
