@@ -15,9 +15,10 @@ Hi everyone, I plan to start the project. If you're interested, please give it a
 
 ## <a id="content"></a>🌐 〢 Content
 - [⚠️ Disclaimer](#disclaimer)
+- [📝・TODO](#todolist)
+- [📊 Features](#features)
 - [💭 Changelog](#changelog)
 - [🕵️‍♂️・Credits](#forkedfrom)
-- [📝・TODO](#todolist)
 - [💼 Terms](#terms)
 
 ## <a id="disclaimer"></a>⚠️ Disclaimer
@@ -34,6 +35,19 @@ This software was made for personal **education** and **sandbox testing** purpos
 - File (icon, pumper, payload, NSIS, Inno, Pyinstaller) 
 ```
 
+
+## <a id="features"></a>📊 Features
+
+```
+- Browsers (+5)
+  - passwords
+  - credit cards
+  - cookies
+  - autofills
+
+- Send to Telegram
+- UploadFile to GoFile
+```
 
 ## <a id="changelog"></a>💭 ChangeLog
 
