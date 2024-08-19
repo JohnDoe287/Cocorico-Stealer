@@ -28,6 +28,7 @@ This software was made for personal **education** and **sandbox testing** purpos
 - V1.0.0 Created Github Repo
 - V1.0.1 Created README Page
 - V1.0.2 Added UPX Packer
+- V1.0.3 Added Assembly File
 
 ```
 
