@@ -1,7 +1,7 @@
 Hi everyone, I plan to start the project. If you're interested, please give it a star and stay tuned.
 
 <p align="center">
-  bo2k168kb is a Windows stealer. Based on the asynchronous module, the code is readable and understandable. For detections on VirusTotal, it is FUD. If there are detections, they are likely false positives ([more info](https://en.wikipedia.org/wiki/False_positives_and_false_negatives)); this is common in a language like Python unfortunately.
+  bo2k168kb is a Windows stealer. Based on the asynchronous module, the code is readable and understandable. For detections on VirusTotal, it is FUD. If there are detections, they are likely [false positives](https://en.wikipedia.org/wiki/False_positives_and_false_negatives); this is common in a language like Python unfortunately.
 </p>
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
