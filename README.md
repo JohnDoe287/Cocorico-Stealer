@@ -31,7 +31,6 @@ This software was made for personal **education** and **sandbox testing** purpos
 - V1.0.3 Added Assembly File
 - V1.0.4 Added Requirements.txt
 - V1.0.5 Added Setup.bat
-
 ```
 
 ### <a id="terms"></a>💼 〢 Terms Of Usage
