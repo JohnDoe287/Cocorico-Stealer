@@ -15,10 +15,10 @@ Hi everyone, I plan to start the project. If you're interested, please give it a
 
 ## <a id="content"></a>🌐 〢 Content
 - [⚠️ Disclaimer](#disclaimer)
-- [📝・TODO](#todolist)
+- [📝 TODO](#todolist)
 - [📊 Features](#features)
 - [💭 Changelog](#changelog)
-- [🕵️‍♂️・Credits](#forkedfrom)
+- [🕵️‍♂️ Credits](#forkedfrom)
 - [💼 Terms](#terms)
 
 ## <a id="disclaimer"></a>⚠️ Disclaimer
