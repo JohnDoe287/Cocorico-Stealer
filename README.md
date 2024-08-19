@@ -15,13 +15,25 @@ Hi everyone, I plan to start the project. If you're interested, please give it a
 
 ## <a id="content"></a>🌐 〢 Content
 - [⚠️ Disclaimer](#disclaimer)
-- [📝 Changelog](#changelog)
+- [💭 Changelog](#changelog)
 - [🕵️‍♂️・Credits](#forkedfrom)
+- [📝・TODO](#todolist)
 - [💼 Terms](#terms)
 
 ## <a id="disclaimer"></a>⚠️ Disclaimer
 I'm not responsible for any damages this software may cause after being acquired. 
 This software was made for personal **education** and **sandbox testing** purposes
+
+## <a id="todolist"></a>📝 TODO List
+
+```
+- Steal (Messengers, Files, Socials Medias, VPN's, FTP Clients, Wallets, Passords Managers).
+- Anti (Virtual Machine, Spamming)
+- Hide Console, System Info
+- Builder, Obfuscator, Binder
+- File (icon, pumper, payload, NSIS, Inno, Pyinstaller) 
+```
+
 
 ## <a id="changelog"></a>💭 ChangeLog
 
@@ -35,10 +47,10 @@ This software was made for personal **education** and **sandbox testing** purpos
 - V1.0.6 Added Main.py
 ```
 
-### <a id="forkedfrom"></a>🕵️‍♂️ 〢 Forked From:
+### <a id="forkedfrom"></a>🕵️‍♂️ Forked From:
 - Exela Stealer (Format & Decryption)
 
-### <a id="terms"></a>💼 〢 Terms Of Usage
+### <a id="terms"></a>💼 Terms Of Usage
 - [x] This script is for educational purposes only. Use at your own risk. The developer is not responsible for any damage caused by its use.
 
 - [x] This software is provided as-is, with no guarantees of performance or suitability. It is intended for educational purposes and sandbox testing. The developer is not liable for any damage or misuse. By using it, you release the developer from any liability.
