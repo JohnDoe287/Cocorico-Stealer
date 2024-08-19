@@ -29,6 +29,8 @@ This software was made for personal **education** and **sandbox testing** purpos
 - V1.0.1 Created README Page
 - V1.0.2 Added UPX Packer
 - V1.0.3 Added Assembly File
+- V1.0.4 Added Requirements.txt
+- V1.0.5 Added Setup.bat
 
 ```
 
