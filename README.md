@@ -13,7 +13,7 @@ Hi everyone, I plan to start the project. If you're interested, please give it a
 <img src="https://img.shields.io/badge/discord-5865F2?style=for-the-badge&logo=discord&logoColor=white">
 </a>
 
-## <a id="content"></a>🌐 〢 Content
+## <a id="content"></a>🌐 Content
 - [⚠️ Disclaimer](#disclaimer)
 - [📝 TODO](#todolist)
 - [📊 Features](#features)
