@@ -74,4 +74,5 @@ This software was made for personal **education** and **sandbox testing** purpos
 ### Author
 - JohnDoe287
 
-<a href=#top>Back to Top</a></p>
+<a align="center">
+  href=#top>Back to Top</a></p>
