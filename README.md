@@ -59,6 +59,7 @@ This software was made for personal **education** and **sandbox testing** purpos
 - V1.0.4 Added Requirements.txt
 - V1.0.5 Added Setup.bat
 - V1.0.6 Added Main.py
+- V1.0.7 Added TODO List (Aug 20 / 12:37 AM)
 ```
 
 ### <a id="forkedfrom"></a>🕵️‍♂️ Forked From:
