@@ -1,3 +1,5 @@
 aiohttp
-cryptography
 requests
+psutil
+pywin32
+cryptography
