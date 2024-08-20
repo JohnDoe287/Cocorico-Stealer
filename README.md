@@ -35,23 +35,28 @@ soon ...
 
 ## <a id="features"></a>📊 Features
 
-```
-- Browsers (+10)
-  - Chromium
-  - Edge
-  - Brave
-  - Chrome
-  - Epic Privacy
-  - Iridium
-  - Opera (gx)
-  - Opera
-  - Yandex
-  - Vivaldi
+<details>
+  <summary>Browsers (10)</summary>
 
+  <details>
+    <summary>Browsers Names</summary>
+    - Chromium
+    - Edge
+    - Brave
+    - Chrome
+    - Epic Privacy
+    - Iridium
+    - Opera (gx)
+    - Opera
+    - Yandex
+    - Vivaldi
+  </details>
+  
   - passwords
   - credit cards
   - cookies
   - autofills
+</details>
 
 - Wallets Extensions
   - (3) MetaMask
@@ -177,7 +182,7 @@ soon ...
 
 - Send logs to Telegram
 - AntiVM & Debugger
-```
+
 
 ## <a id="changelog"></a>💭 ChangeLog
 
