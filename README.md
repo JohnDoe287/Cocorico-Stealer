@@ -4,11 +4,12 @@ Hi everyone, I plan to start the project. If you're interested, please give it a
   bo2k168kb is a Windows stealer. Based on the asynchronous module, the code is readable and understandable. For detections on VirusTotal, it is FUD. If there are detections, they are likely <a href="https://en.wikipedia.org/wiki/False_positives_and_false_negatives">false positives</a>; this is common in a language like Python unfortunately.
 </p>
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <a href="https://t.me/bo2k168kb/">
 <img src="https://img.shields.io/badge/telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white">
 </a>
+  
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  
 <a href="https://discord.com/users/1221728197390106657">
 <img src="https://img.shields.io/badge/discord-5865F2?style=for-the-badge&logo=discord&logoColor=white">
 </a>
