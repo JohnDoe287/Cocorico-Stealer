@@ -31,7 +31,7 @@ soon ...
 
 
 <details>
-  <summary><h1><a id="features"></a>📊 Features</h1></summary>
+  <summary><h2><a id="features"></a>📊 Features</h2></summary>
 
   <details>
     <summary>Browsers (10)</summary>
