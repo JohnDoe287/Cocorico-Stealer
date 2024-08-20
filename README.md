@@ -37,20 +37,19 @@ soon ...
 
 <details>
   <summary>Browsers (10)</summary>
-
+  
   <details>
     <summary>Browsers Names</summary>
-      Chromium
-      Edge
-      Brave
-      Chrome
-      Epic Privacy
-      Iridium
-      Opera (gx)
-      Opera
-      Yandex
-      Vivaldi
-    
+      Chromium<br>
+      Edge<br>
+      Brave<br>
+      Chrome<br>
+      Epic Privacy<br>
+      Iridium<br>
+      Opera (gx)<br>
+      Opera<br>
+      Yandex<br>
+      Vivaldi<br>
   </details>
   
   - passwords
