@@ -91,6 +91,7 @@ soon ...
     - is premium
     - creation date
     - friends lists
+    - cookie bypass
 
   - Twitch Account
   - Twitter Account
