@@ -56,9 +56,9 @@ soon ...
   - credit cards
   - cookies
   - autofills
-  - 
 </details>
 
+-----
 
 <details>
   <summary>Wallets (10)</summary>
