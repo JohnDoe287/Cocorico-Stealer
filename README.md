@@ -7,9 +7,6 @@ Hi everyone, I plan to start the project. If you're interested, please give it a
 <a href="https://t.me/bo2k168kb/">
 <img src="https://img.shields.io/badge/telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white">
 </a>
-  
-&nbsp;
-  
 <a href="https://discord.com/users/1221728197390106657">
 <img src="https://img.shields.io/badge/discord-5865F2?style=for-the-badge&logo=discord&logoColor=white">
 </a>
