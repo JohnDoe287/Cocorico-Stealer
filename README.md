@@ -40,73 +40,224 @@ soon ...
 
   <details>
     <summary>Browsers Names</summary>
-    - Chromium
-    - Edge
-    - Brave
-    - Chrome
-    - Epic Privacy
-    - Iridium
-    - Opera (gx)
-    - Opera
-    - Yandex
-    - Vivaldi
+      Chromium
+      Edge
+      Brave
+      Chrome
+      Epic Privacy
+      Iridium
+      Opera (gx)
+      Opera
+      Yandex
+      Vivaldi
+    
   </details>
   
   - passwords
   - credit cards
   - cookies
   - autofills
+  - 
 </details>
 
-- Wallets Extensions
-  - (3) MetaMask
-  - (2) Ronin Wallet
-  - Exodus
-  - Trust Wallet
-  - Binance
-  - CoinBase
-  - TON
 
-- 2FA Codes
-  - GAuthAuthenticator
-  - EOSAuthenticator
-  - Authy
-  - Authenticator
+<details>
+  <summary>Wallets (10)</summary>
+  
+  <details>
+    <summary>Wallets Extensions</summary>
+        (3) MetaMask
+        (2) Ronin Wallet
+        Exodus
+        Trust Wallet
+        Binance
+        CoinBase
+        TON
+  </details>
 
-- Passwords Managers
-  - 1Password
-  - NordPass
-  - DashLane
-  - Bitwarden
-  - RoboForm
-  - Keeper
-  - MultiPassword
-  - KeePassXC
-  - LastPass
-  - Trezor
+  <details>
+    <summary>Wallets Desktop</summary>
+        Exodus
+        Atomic
+        Bitcoin
+        Bytecoin
+        Coinomi
+        Dash
+        WalletWasabi
+        Electrum
+    
+  </details>
+</details>
 
-- Social Medias (+12)
 
-  - Roblox Account
-    - username
-    - display name
-    - profile url
-    - robux
-    - rap
-    - is premium
-    - creation date
-    - friends lists
-    - cookie bypass
+<details>
+  <summary>2FA Codes Extensions</summary>
+    GAuthAuthenticator
+    EOSAuthenticator
+    Authy
+    Authenticator
 
-  - Twitch Account
-  - Twitter Account
-  - TikTok Account
-  - Spotify Account
-  - Instagram Account
-  - Guilded Account
-  - Patreon Account
-  - Riot User
-  - Steal User
+</details>
+
+<details>
+  <summary>Passwords Managers</summary>
+    1Password
+    NordPass
+    DashLane
+    Bitwarden
+    RoboForm
+    Keeper
+    MultiPassword
+    KeePassXC
+    LastPass
+    Trezor
+
+</details>
+
+
+<details>
+  <summary>Social Medias (+12)</summary>
+  
+  <details>
+    <summary>Roblox Account</summary>
+      username
+      display name
+      profile url
+      robux
+      rap
+      is premium
+      creation date
+      friends lists
+      cookie bypass
+    
+  </details>
+  
+  <details>
+    <summary>Twitch Account</summary>
+    - Username
+    - Display Name
+    - Profile URL
+    - Email
+    - Has Prime
+    - Is Partner
+    - Language
+    - Profile Image URL
+    - Bits Balance
+    - Followers Count
+    
+  </details>
+  
+  <details>
+    <summary>Twitter Account</summary>
+    - Username
+    - Screen Name
+    - Profile URL
+    - Followers Count
+    - Following Count
+    - Tweets Count
+    - Is Verified
+    - Created At
+    - Biography
+    - Profile Picture URL
+    - Cookie
+    
+  </details>
+  
+  <details>
+    <summary>TikTok Account</summary>
+    - Username
+    - Profile URL
+    - Email
+    - Phone Number
+    - Coins
+    - Creation Date
+    - Profile Picture URL
+    - Subscribers Count
+    
+  </details>
+  
+  <details>
+    <summary>Spotify Account</summary>
+    - Username
+    - Display Name
+    - Profile URL
+    - Email
+    - Playlist Count
+    - Followers Count
+    - Subscription Type
+    - Profile Picture URL
+    
+  </details>
+  
+  <details>
+    <summary>Instagram Account</summary>
+    - Username
+    - Full Name
+    - Profile URL
+    - Biography
+    - Email
+    - Is Verified
+    - Followers Count
+    - Following Count
+    - Profile Picture URL
+    
+  </details>
+  
+  <details>
+    <summary>Guilded Account</summary>
+    - Username
+    - Profile URL
+    - Email
+    - Global Username
+    - Subdomain
+    - Join Date
+    - Biography
+    - Profile Picture URL
+    - Social Connections
+    
+  </details>
+  
+  <details>
+    <summary>Patreon Account</summary>
+    - Username
+    - Profile URL
+    - Email
+    - Is Email Verified
+    - Currency
+    - Profile Picture URL
+    - Biography
+    - Social Connections
+    - URL
+    
+  </details>
+  
+  <details>
+    <summary>Riot User</summary>
+    - Username
+    - Email
+    - Region
+    - Locale
+    - Country
+    - MFA Verified
+    
+  </details>
+  
+  <details>
+    <summary>Steal User</summary>
+    - Username
+    - Email
+    - Profile URL
+    - Comments Karma
+    - Total Karma
+    - Coins
+    - Is Moderator
+    - Is Gold
+    - Is Suspended
+    - Profile Picture URL
+    
+  </details>
+  
+</details>
 
 - Messengers
 
@@ -155,15 +306,6 @@ soon ...
   - FileZilla
   - WinSCP
 
-- Wallets Desktop
-  - Exodus
-  - Atomic
-  - Bitcoin
-  - Bytecoin
-  - Coinomi
-  - Dash
-  - WalletWasabi
-  - Electrum
 
 - Computer Info
   - System Info
