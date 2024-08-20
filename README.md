@@ -19,7 +19,7 @@ Hi everyone, I plan to start the project. If you're interested, please give it a
 - [📝 TODO](#todolist)
 - [📊 Features](#features)
 - [💭 Changelog](#changelog)
-- [🕵️‍♂️ Credits](#forkedfrom)
+- [👤 Credits](#credits)
 - [💼 Terms](#terms)
 
 ## <a id="disclaimer"></a>⚠️ Disclaimer
@@ -67,7 +67,7 @@ This software was made for personal **education** and **sandbox testing** purpos
 - V1.0.4 Added an advanced AntiVM & Debugger
 ```
 
-### <a id="forkedfrom"></a>🕵️‍♂️ Forked From:
+### <a id="forkedfrom"></a>👤 Credits:
 - Exela Stealer (Code Format & Browser Decryption)
 - Kematian Stealer (Anti-VM & Debugger)
 
