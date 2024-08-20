@@ -183,14 +183,10 @@ soon ...
 
 ```
 - V1.0.0 Created Github Repo & README Page
-- V1.0.1 Added UPX Packer, Assembly File, Requirements.txt, Setup.bat, Main.py, TODO List
-- V1.0.2 Added (+5) Browser & Decryption for (cards, cookies, passwords)
-- V1.0.3 Added more upload file web site (uguu, fileio, anonfiles, catbox)
-- V1.0.4 Added an advanced AntiVM & Debugger
-- V1.0.5 Added +3 vpn, +2 ftp client, +9 messenger, +2 backup mail, ~10 desktop wallet, ~20 extension wallet
-- V1.0.6 Added +10 social media (+2 are coming...) & Computer Info [softwares, tasklists, processes, networks, clipboards, system]
-- V1.0.7 Changed Telegram embed to see how many social media you get from the client
-- V1.0.8 README upgraded
+- V1.0.1 Added UPX Packer, Assembly File, Requirements.txt, Setup.bat, Main.py, TODO List, (+5) Browser & Decryption for (cards, cookies, passwords)
+- V1.0.2 Added more upload file web site (uguu, fileio, anonfiles, catbox), AntiVM & Debugger, +3 vpn, +2 ftp client, +9 messenger, +2 backup mail, ~10 desktop wallet, ~20 extension wallet, +10 social media (+2 are coming...) & Computer Info [softwares, tasklists, processes, networks, clipboards, system]
+- V1.0.3 Changed Telegram embed to see how many social media you get from the client
+- V1.0.4 README upgraded
 ```
 
 ### <a id="forkedfrom"></a>👤 Credits:
