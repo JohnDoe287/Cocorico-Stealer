@@ -46,8 +46,15 @@ This software was made for personal **education** and **sandbox testing** purpos
   - cookies
   - autofills
 
-- Send to Telegram
-- UploadFile to GoFile
+- UploadFile (+5)
+  - GoFile
+  - FileIo
+  - AnonFiles
+  - Uguu
+  - CatBox
+
+- Send logs to Telegram
+- AntiVM & Debugger
 ```
 
 ## <a id="changelog"></a>💭 ChangeLog
