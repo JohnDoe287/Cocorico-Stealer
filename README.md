@@ -53,19 +53,16 @@ This software was made for personal **education** and **sandbox testing** purpos
 ## <a id="changelog"></a>💭 ChangeLog
 
 ```
-- V1.0.0 Created Github Repo
-- V1.0.1 Created README Page
-- V1.0.2 Added UPX Packer
-- V1.0.3 Added Assembly File
-- V1.0.4 Added Requirements.txt
-- V1.0.5 Added Setup.bat
-- V1.0.6 Added Main.py
-- V1.0.7 Added TODO List (Aug 20 / 12:37 AM)
-- V1.0.8 Added (+5) Browser & Decryption for (cards, cookies, passwords)
+- V1.0.0 Created Github Repo & README Page
+- V1.0.1 Added UPX Packer, Assembly File, Requirements.txt, Setup.bat, Main.py, TODO List
+- V1.0.2 Added (+5) Browser & Decryption for (cards, cookies, passwords)
+- V1.0.3 Added more upload file web site (uguu, fileio, anonfiles, catbox)
+- V1.0.4 Added an advanced AntiVM & Debugger
 ```
 
 ### <a id="forkedfrom"></a>🕵️‍♂️ Forked From:
-- Exela Stealer (Format & Decryption)
+- Exela Stealer (Code Format & Browser Decryption)
+- Kematian Stealer (Anti-VM & Debugger)
 
 ### <a id="terms"></a>💼 Terms Of Usage
 - [x] This script is for educational purposes only. Use at your own risk. The developer is not responsible for any damage caused by its use.
