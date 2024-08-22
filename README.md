@@ -224,7 +224,7 @@ This software was made for personal **education** and **sandbox testing** purpos
 <summary><strong>Other Tools</strong></summary>
 
 • Send to Telegram  
-• UPX Packer  
+• <a href="https://github.com/upx/upx">UPX Packer</a> 
 • Assembly File Editor  
 • Obfuscator
 • Builder
