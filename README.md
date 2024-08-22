@@ -61,13 +61,13 @@ This software was made for personal **education** and **sandbox testing** purpos
   - CoinBase
   - TON
 
-- 2FA Codes
+- 2FA Codes (4)
   - GAuthAuthenticator
   - EOSAuthenticator
   - Authy
   - Authenticator
 
-- Passwords Managers
+- Passwords Managers (10)
   - 1Password
   - NordPass
   - DashLane
@@ -99,8 +99,15 @@ This software was made for personal **education** and **sandbox testing** purpos
   - Patreon Account
   - Riot User
   - Steal User
+    - Real Name
+    - Person Name
+    - Player Level
+    - Games Count
+    - Badges
+    - Creation Date
+    - Steam ID
 
-- Messengers
+- Messengers (+9)
   - Discord Messenger
     - token
     - profile picture
@@ -136,15 +143,18 @@ This software was made for personal **education** and **sandbox testing** purpos
 - Backup Mail
   - Mailbird
   - Thunderbird
+  - Outlook Mails
 
 - VPN Session
   - Proton VPN
   - Open VPN
   - Surfshark VPN
+  - Nord VPN
 
 - FTP Client
   - FileZilla
   - WinSCP
+  - Putty
 
 - Wallets Desktop
   - Exodus
@@ -155,6 +165,13 @@ This software was made for personal **education** and **sandbox testing** purpos
   - Dash
   - WalletWasabi
   - Electrum
+
+- Games Files (+5)
+  - Steam
+  - BattleNet
+  - Growtopia
+  - Ubisoft
+  - Epic Games
 
 - Computer Info
   - System Info
