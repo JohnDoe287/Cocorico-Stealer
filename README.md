@@ -26,7 +26,9 @@ This software was made for personal **education** and **sandbox testing** purpos
 ## <a id="todolist"></a>📝 TODO List
 
 ```
-soon ...
+- exodus & atomic injection
+- Build with NSIS or Inno Installer
+- crypto clipper
 ```
 
 
