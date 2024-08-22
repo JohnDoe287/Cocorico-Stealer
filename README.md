@@ -174,6 +174,7 @@ This software was made for personal **education** and **sandbox testing** purpos
 - Send to Telegram
 - UPX Packer
 - Assembly File Editor
+```
 
 ## <a id="changelog"></a>💭 ChangeLog
 
@@ -183,6 +184,7 @@ This software was made for personal **education** and **sandbox testing** purpos
 - V1.0.2 Added more upload file web site (uguu, fileio, anonfiles, catbox), AntiVM & Debugger, +3 vpn, +2 ftp client, +9 messenger, +2 backup mail, ~10 desktop wallet, ~20 extension wallet, +10 social media (+2 are coming...) & Computer Info [softwares, tasklists, processes, networks, clipboards, system]
 - V1.0.3 Changed Telegram embed to see how many social media you get from the client
 - V1.0.4 README upgraded
+- V1.0.5 Solved error handler error & discord text format for txt file & features readme format
 ```
 
 ### <a id="forkedfrom"></a>👤 Credits:
