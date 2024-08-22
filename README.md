@@ -29,6 +29,7 @@ This software was made for personal **education** and **sandbox testing** purpos
 - exodus & atomic injection
 - Build with NSIS or Inno Installer
 - crypto clipper
+- web or ui server for clients
 ```
 
 
