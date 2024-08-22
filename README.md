@@ -229,19 +229,19 @@ This software was made for personal **education** and **sandbox testing** purpos
 </details>
 
 
-### <a id="forkedfrom"></a>👤 Credits:
+## <a id="forkedfrom"></a>👤 Credits
 - Exela Stealer (Code Format & Browser Decryption)
 - Kematian Stealer (Anti-VM & Debugger)
 - Trap Stealer (Discord, Roblox & some social media)
 
-### <a id="terms"></a>💼 Terms Of Usage
+## <a id="terms"></a>💼 Terms Of Usage
 - [x] This script is for educational purposes only. Use at your own risk. The developer is not responsible for any damage caused by its use.
 
 - [x] This software is provided as-is, with no guarantees of performance or suitability. It is intended for educational purposes and sandbox testing. The developer is not liable for any damage or misuse. By using it, you release the developer from any liability.
 
 - [x] By using/downloading this repository, you agree to the Commons Clause license, which prohibits selling the repository or its code. For more info, see https://commonsclause.com/.
 
-### Author
+## Author
 - JohnDoe287
 
 <p align="center">
