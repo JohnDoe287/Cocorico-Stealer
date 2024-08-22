@@ -36,7 +36,7 @@ This software was made for personal **education** and **sandbox testing** purpos
 
 
 <details>
-    <summary>Browsers (+10)</summary>
+    <summary>**Browsers (+10)**</summary>
     <p>Chromium</p>
     <p>Edge</p>
     <p>Brave</p>
