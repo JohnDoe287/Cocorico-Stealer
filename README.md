@@ -16,6 +16,7 @@ Hi everyone, I plan to start the project. If you're interested, please give it a
 - [📝 TODO](#todolist)
 - [💭 Changelog](#changelog)
 - [📊 Features](#features)
+- [📸 Preview](#preview)
 - [👤 Credits](#credits)
 - [💼 Terms](#terms)
 
@@ -44,6 +45,7 @@ This software was made for personal **education** and **sandbox testing** purpos
 - V1.0.5 Solved error handler error & discord text format for txt file & features readme format
 - V1.0.6 Added +5 Games (steam, epic, uplay, growtopia, battle.net) & nordvpn, putty, steam user info, Advanced Obfuscator (pyminifier, pyarmor), compile with nutika module
 - V1.0.7 Changed Features (README) format & added todo list
+- V1.0.8 added (demo) builder
 ```
 
 
@@ -225,8 +227,14 @@ This software was made for personal **education** and **sandbox testing** purpos
 • UPX Packer  
 • Assembly File Editor  
 • Obfuscator
+• Builder
 
 </details>
+
+## <a id="preview"></a>📸 Preview
+
+![Builder (demo)](url_image)
+
 
 
 ## <a id="forkedfrom"></a>👤 Credits
