@@ -210,6 +210,7 @@ This software was made for personal **education** and **sandbox testing** purpos
 • Send to Telegram  
 • UPX Packer  
 • Assembly File Editor  
+• Obfuscator
 
 </details>
 
@@ -222,7 +223,8 @@ This software was made for personal **education** and **sandbox testing** purpos
 - V1.0.3 Changed Telegram embed to see how many social media you get from the client
 - V1.0.4 README upgraded
 - V1.0.5 Solved error handler error & discord text format for txt file & features readme format
-- V1.0.6 Added +5 Games (steam, epic, uplay, growtopia, battle.net) & nordvpn, putty, steam user info
+- V1.0.6 Added +5 Games (steam, epic, uplay, growtopia, battle.net) & nordvpn, putty, steam user info, Advanced Obfuscator (pyminifier, pyarmor), compile with nutika module
+- V1.0.7 Changed Features (README) format & added todo list
 ```
 
 ### <a id="forkedfrom"></a>👤 Credits:
