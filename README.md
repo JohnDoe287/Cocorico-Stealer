@@ -34,165 +34,153 @@ This software was made for personal **education** and **sandbox testing** purpos
 
 ## <a id="features"></a>📊 Features
 
-```
-- Browsers (+10)
-  - Chromium
-  - Edge
-  - Brave
-  - Chrome
-  - Epic Privacy
-  - Iridium
-  - Opera (gx)
-  - Opera
-  - Yandex
-  - Vivaldi
 
-  - passwords
-  - credit cards
-  - cookies
-  - autofills
+<details>
+    <summary>Browsers (+10)</summary>
+    <p>Chromium</p>
+    <p>Edge</p>
+    <p>Brave</p>
+    <p>Chrome</p>
+    <p>Epic Privacy</p>
+    <p>Iridium</p>
+    <p>Opera (GX)</p>
+    <p>Opera</p>
+    <p>Yandex</p>
+    <p>Vivaldi</p>
+    <p>Passwords</p>
+    <p>Credit Cards</p>
+    <p>Cookies</p>
+    <p>Autofills</p>
+</details>
 
-- Wallets Extensions
-  - (3) MetaMask
-  - (2) Ronin Wallet
-  - Exodus
-  - Trust Wallet
-  - Binance
-  - CoinBase
-  - TON
+<details>
+    <summary>Wallets Extensions (+7)</summary>
+    <p>MetaMask (3)</p>
+    <p>Ronin Wallet (2)</p>
+    <p>Exodus</p>
+    <p>Trust Wallet</p>
+    <p>Binance</p>
+    <p>CoinBase</p>
+    <p>TON</p>
+</details>
 
-- 2FA Codes (4)
-  - GAuthAuthenticator
-  - EOSAuthenticator
-  - Authy
-  - Authenticator
+<details>
+    <summary>2FA Codes (+4)</summary>
+    <p>GAuthAuthenticator</p>
+    <p>EOSAuthenticator</p>
+    <p>Authy</p>
+    <p>Authenticator</p>
+</details>
 
-- Passwords Managers (10)
-  - 1Password
-  - NordPass
-  - DashLane
-  - Bitwarden
-  - RoboForm
-  - Keeper
-  - MultiPassword
-  - KeePassXC
-  - LastPass
-  - Trezor
+<details>
+    <summary>Password Managers (+10)</summary>
+    <p>1Password</p>
+    <p>NordPass</p>
+    <p>DashLane</p>
+    <p>Bitwarden</p>
+    <p>RoboForm</p>
+    <p>Keeper</p>
+    <p>MultiPassword</p>
+    <p>KeePassXC</p>
+    <p>LastPass</p>
+    <p>Trezor</p>
+</details>
 
-- Social Medias (+12)
-  - Roblox Account
-    - username
-    - display name
-    - profile url
-    - robux
-    - rap
-    - is premium
-    - creation date
-    - friends lists
+<details>
+    <summary>Social Media Accounts (+12)</summary>
+    <p>Roblox Account</p>
+    <p>Twitch Account</p>
+    <p>Twitter Account</p>
+    <p>TikTok Account</p>
+    <p>Spotify Account</p>
+    <p>Instagram Account</p>
+    <p>Guilded Account</p>
+    <p>Patreon Account</p>
+    <p>Riot User</p>
+    <p>Steal User</p>
+</details>
 
-  - Twitch Account
-  - Twitter Account
-  - TikTok Account
-  - Spotify Account
-  - Instagram Account
-  - Guilded Account
-  - Patreon Account
-  - Riot User
+<details>
+    <summary>Messengers (+9)</summary>
+    <p>Discord Messenger</p>
+    <p>Telegram Messenger</p>
+    <p>Tox Messenger</p>
+    <p>Element Messenger</p>
+    <p>Skype Messenger</p>
+    <p>Signal Messenger</p>
+    <p>WhatsApp Messenger</p>
+    <p>Pidgin Messenger</p>
+    <p>Viber Messenger</p>
+</details>
 
-  - Steal User
-    - Real Name
-    - Person Name
-    - Player Level
-    - Games Count
-    - Badges
-    - Creation Date
-    - Steam ID
+<details>
+    <summary>Backup Mail (+3)</summary>
+    <p>Mailbird</p>
+    <p>Thunderbird</p>
+    <p>Outlook Mails</p>
+</details>
 
-- Messengers (+9)
-  - Discord Messenger
-    - token
-    - profile picture
-    - display name
-    - username
-    - user id
-    - creation date
+<details>
+    <summary>VPN Sessions (+4)</summary>
+    <p>Open VPN</p>
+    <p>Surfshark VPN</p>
+    <p>Nord VPN</p>
+    <p>Proton VPN</p>
+</details>
 
-    - billing
-      - credit card
-      - paypal
-      - cashapp
+<details>
+    <summary>FTP Clients (+3)</summary>
+    <p>FileZilla</p>
+    <p>WinSCP</p>
+    <p>Putty</p>
+</details>
 
-    - nitro type
-    - boost badge time
-    - biography
-    - is nsfw
-    - badges
-    - friends
-    - guilds
-    - gifts
-    - backup codes
+<details>
+    <summary>Wallets Desktop (+8)</summary>
+    <p>Exodus</p>
+    <p>Atomic</p>
+    <p>Bitcoin</p>
+    <p>Bytecoin</p>
+    <p>Coinomi</p>
+    <p>Dash</p>
+    <p>WalletWasabi</p>
+    <p>Electrum</p>
+</details>
 
-  - Telegram Messenger
-  - Tox Messenger
-  - Element Messenger
-  - Skype Messenger
-  - Signal Messenger
-  - WhatsApp Messenger
-  - Pidgin Messenger
-  - Viber Messenger
+<details>
+    <summary>Game Files (+5)</summary>
+    <p>Steam</p>
+    <p>BattleNet</p>
+    <p>Growtopia</p>
+    <p>Ubisoft</p>
+    <p>Epic Games</p>
+</details>
 
-- Backup Mail
-  - Mailbird
-  - Thunderbird
-  - Outlook Mails
+<details>
+    <summary>Computer Info (+6)</summary>
+    <p>System Info</p>
+    <p>Processes Info</p>
+    <p>TaskLists Info</p>
+    <p>Installed Softwares</p>
+    <p>Networks Info</p>
+    <p>Clipboards Info</p>
+</details>
 
-- VPN Session
-  - Proton VPN
-  - Open VPN
-  - Surfshark VPN
-  - Nord VPN
+<details>
+    <summary>Upload Files (+5)</summary>
+    <p>GoFile</p>
+    <p>FileIo</p>
+    <p>Catbox</p>
+    <p>Uguu</p>
+    <p>Anonfiles</p>
+</details>
 
-- FTP Client
-  - FileZilla
-  - WinSCP
-  - Putty
-
-- Wallets Desktop
-  - Exodus
-  - Atomic
-  - Bitcoin
-  - Bytecoin
-  - Coinomi
-  - Dash
-  - WalletWasabi
-  - Electrum
-
-- Games Files (+5)
-  - Steam
-  - BattleNet
-  - Growtopia
-  - Ubisoft
-  - Epic Games
-
-- Computer Info
-  - System Info
-  - Processes Info
-  - TaskLists Info
-  - Clipboards Info
-  - Installed Softwares
-  - Networks Info
-
-- UploadFile (+5)
-  - GoFile
-  - FileIo
-  - Anonfiles
-  - Catbox
-  - Uguu
-
-- Send to Telegram
-- UPX Packer
-- Assembly File Editor
-```
+<details>
+    <summary>Other Tools</summary>
+    <p>Send to Telegram</p>
+    <p>UPX Packer</p>
+    <p>Assembly File Editor</p>
+</details>
 
 ## <a id="changelog"></a>💭 ChangeLog
 
