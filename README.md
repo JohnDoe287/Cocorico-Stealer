@@ -234,7 +234,7 @@ This software was made for personal **education** and **sandbox testing** purpos
 
 ## <a id="preview"></a>📸 Preview
 
-soon ...
+! [body embed](https://raw.githubusercontent.com/JohnDoe287/bo2k168kb-stealer/main/preview/embed_all.png)
 
 
 ## <a id="forkedfrom"></a>👤 Credits
