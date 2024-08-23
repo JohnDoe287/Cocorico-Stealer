@@ -157,10 +157,10 @@ This software was made for personal **education** and **sandbox testing** purpos
 <details>
 <summary><strong>VPN Sessions (+4)</strong></summary>
 
-• Open VPN  
-• Surfshark VPN  
-• Nord VPN  
-• Proton VPN  
+• <a href="https://openvpn.net/">Open VPN</a>  
+• <a href="https://surfshark.com/">Surfshark VPN</a>  
+• <a href="https://nordvpn.com/">Nord VPN</a>  
+• <a href="https://protonvpn.com/">Proton VPN</a>  
 
 </details>
 
@@ -213,11 +213,11 @@ This software was made for personal **education** and **sandbox testing** purpos
 <details>
 <summary><strong>Upload Files (+5)</strong></summary>
 
-• GoFile  
-• FileIo  
-• Catbox  
-• Uguu  
-• Krakenfiles  
+• <a href="https://gofile.io/welcome">GoFile</a>  
+• <a href="https://www.file.io/">Fileio</a>  
+• <a href="https://catbox.moe/">Catbox</a>  
+• <a href="https://uguu.se/">Uguu</a>  
+• <a href="https://krakenfiles.com/">Kraken</a>  
 
 </details>
 
