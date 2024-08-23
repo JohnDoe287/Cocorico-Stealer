@@ -46,6 +46,7 @@ This software was made for personal **education** and **sandbox testing** purpos
 - V1.0.6 Added +5 Games (steam, epic, uplay, growtopia, battle.net) & nordvpn, putty, steam user info, Advanced Obfuscator (pyminifier, pyarmor), compile with nutika module
 - V1.0.7 Changed Features (README) format & added todo list
 - V1.0.8 added (demo) builder
+- V1.0.9 changed telegram embed, and updated error handler, removed anonfiles and replaced with krakenfiles
 ```
 
 
@@ -216,19 +217,19 @@ This software was made for personal **education** and **sandbox testing** purpos
 • FileIo  
 • Catbox  
 • Uguu  
-• Anonfiles  
+• Krakenfiles  
 
 </details>
 
 <details>
 <summary><strong>Other Tools</strong></summary>
- 
-• Send to Telegram 
-• Assembly File Editor 
-• Obfuscator 
-• Builder 
-• <a href="https://github.com/upx/upx">UPX Packer</a> 
- 
+
+• Send to Telegram  
+• Assembly File Editor  
+• Obfuscator  
+• Builder  
+• <a href="https://github.com/upx/upx">UPX Packer</a>  
+
 </details>
 
 ## <a id="preview"></a>📸 Preview
