@@ -1,4 +1,5 @@
-Hi everyone, I plan to start the project. If you're interested, please give it a star and stay tuned.
+<h1>NOT WORKING !</h1>
+  <h2>I will change the readme when the Stealer is ready if you want to be informed about the project put a star</h2>
 
 <p align="center">
   bo2k168kb is a Windows stealer. Based on the asynchronous module, the code is readable and understandable. For detections on VirusTotal, it is FUD. If there are detections, they are likely <a href="https://en.wikipedia.org/wiki/False_positives_and_false_negatives">false positives</a>; this is common in a language like Python unfortunately.
