@@ -48,6 +48,7 @@ This software was made for personal **education** and **sandbox testing** purpos
 - V1.0.7 Changed Features (README) format & added todo list
 - V1.0.8 added (demo) builder
 - V1.0.9 changed telegram embed, and updated error handler, removed anonfiles and replaced with krakenfiles
+- V1.1.0 I will change the whole format of the stealer, so that it is easy to understand and use for everyone, with documentation etc.
 ```
 
 
