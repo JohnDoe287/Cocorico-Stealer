@@ -17,8 +17,6 @@
 - [⚠️ Disclaimer](#disclaimer)
 - [📝 TODO](#todolist)
 - [💭 Changelog](#changelog)
-- [📚 Documentation](#documentation)
-- [📸 Preview](#preview)
 - [👤 Credits](#credits)
 - [💼 Terms](#terms)
 
@@ -54,15 +52,6 @@ This software was made for personal **education** and **sandbox testing** purpos
 - V1.1.2 added computer, file upload, antivm & some sessions to src folder & added documentation to readme file
 - V1.1.3 back after 2 week, removed features (bc the project is not finished) & removed src folder (i'll explain everything in main file)
 ```
-## <a id="documentation"></a>📚 Documentation
-soon..
-
-
-## <a id="preview"></a>📸 Preview
-
-![body embed](https://raw.githubusercontent.com/JohnDoe287/bo2k168kb-stealer/main/preview/embed_all.png)  
-
-![link embed](https://raw.githubusercontent.com/JohnDoe287/bo2k168kb-stealer/main/preview/embed_link.png)  
 
 
 ## <a id="forkedfrom"></a>👤 Credits
