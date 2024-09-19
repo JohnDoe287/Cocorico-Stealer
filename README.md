@@ -3,7 +3,7 @@
 
 
 <p align="center">
-  bo2k168kb is a Windows stealer. Based on the asynchronous module, the code is readable and understandable. For detections on VirusTotal, it is FUD. If there are detections, they are likely <a href="https://en.wikipedia.org/wiki/False_positives_and_false_negatives">false positives</a>; this is common in a language like Python unfortunately.
+  bo2k168kb is a stealer. Based on the asynchronous module, the code is readable and understandable. For detections on VirusTotal, it is FUD. If there are detections, they are likely <a href="https://en.wikipedia.org/wiki/False_positives_and_false_negatives">false positives</a>; this is common in a language like Python unfortunately.
 </p>
 
 <a href="https://t.me/bo2k168kb/">
