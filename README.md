@@ -51,6 +51,7 @@ This software was made for personal **education** and **sandbox testing** purpos
 - V1.1.1 added crypto clipper (not working rn)
 - V1.1.2 added computer, file upload, antivm & some sessions to src folder & added documentation to readme file
 - V1.1.3 back after 2 week, removed features (bc the project is not finished) & removed src folder (i'll explain everything in main file)
+- V1.1.4 removed many features, added linux stealer (only tested on ubuntu), removed preview images, changed readme file, working on mac-os stealer
 ```
 
 
