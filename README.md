@@ -1,5 +1,5 @@
-<h1>NOT WORKING !</h1>
-  <h2>I will change the readme when the Stealer is ready if you want to be informed about the project put a star</h2>
+<h1>NOT FINISHED !</h1>
+  <h2>I will change the readme when the Stealer is ready if you want to be informed about the project put a star.</h2>
 
 
 <p align="center">
