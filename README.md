@@ -52,6 +52,7 @@ This software was made for personal **education** and **sandbox testing** purpos
 - V1.1.2 added computer, file upload, antivm & some sessions to src folder & added documentation to readme file
 - V1.1.3 back after 2 week, removed features (bc the project is not finished) & removed src folder (i'll explain everything in main file)
 - V1.1.4 removed many features, added linux stealer (only tested on ubuntu), removed preview images, changed readme file, working on mac-os stealer
+- V1.1.5 added android stealer & windows (testing) on tests folder, removed many features on main.py file & i'm focusing on steal wallet data & telegram files & thinking about c&c or c2 server rat panel
 ```
 
 
