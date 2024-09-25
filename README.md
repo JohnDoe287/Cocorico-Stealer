@@ -61,7 +61,7 @@ This software was made for personal **education** and **sandbox testing** purpos
 - [x] By using/downloading this repository, you agree to the Commons Clause license, which prohibits selling the repository or its code. For more info, see https://commonsclause.com/.
 
 ## Author
-- JohnDoe287
+- bo2k168kb
 
 <p align="center">
   <a href=#top>Back to Top</a>
