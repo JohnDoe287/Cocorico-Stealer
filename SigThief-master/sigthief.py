@@ -42,8 +42,7 @@ def gather_file_info_win(binary):
         flItms['MinorLinkerVersion'] = struct.unpack("!B", binary.read(1))[0]
         flItms['SizeOfCode'] = struct.unpack("<I", binary.read(4))[0]
         flItms['SizeOfInitializedData'] = struct.unpack("<I", binary.read(4))[0]
-        flItms['SizeOfUninitializedData'] = struct.unpack("<I",
-                                                               binary.read(4))[0]
+        flItms['SizeOfUninitializedData'] = struct.unpack("<I", binary.read(4))[0]
         flItms['AddressOfEntryPoint'] = struct.unpack('<I', binary.read(4))[0]
         flItms['PatchLocation'] = flItms['AddressOfEntryPoint']
         flItms['BaseOfCode'] = struct.unpack('<I', binary.read(4))[0]
@@ -57,10 +56,8 @@ def gather_file_info_win(binary):
             flItms['ImageBase'] = struct.unpack('<I', binary.read(4))[0]
         flItms['SectionAlignment'] = struct.unpack('<I', binary.read(4))[0]
         flItms['FileAlignment'] = struct.unpack('<I', binary.read(4))[0]
-        flItms['MajorOperatingSystemVersion'] = struct.unpack('<H',
-                                                                   binary.read(2))[0]
-        flItms['MinorOperatingSystemVersion'] = struct.unpack('<H',
-                                                                   binary.read(2))[0]
+        flItms['MajorOperatingSystemVersion'] = struct.unpack('<H', binary.read(2))[0]
+        flItms['MinorOperatingSystemVersion'] = struct.unpack('<H', binary.read(2))[0]
         flItms['MajorImageVersion'] = struct.unpack('<H', binary.read(2))[0]
         flItms['MinorImageVersion'] = struct.unpack('<H', binary.read(2))[0]
         flItms['MajorSubsystemVersion'] = struct.unpack('<H', binary.read(2))[0]
@@ -127,14 +124,14 @@ def writeCert(cert, exe, output):
     print("Output file: {0}".format(output))
 
     with open(exe, 'rb') as g:
-        with open(output, 'wb') as f:
-            f.write(g.read())
-            f.seek(0)
-            f.seek(flItms['CertTableLOC'], 0)
-            f.write(struct.pack("<I", len(open(exe, 'rb').read())))
-            f.write(struct.pack("<I", len(cert)))
-            f.seek(0, io.SEEK_END)
-            f.write(cert)
+        with open(output, 'wb') as file:
+            file.write(g.read())
+            file.seek(0)
+            file.seek(flItms['CertTableLOC'], 0)
+            file.write(struct.pack("<I", len(open(exe, 'rb').read())))
+            file.write(struct.pack("<I", len(cert)))
+            file.seek(0, io.SEEK_END)
+            file.write(cert)
 
     print("Signature appended. \nFIN.")
 
@@ -201,14 +198,14 @@ def signfile(exe, sigfile, output):
     print("Output file: {0}".format(output))
     
     with open(exe, 'rb') as g:
-        with open(output, 'wb') as f:
-            f.write(g.read())
-            f.seek(0)
-            f.seek(flItms['CertTableLOC'], 0)
-            f.write(struct.pack("<I", len(open(exe, 'rb').read())))
-            f.write(struct.pack("<I", len(cert)))
-            f.seek(0, io.SEEK_END)
-            f.write(cert)
+        with open(output, 'wb') as file:
+            file.write(g.read())
+            file.seek(0)
+            file.seek(flItms['CertTableLOC'], 0)
+            file.write(struct.pack("<I", len(open(exe, 'rb').read())))
+            file.write(struct.pack("<I", len(cert)))
+            file.seek(0, io.SEEK_END)
+            file.write(cert)
     print("Signature appended. \nFIN.")
 
 
@@ -216,22 +213,14 @@ if __name__ == "__main__":
     usage = 'usage: %prog [options]'
     print("\n\n!! New Version available now for Dev Tier Sponsors! Sponsor here: https://github.com/sponsors/secretsquirrel\n\n")
     parser = OptionParser()
-    parser.add_option("-i", "--file", dest="inputfile", 
-                  help="input file", metavar="FILE")
-    parser.add_option('-r', '--rip', dest='ripsig', action='store_true',
-                  help='rip signature off inputfile')
-    parser.add_option('-a', '--add', dest='addsig', action='store_true',
-                  help='add signautre to targetfile')
-    parser.add_option('-o', '--output', dest='outputfile',
-                  help='output file')
-    parser.add_option('-s', '--sig', dest='sigfile',
-                  help='binary signature from disk')
-    parser.add_option('-t', '--target', dest='targetfile',
-                  help='file to append signature to')
-    parser.add_option('-c', '--checksig', dest='checksig', action='store_true',
-                  help='file to check if signed; does not verify signature')
-    parser.add_option('-T', '--truncate', dest="truncate", action='store_true',
-                  help='truncate signature (i.e. remove sig)')
+    parser.add_option("-i", "--file", dest="inputfile",  help="input file", metavar="FILE")
+    parser.add_option('-r', '--rip', dest='ripsig', action='store_true', help='rip signature off inputfile')
+    parser.add_option('-a', '--add', dest='addsig', action='store_true', help='add signautre to targetfile')
+    parser.add_option('-o', '--output', dest='outputfile', help='output file')
+    parser.add_option('-s', '--sig', dest='sigfile', help='binary signature from disk')
+    parser.add_option('-t', '--target', dest='targetfile', help='file to append signature to')
+    parser.add_option('-c', '--checksig', dest='checksig', action='store_true', help='file to check if signed; does not verify signature')
+    parser.add_option('-T', '--truncate', dest="truncate", action='store_true', help='truncate signature (i.e. remove sig)')
     (options, args) = parser.parse_args()
     
     # rip signature
@@ -266,4 +255,3 @@ if __name__ == "__main__":
 
     parser.print_help()
     parser.error("You must do something!")
-
