@@ -1,6 +1,4 @@
 <h1>Fensec Stealer !</h1>
-  <p>Get your key to use the premium version of terek.</p>
-
 
 <p align="center">
   Fensec is a stealer. Based on the asynchronous module, the code is readable and understandable. For detections on VirusTotal, it is FUD. If there are detections, they are likely <a href="https://en.wikipedia.org/wiki/False_positives_and_false_negatives">false positives</a>; this is common in a language like Python unfortunately. But I will do my best to keep detections as low as possible.
