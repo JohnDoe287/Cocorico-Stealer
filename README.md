@@ -1,17 +1,12 @@
-<h1>bo2k stealer !</h1>
-  <h2>I will change the readme when the Stealer is ready if you want to be informed about the project put a star.</h2>
+<h1>Fensec Stealer !</h1>
+  <p>Get your key to use the premium version of terek.</p>
 
 
 <p align="center">
-  bo2k168kb is a stealer. Based on the asynchronous module, the code is readable and understandable. For detections on VirusTotal, it is FUD. If there are detections, they are likely <a href="https://en.wikipedia.org/wiki/False_positives_and_false_negatives">false positives</a>; this is common in a language like Python unfortunately.
+  Fensec is a stealer. Based on the asynchronous module, the code is readable and understandable. For detections on VirusTotal, it is FUD. If there are detections, they are likely <a href="https://en.wikipedia.org/wiki/False_positives_and_false_negatives">false positives</a>; this is common in a language like Python unfortunately. But I will do my best to keep detections as low as possible.
 </p>
 
-<a href="https://t.me/bo2k168kb/">
-<img src="https://img.shields.io/badge/telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white">
-</a>
-<a href="https://discord.com/users/1221728197390106657">
-<img src="https://img.shields.io/badge/discord-5865F2?style=for-the-badge&logo=discord&logoColor=white">
-</a>
+currently working on a telegram bot to build
 
 ## <a id="content"></a>🌐 Content
 - [⚠️ Disclaimer](#disclaimer)
@@ -61,7 +56,7 @@ This software was made for personal **education** and **sandbox testing** purpos
 - [x] By using/downloading this repository, you agree to the Commons Clause license, which prohibits selling the repository or its code. For more info, see https://commonsclause.com/.
 
 ## Author
-- bo2k168kb
+- Terek62
 
 <p align="center">
   <a href=#top>Back to Top</a>
