@@ -49,11 +49,11 @@ Forked From
 Terms Of Usage
 -----
 
-- [x] This script is for educational purposes only. Use at your own risk. The developer is not responsible for any damage caused by its use.
+- This script is for educational purposes only. Use at your own risk. The developer is not responsible for any damage caused by its use.
 
-- [x] This software is provided as-is, with no guarantees of performance or suitability. It is intended for educational purposes and sandbox testing. The developer is not liable for any damage or misuse. By using it, you release the developer from any liability.
+- This software is provided as-is, with no guarantees of performance or suitability. It is intended for educational purposes and sandbox testing. The developer is not liable for any damage or misuse. By using it, you release the developer from any liability.
 
-- [x] By using/downloading this repository, you agree to the Commons Clause license, which prohibits selling the repository or its code. For more info, see https://commonsclause.com/.
+- By using/downloading this repository, you agree to the Commons Clause license, which prohibits selling the repository or its code. For more info, see https://commonsclause.com/.
 
 Author
 -----
