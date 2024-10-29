@@ -1,19 +1,15 @@
-<h1>Fensec Stealer V1 !</h1>
+Fensec Stealer V1 !
+-----
 
-<p align="center">
+<p>
   Fensec is a stealer. Based on the asynchronous module, the code is readable and understandable. For detections on VirusTotal, it is FUD. If there are detections, they are likely <a href="https://en.wikipedia.org/wiki/False_positives_and_false_negatives">false positives</a>; this is common in a language like Python unfortunately. But I will do my best to keep detections as low as possible.
 </p>
 
 currently working on a telegram bot to build
 
-content
-- [⚠️ Disclaimer](#disclaimer)
-- [📝 TODO](#todolist)
-- [💭 Changelog](#changelog)
-- [👤 Credits](#credits)
-- [💼 Terms](#terms)
 
-disclaimer
+Disclaimer
+-----
 I'm not responsible for any damages this software may cause after being acquired. 
 This software was made for personal **education** and **sandbox testing** purposes
 
@@ -43,19 +39,25 @@ Change Log
 ```
 
 
-forked from
+Forked From
+-----
+
 - Exela Stealer (Code Format & Browser Decryption)
 - Kematian Stealer (Anti-VM & Debugger)
 - Trap Stealer (Discord, Roblox & some social media)
 
-terms of usage
+Terms Of Usage
+-----
+
 - [x] This script is for educational purposes only. Use at your own risk. The developer is not responsible for any damage caused by its use.
 
 - [x] This software is provided as-is, with no guarantees of performance or suitability. It is intended for educational purposes and sandbox testing. The developer is not liable for any damage or misuse. By using it, you release the developer from any liability.
 
 - [x] By using/downloading this repository, you agree to the Commons Clause license, which prohibits selling the repository or its code. For more info, see https://commonsclause.com/.
 
-author
+Author
+-----
+
 - Terek62
 
 <p align="center">
