@@ -7,11 +7,21 @@ Fensec Stealer V1 !
 
 currently working on a telegram bot to build
 
-
-Disclaimer
+Features
 -----
-I'm not responsible for any damages this software may cause after being acquired. 
-This software was made for personal **education** and **sandbox testing** purposes
+
+```
+!Games
+!Browsers
+!Sessions
+!Messengers
+!FTP Clients
+!Emails
+!VPNs
+!Computer
+!Wallet
+!Jabber
+```
 
 
 Change Log
@@ -39,22 +49,6 @@ Change Log
 - V1.1.8 Added Gecko Browser | Added Wallet Injection (Atomic, Exodus) | Working on Crypto Clipper | Stay Tuned ...
 ```
 
-
-Forked From
------
-
-- Exela Stealer (Code Format & Browser Decryption)
-- Kematian Stealer (Anti-VM & Debugger)
-- Trap Stealer (Discord, Roblox & some social media)
-
-Terms Of Usage
------
-
-- This script is for educational purposes only. Use at your own risk. The developer is not responsible for any damage caused by its use.
-
-- This software is provided as-is, with no guarantees of performance or suitability. It is intended for educational purposes and sandbox testing. The developer is not liable for any damage or misuse. By using it, you release the developer from any liability.
-
-- By using/downloading this repository, you agree to the Commons Clause license, which prohibits selling the repository or its code. For more info, see https://commonsclause.com/.
 
 Author
 -----
