@@ -2,10 +2,10 @@ Fensec Stealer V1 !
 -----
 
 <p>
-  Fensec is a stealer. Based on the asynchronous module, the code is readable and understandable. For detections on VirusTotal, it is FUD. If there are detections, they are likely <a href="https://en.wikipedia.org/wiki/False_positives_and_false_negatives">false positives</a>; this is common in a language like Python unfortunately. But I will do my best to keep detections as low as possible.
+  the project is not finished yet put a star and join the telegram
 </p>
 
-currently working on a telegram bot to build
+https://t.me/terek3
 
 Features
 -----
