@@ -36,6 +36,7 @@ Change Log
 - V1.1.5 added android stealer. windows (testing) on tests folder, removed many features on main.py file & i'm focusing on steal wallet data & telegram files & thinking about c&c or c2 server rat panel
 - V1.1.6 removed all features except telegram files. crypto + added new crypto clipper & I will not update the stealer anymore, I am making a premium system to be able to buy a subscription (with a telegram bot)
 - V1.1.7 Changed stealer name to Fensec. I added all the removed features and I'm now working on them so that they work
+- V1.1.8 Added Gecko Browser | Added Wallet Injection (Atomic, Exodus) | Working on Crypto Clipper | Stay Tuned ...
 ```
 
 
