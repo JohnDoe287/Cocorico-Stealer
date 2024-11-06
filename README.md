@@ -11,16 +11,75 @@ Features
 -----
 
 ```
-!Games
 !Browsers
+- Gecko & Chromium (Passwords, Cookies, Credit Cards, Autofills, Historys, Downloads, Bookmarks)
+- Extension (Password Managers, Wallets)
+
+
 !Sessions
+- Stake
+- Reddit
+- Twitter
+- Twitch
+- TikTok
+- Instagram
+- Spotify
+- Patreon
+- Guilded
+
+!Games
+- BattleNet
+- Riot Games
+- Epic Games
+- Steam
+- Growtopia
+- Ubisoft
+- Minecraft
+- Roblox
+
 !Messengers
-!FTP Clients
-!Emails
-!VPNs
-!Computer
-!Wallet
+- Telegram
+- Discord (Account, Injection)
+- Tox
+- Signal
+- Whatsapp
+- Element
+- Viber
+- Skype
+
 !Jabber
+- Pidgin
+
+!FTP Clients
+- Filezilla
+- WinSCP
+- Putty
+
+!Emails
+- ThunderBird
+- BackupMailBird
+- Flock
+- Postbox
+
+!VPNs
+- NordVPN
+- SurfShark
+- OpenVPN
+- Proton
+- Mullvad
+
+!Wallet
+- Crypto Clipper
+- Crypto Miner
+- Wallet Injection (Atomic, Exodus)
+
+!Computer
+- Binder
+- UPX Packer
+- Obfuscator
+- Builder
+- Assembly File
+- Icon Changer
 ```
 
 
@@ -48,6 +107,7 @@ Change Log
 - V1.1.7 Changed stealer name to Fensec. I added all the removed features and I'm now working on them so that they work
 - V1.1.8 I upgraded the stealer to a paid version, no more github source code.
 - V1.1.9 Added Gecko Browser | Added Wallet Injection (Atomic, Exodus) | Working on Crypto Clipper | Stay Tuned ...
+- V1.2.0 Added Features on README Github Page
 ```
 
 
