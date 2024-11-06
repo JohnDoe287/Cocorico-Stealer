@@ -114,7 +114,7 @@ Change Log
 Author
 -----
 
-- Terek62
+- Terek
 
 <p align="center">
   <a href=#top>Back to Top</a>
