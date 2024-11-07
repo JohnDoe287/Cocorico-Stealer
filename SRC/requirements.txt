@@ -1,0 +1,6 @@
+aiohttp
+requests
+psutil
+pywin32
+cryptography
+pycryptodome
