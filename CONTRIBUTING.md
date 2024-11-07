@@ -1,6 +1,6 @@
-# Contributing to bo2k168kb Stealer
+# Contributing to Cocorico Stealer
 
-Thank you for considering contributing to bo2k168kb Stealer! We welcome your contributions to help make this project even better. Before you get started, please take a moment to read the following guidelines.
+Thank you for considering contributing to Cocorico Stealer! We welcome your contributions to help make this project even better. Before you get started, please take a moment to read the following guidelines.
 
 ## How to Contribute
 
