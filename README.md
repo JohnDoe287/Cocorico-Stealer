@@ -65,7 +65,7 @@ Features
 - SurfShark
 - OpenVPN
 - Proton
-- Mullvad
+- Mullvad (Account, Injection)
 
 !Wallet
 - Crypto Clipper
@@ -109,6 +109,7 @@ Change Log
 - V1.2.0 Added Features on README Github Page
 - V1.2.1 Added +12 cookies sessions & updated small bug's. Working on facebook cookie session
 - V1.2.2 Improved obfuscator & changed fake code format
+- V1.2.3 Added Mullvad Browser & working on Mullvad injection
 ```
 
 
