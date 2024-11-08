@@ -15,7 +15,6 @@ Features
 - Gecko & Chromium (Passwords, Cookies, Credit Cards, Autofills, Historys, Downloads, Bookmarks)
 - Extension (Password Managers, Wallets)
 
-
 !Sessions
 - Stake
 - Reddit
