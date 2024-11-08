@@ -1,4 +1,4 @@
-Fensec Stealer V1.2 !
+Cocorico Stealer V1.2 !
 -----
 
 <p>
