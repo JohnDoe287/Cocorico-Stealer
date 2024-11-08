@@ -108,6 +108,7 @@ Change Log
 - V1.1.8 I upgraded the stealer to a paid version, no more github source code.
 - V1.1.9 Added Gecko Browser | Added Wallet Injection (Atomic, Exodus) | Working on Crypto Clipper | Stay Tuned ...
 - V1.2.0 Added Features on README Github Page
+- V1.2.1 Added +12 cookies sessions & updated small bug's. Working on facebook cookie session
 ```
 
 
