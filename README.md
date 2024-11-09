@@ -35,6 +35,9 @@ Features
 - Ubisoft
 - Minecraft
 - Roblox
+- Rockstar Games
+- Galaxy (GOG)
+- Electronic Arts
 
 !Messengers
 - Telegram
@@ -110,6 +113,7 @@ Change Log
 - V1.2.1 Added +12 cookies sessions & updated small bug's. Working on facebook cookie session
 - V1.2.2 Improved obfuscator & changed fake code format
 - V1.2.3 Added Mullvad Browser & working on Mullvad injection
+- V1.2.4 Added 3 more games (Electronic Arts, Galaxy (GOG), RockstarGames)
 ```
 
 
