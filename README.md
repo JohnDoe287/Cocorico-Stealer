@@ -38,6 +38,7 @@ Features
 - Rockstar Games
 - Galaxy (GOG)
 - Electronic Arts
+- Riot Games
 
 !Messengers
 - Telegram
@@ -68,7 +69,7 @@ Features
 - SurfShark
 - OpenVPN
 - Proton
-- Mullvad (Account, Injection)
+- Mullvad (Injection)
 
 !Wallet
 - Crypto Clipper
@@ -114,6 +115,7 @@ Change Log
 - V1.2.2 Improved obfuscator & changed fake code format
 - V1.2.3 Added Mullvad Browser & working on Mullvad injection
 - V1.2.4 Added 3 more games (Electronic Arts, Galaxy (GOG), RockstarGames)
+- V1.2.5 Added 1 more game (Riot Games) & Added MullvadVPN Injection
 ```
 
 
