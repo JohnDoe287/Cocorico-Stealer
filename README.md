@@ -55,14 +55,14 @@ Features
 
 !FTP Clients
 - Filezilla
-- WinSCP
-- Putty
+- Working on (Putty, WinSCP, Telnet)
 
 !Emails
 - ThunderBird
 - BackupMailBird
 - Flock
 - Postbox
+- Working on (MailSpring Injection)
 
 !VPNs
 - NordVPN
@@ -72,9 +72,9 @@ Features
 - Mullvad (Injection)
 
 !Wallet
-- Crypto Clipper
-- Crypto Miner
 - Wallet Injection (Atomic, Exodus)
+- Wallet Desktop
+- Working on (Crypto Miner & Clipper)
 
 !Computer
 - Binder
@@ -83,6 +83,7 @@ Features
 - Builder
 - Assembly File
 - Icon Changer
+- Working on (Startup)
 ```
 
 
@@ -116,6 +117,7 @@ Change Log
 - V1.2.3 Added Mullvad Browser & working on Mullvad injection
 - V1.2.4 Added 3 more games (Electronic Arts, Galaxy (GOG), RockstarGames)
 - V1.2.5 Added 1 more game (Riot Games) & Added MullvadVPN Injection
+- V1.2.6 Updated Mullvad Injection Url & Removed Putty & WinSCP Clients
 ```
 
 
