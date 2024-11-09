@@ -5,7 +5,7 @@ Cocorico Stealer V1.2 !
   here is my first python malware project, there are features never before offered for free to the general public, so don't hesitate to take advantage of this short moment
 </p>
 
-https://t.me/terek3
+https://t.me/cocoricostealer
 
 Features
 -----
