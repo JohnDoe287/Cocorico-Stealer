@@ -5,7 +5,6 @@
   here is my first python malware project, there are features never before offered for free to the general public, so don't hesitate to take advantage of this short moment
 </p>
 
-
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 <a href="https://t.me/cocoricostealer">
   <img src="https://img.shields.io/badge/telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white">
@@ -35,13 +34,13 @@
 - BattleNet
 - Riot Games
 - Epic Games
-- Steam (Files, Sessions)
-- Ubisoft (Uplay)
-- Roblox (Account Data)
+- Steam
+- Ubisoft
+- Roblox
 - Rockstar Games
-- Galaxy (GOG.com v2.0)
-- Electronic Arts (EA Sports)
-- ⏳ Working on (Minecraft Sessions)
+- Galaxy
+- Electronic Arts
+- Minecraft
 
 🗣 Messengers
 - Telegram
@@ -78,18 +77,16 @@
 💰 Wallet
 - Wallet Injection (Atomic, Exodus)
 - Wallet Desktop
-- ⏳ Working on (Crypto Miner & Clipper)
+- Crypto Clipper
+- ⏳ Working on (Crypto Miner)
 
 💻 Computer
-- Binder
 - UPX Packer
 - Obfuscator
 - Builder
-- Assembly File
-- Icon Changer
-- ⏳ Working on (Startup)
+- Anti (VM, Debugger, Viruses)
+- ⏳ Working on (Startup, Persistence, Shedule, TaskKill, Bypass UAC, Imporve AntiVM, Binder, Icon Changer)
 ```
-
 
 🛠 Change Log
 -----
@@ -124,8 +121,8 @@
 - V1.2.6 Updated Mullvad Injection Url & Removed Putty & WinSCP Clients
 - V1.2.7 Changed README file format
 - V1.2.8 Added Gecko Password Decryption (Not Working) and WinSCP (Updated), Removed Growtopia, Updated Games, Filezilla and Telegram Embed
+- V1.2.9 Added Minecraft Session Stealer & Crypto Clipper
 ```
-
 
 👤 Author
 -----
