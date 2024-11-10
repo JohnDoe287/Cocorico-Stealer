@@ -35,14 +35,13 @@
 - BattleNet
 - Riot Games
 - Epic Games
-- Steam
-- Growtopia
-- Ubisoft
-- Minecraft
-- Roblox
+- Steam (Files, Sessions)
+- Ubisoft (Uplay)
+- Roblox (Account Data)
 - Rockstar Games
-- Galaxy (GOG)
-- Electronic Arts
+- Galaxy (GOG.com v2.0)
+- Electronic Arts (EA Sports)
+- ⏳ Working on (Minecraft Sessions)
 
 🗣 Messengers
 - Telegram
@@ -59,7 +58,8 @@
 
 ⚙️ FTP Clients
 - Filezilla
-- ⏳ Working on (Putty, WinSCP, Telnet)
+- WinSCP
+- ⏳ Working on (Putty, Telnet)
 
 ✉️ Emails
 - ThunderBird
@@ -123,6 +123,7 @@
 - V1.2.5 Added 1 more game (Riot Games) & Added MullvadVPN Injection
 - V1.2.6 Updated Mullvad Injection Url & Removed Putty & WinSCP Clients
 - V1.2.7 Changed README file format
+- V1.2.8 Added Gecko Password Decryption (Not Working) and WinSCP (Updated), Removed Growtopia, Updated Games, Filezilla and Telegram Embed
 ```
 
 
