@@ -16,8 +16,9 @@
 
 ```
 🌐 Browsers
-- Gecko & Chromium (Passwords, Cookies, Credit Cards, Autofills, Historys, Downloads, Bookmarks)
+- Gecko (Cookies, Autofills, Historys)
 - Extension (Password Managers, Wallets)
+- Working on Chromium App-Bound Decryption & Gecko (Password, Credit Card) Decryption
 
 🍪 Sessions
 - Stake
@@ -42,17 +43,16 @@
 - Rockstar Games
 - Galaxy (GOG)
 - Electronic Arts
-- Riot Games
 
 🗣 Messengers
 - Telegram
-- Discord (Account, Injection)
 - Tox
 - Signal
 - Whatsapp
 - Element
 - Viber
 - Skype
+- Working on Discord (Account, Injection)
 
 ☎️ Jabber
 - Pidgin
@@ -73,7 +73,7 @@
 - SurfShark
 - OpenVPN
 - Proton
-- Mullvad (Injection)
+- Working on Mullvad (Injection)
 
 💰 Wallet
 - Wallet Injection (Atomic, Exodus)
@@ -122,6 +122,7 @@
 - V1.2.4 Added 3 more games (Electronic Arts, Galaxy (GOG), RockstarGames)
 - V1.2.5 Added 1 more game (Riot Games) & Added MullvadVPN Injection
 - V1.2.6 Updated Mullvad Injection Url & Removed Putty & WinSCP Clients
+- V1.2.7 Changed README file format
 ```
 
 
