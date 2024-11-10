@@ -1,11 +1,17 @@
-Cocorico Stealer V1.2 !
+🐔 Cocorico Stealer V1.2 !
 -----
 
 <p>
   here is my first python malware project, there are features never before offered for free to the general public, so don't hesitate to take advantage of this short moment
 </p>
 
-https://t.me/cocoricostealer
+
+<div align="center">
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://t.me/cocoricostealer">
+    <img src="https://img.shields.io/badge/telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white">
+  </a>
+</div>
 
 Features
 -----
