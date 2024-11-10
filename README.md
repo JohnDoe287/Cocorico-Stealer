@@ -126,7 +126,7 @@
 ```
 
 
-Author
+👤 Author
 -----
 
 - Terek
