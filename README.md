@@ -11,11 +11,11 @@ Features
 -----
 
 ```
-!Browsers
+🌐 Browsers
 - Gecko & Chromium (Passwords, Cookies, Credit Cards, Autofills, Historys, Downloads, Bookmarks)
 - Extension (Password Managers, Wallets)
 
-!Sessions
+🍪 Sessions
 - Stake
 - Reddit
 - Twitter
@@ -26,7 +26,7 @@ Features
 - Patreon
 - Guilded
 
-!Games
+🎮 Games
 - BattleNet
 - Riot Games
 - Epic Games
@@ -40,7 +40,7 @@ Features
 - Electronic Arts
 - Riot Games
 
-!Messengers
+🗣 Messengers
 - Telegram
 - Discord (Account, Injection)
 - Tox
@@ -50,33 +50,33 @@ Features
 - Viber
 - Skype
 
-!Jabber
+☎️ Jabber
 - Pidgin
 
-!FTP Clients
+⚙️ FTP Clients
 - Filezilla
 - Working on (Putty, WinSCP, Telnet)
 
-!Emails
+✉️ Emails
 - ThunderBird
 - BackupMailBird
 - Flock
 - Postbox
 - Working on (MailSpring Injection)
 
-!VPNs
+🛡 VPNs
 - NordVPN
 - SurfShark
 - OpenVPN
 - Proton
 - Mullvad (Injection)
 
-!Wallet
+💰 Wallet
 - Wallet Injection (Atomic, Exodus)
 - Wallet Desktop
 - Working on (Crypto Miner & Clipper)
 
-!Computer
+💻 Computer
 - Binder
 - UPX Packer
 - Obfuscator
