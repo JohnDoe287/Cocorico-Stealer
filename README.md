@@ -18,7 +18,7 @@
 🌐 Browsers
 - Gecko (Cookies, Autofills, Historys)
 - Extension (Password Managers, Wallets)
-- Working on Chromium App-Bound Decryption & Gecko (Password, Credit Card) Decryption
+- ⏳ Working on Chromium App-Bound Decryption & Gecko (Password, Credit Card) Decryption
 
 🍪 Sessions
 - Stake
@@ -52,33 +52,33 @@
 - Element
 - Viber
 - Skype
-- Working on Discord (Account, Injection)
+- ⏳ Working on Discord (Account, Injection)
 
 ☎️ Jabber
 - Pidgin
 
 ⚙️ FTP Clients
 - Filezilla
-- Working on (Putty, WinSCP, Telnet)
+- ⏳ Working on (Putty, WinSCP, Telnet)
 
 ✉️ Emails
 - ThunderBird
 - BackupMailBird
 - Flock
 - Postbox
-- Working on (MailSpring Injection)
+- ⏳ Working on (MailSpring Injection)
 
 🛡 VPNs
 - NordVPN
 - SurfShark
 - OpenVPN
 - Proton
-- Working on Mullvad (Injection)
+- ⏳ Working on Mullvad (Injection)
 
 💰 Wallet
 - Wallet Injection (Atomic, Exodus)
 - Wallet Desktop
-- Working on (Crypto Miner & Clipper)
+- ⏳ Working on (Crypto Miner & Clipper)
 
 💻 Computer
 - Binder
@@ -87,7 +87,7 @@
 - Builder
 - Assembly File
 - Icon Changer
-- Working on (Startup)
+- ⏳ Working on (Startup)
 ```
 
 
