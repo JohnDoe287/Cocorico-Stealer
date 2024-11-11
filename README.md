@@ -2,7 +2,7 @@
 -----
 
 <p>
-  here is my first python malware project, there are features never before offered for free to the general public, so don't hesitate to take advantage of this short moment
+  I'm leaving the project for now, I'll probably resume in a few months
 </p>
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
