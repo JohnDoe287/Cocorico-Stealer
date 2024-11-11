@@ -1,4 +1,4 @@
-🧬 Eclipse Stealer V1.2 !
+🧬 Eclipse Stealer V1.3 !
 -----
 
 <p>
