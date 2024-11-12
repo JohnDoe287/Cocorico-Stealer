@@ -84,6 +84,7 @@
 - UPX Packer
 - Obfuscator
 - Builder
+- Sensitive Files Stealer
 - Anti (VM, Debugger, Viruses)
 - ⏳ Working on (Startup, Persistence, Shedule, TaskKill, Bypass UAC, Imporve AntiVM, Binder, Icon Changer)
 ```
@@ -124,6 +125,7 @@
 - V1.2.9 Added Minecraft Session Stealer & Crypto Clipper
 - V1.3.0 Changed Stealer Name to Eclipse
 - V1.3.1 reAdded Stealer & Added Shadow Games Client, Total Commander (FTP), Sensitive Files Stealer. Updated Tox, Signal, Clipper !!
+- V1.3.2 Updated Roblox and Files Stealer
 ```
 
 👤 Author
