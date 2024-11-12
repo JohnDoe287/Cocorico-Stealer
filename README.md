@@ -126,6 +126,7 @@
 - V1.3.0 Changed Stealer Name to Eclipse
 - V1.3.1 reAdded Stealer & Added Shadow Games Client, Total Commander (FTP), Sensitive Files Stealer. Updated Tox, Signal, Clipper !!
 - V1.3.2 Updated Roblox and Files Stealer
+- V1.3.3 Added Start.bat to run builder file faster and changed setup.bat file to check if python is installed, if not it will install python
 ```
 
 👤 Author
