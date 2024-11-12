@@ -2,7 +2,7 @@
 -----
 
 <p>
-  Eclipse Stealer is a malware targeting the Windows operating system, with many features, it allows you to recover a wide range of sensitive information. With regular updates with exclusive FREE features and completely undetectable
+  Eclipse Stealer is a malware targeting Windows operating system, with many features, it allows you to recover a wide range of sensitive information. With regular updates with exclusive FREE features and completely undetectable
 </p>
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
