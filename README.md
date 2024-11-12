@@ -15,9 +15,9 @@
 
 ```
 🌐 Browsers
-- Gecko (Cookies, Autofills, Historys)
+- Gecko (Cookies, Autofills, Historys)[Firefox, SeaMonkey, Mullvad, IceCat, PaleMoon, WaterFox, Flock]
 - Extension (Password Managers, Wallets)
-- ⏳ Working on Chromium App-Bound Decryption & Gecko (Password, Credit Card) Decryption
+- ⏳ Working on Chromium App-Bound Decryption & Gecko Password Decryption
 
 🍪 Sessions
 - Stake
@@ -26,6 +26,7 @@
 - Twitch
 - TikTok
 - Instagram
+- Facebook
 - Spotify
 - Patreon
 - Guilded
@@ -86,6 +87,7 @@
 - Builder
 - Sensitive Files Stealer
 - Anti (VM, Debugger, Viruses)
+- Installed Anti Viruses
 - ⏳ Working on (Startup, Persistence, Shedule, TaskKill, Bypass UAC, Imporve AntiVM, Binder, Icon Changer)
 ```
 
@@ -127,6 +129,7 @@
 - V1.3.1 reAdded Stealer & Added Shadow Games Client, Total Commander (FTP), Sensitive Files Stealer. Updated Tox, Signal, Clipper !!
 - V1.3.2 Updated Roblox and Files Stealer
 - V1.3.3 Added Start.bat to run builder file faster and changed setup.bat file to check if python is installed, if not it will install python
+- V1.3.4 Added Facebook Cookie Session Stealer and +37 Chromium Browsers for Password Managers, changed mozilla decryption method (not tested yet) and added installed antiviruses names.
 ```
 
 👤 Author
