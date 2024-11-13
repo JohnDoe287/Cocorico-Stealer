@@ -133,6 +133,7 @@
 - V1.3.2 Updated Roblox and Files Stealer
 - V1.3.3 Added Start.bat to run builder file faster and changed setup.bat file to check if python is installed, if not it will install python
 - V1.3.4 Added Facebook Cookie Session Stealer and +37 Chromium Browsers for Password Managers, changed mozilla decryption method (not tested yet) and added installed antiviruses names.
+- V1.3.5 Updated Gecko Passwords and some small code fix
 ```
 
 👤 Author
