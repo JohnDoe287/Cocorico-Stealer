@@ -87,6 +87,9 @@
 - Builder
 - Sensitive Files Stealer
 - Anti (VM, Debugger, Viruses)
+- System Informations
+- Clipboard
+- Network
 - Installed Anti Viruses
 - ⏳ Working on (Startup, Persistence, Shedule, TaskKill, Bypass UAC, Imporve AntiVM, Binder, Icon Changer)
 ```
