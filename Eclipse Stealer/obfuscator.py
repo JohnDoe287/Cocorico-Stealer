@@ -88,8 +88,8 @@ def encrypt_code(code, key):
     return base64.b64encode(Fernet(key).encrypt(zlib.compress(code.encode('utf-8')))).decode('utf-8')
 
 def main():
-    parser = argparse.ArgumentParser(description='Obfuscated file with Cocorico Stealer')
-    parser.add_argument('file', help='https://github.com/JohnDoe287/Cocorico-Stealer')
+    parser = argparse.ArgumentParser(description='Obfuscated file with Eclipse Stealer')
+    parser.add_argument('file', help='https://github.com/JohnDoe287/Eclipse-Stealer')
     args = parser.parse_args()
     
     os.makedirs(BUILD_PATH, exist_ok=True)
