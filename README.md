@@ -15,7 +15,7 @@
 
 ```
 🌐 Browsers
-- Gecko (Cookies, Autofills, Historys)[Firefox, SeaMonkey, Mullvad, IceCat, PaleMoon, WaterFox, Flock]
+- Gecko (Cookies, Autofills, Historys) [Firefox, SeaMonkey, Mullvad, IceCat, PaleMoon, WaterFox, Flock]
 - Extension (Password Managers, Wallets)
 - ⏳ Working on Chromium App-Bound Decryption & Gecko Password Decryption
 
@@ -87,11 +87,14 @@
 - Builder
 - Sensitive Files Stealer
 - Anti (VM, Debugger, Viruses)
-- System Informations
 - Clipboard
 - Network
+- System Informations
+- Files System Informations
 - Installed Anti Viruses
-- ⏳ Working on (Startup, Persistence, Shedule, TaskKill, Bypass UAC, Imporve AntiVM, Binder, Icon Changer)
+- Installed Applications
+- Wifi (SSID, Passwords)
+- ⏳ Working on (Startup, Persistence, Shedule, TaskKill, Bypass UAC, Binder, Icon Changer)
 ```
 
 🛠 Change Log
@@ -134,6 +137,7 @@
 - V1.3.3 Added Start.bat to run builder file faster and changed setup.bat file to check if python is installed, if not it will install python
 - V1.3.4 Added Facebook Cookie Session Stealer and +37 Chromium Browsers for Password Managers, changed mozilla decryption method (not tested yet) and added installed antiviruses names.
 - V1.3.5 Updated Gecko Passwords and some small code fix
+- V1.3.6 Improved AntiVM and added more function to get more computer informations & fixed small code errors
 ```
 
 👤 Author
