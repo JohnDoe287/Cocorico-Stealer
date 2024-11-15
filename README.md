@@ -138,6 +138,7 @@
 - V1.3.4 Added Facebook Cookie Session Stealer and +37 Chromium Browsers for Password Managers, changed mozilla decryption method (not tested yet) and added installed antiviruses names.
 - V1.3.5 Updated Gecko Passwords and some small code fix
 - V1.3.6 Improved AntiVM, Roblox and added more function to get more computer informations & fixed small code errors
+- V1.3.7 Added +12 Minecraft Clients
 ```
 
 👤 Author
