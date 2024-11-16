@@ -60,6 +60,7 @@
 - Filezilla
 - WinSCP
 - Total Commander
+- Smart FTP
 - ⏳ Working on (Putty, Telnet)
 
 ✉️ Emails
@@ -139,6 +140,7 @@
 - V1.3.5 Updated Gecko Passwords and some small code fix
 - V1.3.6 Improved AntiVM, Roblox and added more function to get more computer informations & fixed small code errors
 - V1.3.7 Added +12 Minecraft Clients
+- V1.3.8 Added SmartFTP
 ```
 
 👤 Author
